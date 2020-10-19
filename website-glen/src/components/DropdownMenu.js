@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { ReactComponent as HomeIcon } from './icons/home.svg';
-import { ReactComponent as WrenchIcon } from './icons/open-wrench-tool-silhouette.svg';
-import { ReactComponent as HelpIcon } from './icons/question-mark-on-a-circular-black-background.svg';
+import HomeIcon from '@material-ui/icons/Home';
+import BuildIcon from '@material-ui/icons/Build';
+import HelpIcon from '@material-ui/icons/Help';
 import { Link } from 'react-router-dom';
 
 
@@ -54,14 +54,14 @@ function DropdownMenu() {
 
           <Link to='/protplot'>
             <DropdownItem
-              leftIcon={<WrenchIcon />}>
+              leftIcon={<BuildIcon />}>
               PropPlot
             </DropdownItem>
           </Link>
 
           <Link to='/motif-x'>
             <DropdownItem
-              leftIcon={<WrenchIcon />}>
+              leftIcon={<BuildIcon />}>
               Motif-x
               </DropdownItem>
           </Link>

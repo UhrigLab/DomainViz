@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import {ReactComponent as CaretIcon} from './components/icons/caret-down.svg';
+import 'fontsource-roboto';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import {
   BrowserRouter,
   Switch,
@@ -33,7 +34,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Navbar>
-          <NavItem icon={<CaretIcon/>}>
+          <NavItem icon={<ArrowDropDownIcon/>}>
             <DropdownMenu></DropdownMenu>
           </NavItem>
         </Navbar>
@@ -46,9 +47,7 @@ function App() {
           <Route path="/motif-x" component={MotifX}/>
         </Switch>
       </BrowserRouter>
-      <footer> {/* attribution for .svg files*/}
-        <div>Icons made by <a href="https://www.flaticon.com/authors/dave-gandy" title="Dave Gandy">Dave Gandy</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
-      </footer>
+     
     </div>
     
   );
