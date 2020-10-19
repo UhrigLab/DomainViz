@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { Button, Grid, makeStyles } from '@material-ui/core';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import { Button, makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UploadFile({ handleFile, text, color="primary" }) {
+function UploadFile({ handleFile }) {
   const classes = useStyles();
 
   const handleChange = e => {
@@ -33,11 +33,11 @@ function UploadFile({ handleFile, text, color="primary" }) {
       <label htmlFor="contained-button-file">
         <Button
           variant="contained"
-          color={color}
+          color='default'
           component="span"
-          startIcon={<AddCircleIcon />}
+          startIcon={<CloudUploadIcon />}
           className={classes.button}>
-          {text}
+          Upload
         </Button>
       </label>
     </>
