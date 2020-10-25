@@ -23,7 +23,7 @@ function UploadFile({ handleFile }) {
   return (
     <>
       <input
-        accept=".tsv"
+        accept=".tsv,.fa,.fasta"
         className={classes.input}
         id="contained-button-file"
         type="file"

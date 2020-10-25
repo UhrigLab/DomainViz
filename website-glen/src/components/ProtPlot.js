@@ -1,4 +1,6 @@
 import React, { useRef, useState } from 'react';
+//import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
+import axios from 'axios';
 import UploadFile from './UploadFile';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -21,19 +23,45 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+//generates random id;
+let guid = () => {
+    let s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    //return id of format 'aaaaaaaa'-'aaaa'-'aaaa'-'aaaa'-'aaaaaaaaaaaa'
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+}
+
 function ProtPlot() {
     const classes = useStyles();
+    const userID = guid();
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
     });
-
     const handleCheckBox = (event) => {
         setCheckboxes({ ...checkboxes, [event.target.name]: event.target.checked });
     };
-    function handleFastaFile(file) {
+
+
+    async function handleFastaFile(file) {
         //Save file to server so the backend can access it
-        console.log("Saved Fasta file")
+        const data = new FormData();
+        data.append(userID, file, file.name)
+
+        axios.post('/fastafiles', data, {
+            headers: {
+                'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
+            },
+            timeout: 3000,
+        }).then(response => {
+            console.log(response);
+        })
+        .catch(error => {
+            console.log(error);
+        });
     }
     function handlePrositeFile(file) {
         console.log(file)

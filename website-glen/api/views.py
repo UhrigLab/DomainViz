@@ -33,5 +33,25 @@ def images():
 
     return jsonify({'images' : images})
 
+@main.route('/fastafiles', methods=['POST'])
+def fastafiles():
+    # data comes in the format:
+    # b'-----------------------------197130814939513389033381765664\r\nContent-Disposition: form-data; name="userID"; filename="XXXX.fa"\r\nContent-Type: application/octet-stream\r\n\r\nThese are the words I am writing.\r\n-----------------------------197130814939513389033381765664--\r\n'
+    user_id = request.get_data()
+    user_id = user_id.decode("utf-8")
+    
+    # remove the content not including the name sent by the front-end, which is the unique userID
+    user_id = user_id.split(sep="name=\"")[1]
+    user_id = user_id.split(sep="\"")[0]
+    
+    file_data = request.files[user_id]
+    # TODO validate file
+    
+    file_data.save(os.path.abspath('api/tmp/' + file_data.filename))
+
+    # TODO call Pascals script for fasta files here
+    # TODO save pdf in local folder and save to database with user_id being the userID
+
+    return 'Done', 201
 #after request [POST] requests only
 #validate file exists, if it does, delete file
