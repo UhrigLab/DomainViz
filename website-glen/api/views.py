@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from . import db
 from .models import ImageFile
 import os
+import subprocess
 
 main = Blueprint('main', __name__)
 
@@ -33,8 +34,8 @@ def images():
 
     return jsonify({'images' : images})
 
-@main.route('/fastafiles', methods=['POST'])
-def fastafiles():
+@main.route('/partonefiles', methods=['POST'])
+def partonefiles():
     # data comes in the format:
     # b'-----------------------------197130814939513389033381765664\r\nContent-Disposition: form-data; name="userID"; filename="XXXX.fa"\r\nContent-Type: application/octet-stream\r\n\r\nThese are the words I am writing.\r\n-----------------------------197130814939513389033381765664--\r\n'
     user_id = request.get_data()
@@ -46,12 +47,20 @@ def fastafiles():
     
     file_data = request.files[user_id]
     # TODO validate file
-    
-    file_data.save(os.path.abspath('api/tmp/' + file_data.filename))
+    file_path = 'api/tmp/' 
+    file_data.save(os.path.abspath(file_path + file_data.filename))
 
-    # TODO call Pascals script for fasta files here
+    # call Pascals script for fasta files here
+    call = "python3 api/propplot_pfamtest.py -id " + user_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
+    subprocess.call(call, shell=True)
     # TODO save pdf in local folder and save to database with user_id being the userID
 
+    return 'Done', 201
+
+@main.route('/parttwofiles', methods=['POST'])
+def parttwofiles():
+    data = request.get_data()
+    print(data)
     return 'Done', 201
 #after request [POST] requests only
 #validate file exists, if it does, delete file

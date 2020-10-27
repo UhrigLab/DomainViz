@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { Button, makeStyles } from '@material-ui/core';
 
@@ -12,25 +12,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UploadFile({ handleFile }) {
+function UploadFile({ value, handleFile }) {
   const classes = useStyles();
-
-  const handleChange = e => {
-    const fileUploaded = e.target.files[0];
-    handleFile(fileUploaded);
-  }
 
   return (
     <>
       <input
         accept=".tsv,.fa,.fasta"
         className={classes.input}
-        id="contained-button-file"
+        id={value}
         type="file"
         style={{ display: 'none' }}
-        onChange={handleChange}
+        onChange={e => handleFile(e.target.files[0])}
       />
-      <label htmlFor="contained-button-file">
+      <label htmlFor={value}>
         <Button
           variant="contained"
           color='default'
