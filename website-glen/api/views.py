@@ -1,10 +1,26 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, redirect
+from flask.helpers import url_for
 from . import db
 from .models import ImageFile
 import os
 import subprocess
 
 main = Blueprint('main', __name__)
+@main.route('/', defaults={'path': ''})
+@main.route('/images/<username>')
+def images(username):
+    user_id = username
+    image_list = ImageFile.query.all()
+    images = []
+
+    for image_data in image_list:
+        if image_data.userID == user_id:
+            images.append({"userID" : image_data.userID, "filepath" : image_data.filepath})
+            print("added image: " + image_data.filepath)
+        else:
+            print("User ID: " + str(image_data.userID) + " did not match requested: " + user_id)
+
+    return jsonify({'images' : images})
 
 @main.route('/save_images', methods=['POST'])
 def save_images():
@@ -24,18 +40,8 @@ def save_images():
     #return success response to front end
     return 'Done', 201
 
-@main.route('/images')
-def images():
-    image_list = ImageFile.query.all()
-    images = []
-
-    for image_data in image_list:
-        images.append({"userID" : image_data.userID, "filepath" : image_data.filepath})
-
-    return jsonify({'images' : images})
-
-@main.route('/partonefiles', methods=['POST'])
-def partonefiles():
+@main.route('/sendfiles', methods=['POST'])
+def sendfiles():
     # data comes in the format:
     # b'-----------------------------197130814939513389033381765664\r\nContent-Disposition: form-data; name="userID"; filename="XXXX.fa"\r\nContent-Type: application/octet-stream\r\n\r\nThese are the words I am writing.\r\n-----------------------------197130814939513389033381765664--\r\n'
     user_id = request.get_data()
@@ -51,16 +57,20 @@ def partonefiles():
     file_data.save(os.path.abspath(file_path + file_data.filename))
 
     # call Pascals script for fasta files here
-    call = "python3 api/propplot_pfamtest.py -id " + user_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
+    call = "python3 api/propplot_v1_2.py -id " + user_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
     subprocess.call(call, shell=True)
     # TODO save pdf in local folder and save to database with user_id being the userID
+    prosite_file = ImageFile(userID=user_id, filepath=os.path.abspath(file_path + user_id + "_ProteinGroup_prosite.pdf"))
+    pfam_file = ImageFile(userID=user_id, filepath=os.path.abspath(file_path + user_id + "_ProteinGroup_pfam.pdf"))
+    combined_file = ImageFile(userID=user_id, filepath=os.path.abspath(file_path + user_id + "_ProteinGroup_combined.pdf"))
 
-    return 'Done', 201
+    db.session.add(prosite_file)
+    db.session.add(pfam_file)
+    db.session.add(combined_file)
+    db.session.commit()
 
-@main.route('/parttwofiles', methods=['POST'])
-def parttwofiles():
-    data = request.get_data()
-    print(data)
-    return 'Done', 201
+    #return redirect(url_for('images' + user_id)), 201
+    return "Done", 201
+
 #after request [POST] requests only
 #validate file exists, if it does, delete file
