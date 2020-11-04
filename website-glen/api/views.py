@@ -69,7 +69,6 @@ def sendfiles():
     db.session.add(combined_file)
     db.session.commit()
 
-    #return redirect(url_for('images' + user_id)), 201
     return "Done", 201
 
 #after request [POST] requests only

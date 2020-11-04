@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Checkbox, FormControlLabel, TextField } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
-
 const useStyles = makeStyles((theme) => ({
   root: {
       flexGrow: 1,
@@ -38,7 +37,7 @@ function Home() {
     <>
       <h3>Home page</h3>
       <Grid container spacing={3} alignItems='center'>
-
+        {/* //TODO: move paper element to in front of User ID input */}
         <Grid item xs={12}>
           <Paper className={classes.paper} variant='outlined'>Already have a code? Enter it here:</Paper>
         </Grid>

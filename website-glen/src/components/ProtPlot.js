@@ -6,8 +6,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { Button, Checkbox, FormControlLabel, TextField } from '@material-ui/core';
-
-
+//TODO: Change Paper elements to be click-to-open elements for ease of viewing
+//TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
+//TODO: create and insert proper instructions
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -76,7 +77,6 @@ function ProtPlot() {
 
     async function sendPartOneFiles() {
         //Save file to server so the backend can access it 
-        console.log("test")
         const data = new FormData();
         
         if (fastaFile == null) {
@@ -131,7 +131,6 @@ function ProtPlot() {
         //         data.append(textFields.scaleFigureTextField.name, parseFloat(textFields.scaleFigureTextField));
         //     }
         // }
-        console.log("testtest")
         data.append(userID, fastaFile, fastaFile.name);
         axios.post('/sendfiles', data, {
             headers: {
@@ -141,6 +140,7 @@ function ProtPlot() {
         }).then(response => {
             console.log("done")
             console.log(response);
+            // TODO: Route to images/userid
 
             // proteinGroupsFile = null;
             // colorFile = null;
