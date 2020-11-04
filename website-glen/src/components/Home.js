@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, Checkbox, FormControlLabel, TextField } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   root: {

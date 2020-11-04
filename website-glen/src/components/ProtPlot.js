@@ -37,7 +37,7 @@ let guid = () => {
 
 function ProtPlot() {
     const classes = useStyles();
-    const userID = guid();
+    const resultID = guid();
 
     let fastaFile = null;
     let proteinGroupsFile = null;
@@ -85,13 +85,13 @@ function ProtPlot() {
         }
 
         // if (proteinGroupsFile !== null) {
-        //     data.append(userID, proteinGroupsFile, proteinGroupsFile.name);
+        //     data.append(resultID, proteinGroupsFile, proteinGroupsFile.name);
         // }
         // if (colorFile !== null) {
-        //     data.append(userID, colorFile, colorFile.name);
+        //     data.append(resultID, colorFile, colorFile.name);
         // }
         // if (ignoreDomainsFile !== null) {
-        //     data.append(userID, ignoreDomainsFile, ignoreDomainsFile.name);
+        //     data.append(resultID, ignoreDomainsFile, ignoreDomainsFile.name);
         // }
 
         // if (checkboxes.absoluteResultsCheckbox) {
@@ -131,8 +131,9 @@ function ProtPlot() {
         //         data.append(textFields.scaleFigureTextField.name, parseFloat(textFields.scaleFigureTextField));
         //     }
         // }
-        data.append(userID, fastaFile, fastaFile.name);
-        axios.post('/sendfiles', data, {
+        console.log("test")
+        data.append(resultID, fastaFile, fastaFile.name);
+        await axios.post('/sendfiles', data, {
             headers: {
                 //'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
                 'Content-Type': 'multipart/form-data',
@@ -140,8 +141,8 @@ function ProtPlot() {
         }).then(response => {
             console.log("done")
             console.log(response);
-            // TODO: Route to images/userid
-
+            // TODO: Route to images/resultID
+            //alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
             // proteinGroupsFile = null;
             // colorFile = null;
             // ignoreDomainsFile = null;

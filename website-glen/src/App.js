@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import './App.css';
 import 'fontsource-roboto';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
@@ -19,9 +19,6 @@ import MotifX from './components/MotifX';
 
 function App() {
   
-  const [images, setImages] = useState([]);
-
-  // This useEffect fetches the PDF images from the backend that are associated with the user
   return (
     <div className="App">
       <BrowserRouter>
@@ -34,7 +31,6 @@ function App() {
         <Switch>
           <Route path="/" exact component={Home}/>
           <Route path="/about" component={About}/>
-          {/* <Route path="/view-results/" component= {() => <ViewPDF images={images}/>}/>  */}
           <Route path="/view-results/" component={ViewPDF}/> 
           <Route path="/protplot" component={ProtPlot}/>
           <Route path="/motif-x" component={MotifX}/>
