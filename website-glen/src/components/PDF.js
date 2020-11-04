@@ -2,8 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { Page } from 'react-pdf';
 import { Document } from 'react-pdf/dist/esm/entry.webpack';
 
-//85578953-57f7-b1d5-3218-b211caf27795
-
 export const PDF = ({pdf}) => {
 
     const [numPages, setNumPages] = useState(null);

@@ -142,7 +142,7 @@ function ProtPlot() {
             console.log("done")
             console.log(response);
             // TODO: Route to images/resultID
-            //alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
+            alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
             // proteinGroupsFile = null;
             // colorFile = null;
             // ignoreDomainsFile = null;

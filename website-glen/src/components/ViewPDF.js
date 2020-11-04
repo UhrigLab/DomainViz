@@ -21,14 +21,8 @@ export const ViewPDF = () => {
                 {images.map(image => {
                     return (
                         <>
-                            {/* <Grid item xs={6}>
-                                <Paper variant='outlined'>{image.filepath.split(uid)[1]}</Paper>
-                            </Grid>
                             <Grid item xs={6}>
-                                <PDF pdf={process.env.PUBLIC_URL + image.filepath.split('public')[1]}></PDF>
-                            </Grid> */}
-                            <Grid item xs={6}>
-                                {/* <Paper variant='outlined'>{image.filepath.split(uid)[1]}</Paper> */}
+                                <Paper variant='outlined'>{"hello world"}</Paper>
                             </Grid>
                             <Grid item xs={6}>
                                 <PDF pdf={image.file}></PDF>

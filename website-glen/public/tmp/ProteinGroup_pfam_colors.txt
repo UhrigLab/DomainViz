@@ -1,2 +1,0 @@
-Pkinase	#1f77b4
-Pkinase_Tyr	#ff7f0e

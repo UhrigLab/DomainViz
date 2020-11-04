@@ -4,7 +4,7 @@ from . import db
 #from .models import ImageFile
 from .models import PDFModel
 
-import os, subprocess, base64
+import os, subprocess, base64, glob
 
 main = Blueprint('main', __name__)
 @main.route('/', defaults={'path': ''})
@@ -17,8 +17,7 @@ def images(username):
 
     for image_data in image_list:
         if image_data.resultID == result_id:
-            image_bytes = image_data.file
-            b64_bytes = base64.b64encode(image_bytes)
+            b64_bytes = base64.b64encode(image_data.file)
             image_file = b64_bytes.decode("utf-8")
             images.append({"resultID" : image_data.resultID, "file" : image_file})
             print("added image.")
@@ -47,28 +46,26 @@ def sendfiles():
     call = "python3 api/propplot_v1_2.py -id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
     subprocess.call(call, shell=True)
 
-    prosite_filepath = os.path.abspath(file_path + result_id + "_ProteinGroup_prosite.pdf")
-    prosite_file = open(prosite_filepath, 'rb')
-    prosite_data = prosite_file.read()
-    prosite_db_entry = PDFModel(resultID=result_id, file=prosite_data)
+    # save the pdfs to the database
+    prosite_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_prosite.pdf"), 'rb')
+    prosite_db_entry = PDFModel(resultID=result_id, file=prosite_file.read())
 
+    pfam_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_pfam.pdf"), 'rb')
+    pfam_db_entry = PDFModel(resultID=result_id, file=pfam_file.read())
 
-    # prosite_file = ImageFile(userID=result_id, filepath=os.path.abspath(file_path + result_id + "_ProteinGroup_prosite.pdf"))
-    # pfam_file = ImageFile(userID=result_id, filepath=os.path.abspath(file_path + result_id + "_ProteinGroup_pfam.pdf"))
-    # combined_file = ImageFile(userID=result_id, filepath=os.path.abspath(file_path + result_id + "_ProteinGroup_combined.pdf"))
+    combined_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_combined.pdf"), 'rb')
+    combined_db_entry = PDFModel(resultID=result_id, file=combined_file.read())
     
-    #keep
     db.session.add(prosite_db_entry)
-    #
+    db.session.add(pfam_db_entry)
+    db.session.add(combined_db_entry)
     
-    # db.session.add(pfam_file)
-    # db.session.add(combined_file)
-    
-    #keep
     db.session.commit()
-    #
 
-    #TODO delete temp files once stored in db
+    # delete temp files
+    for f in glob.glob('api/tmp/'+result_id+'*'):
+        print("Removing: " + str(f))
+        os.remove(f)
 
     return "Done", 201
 
