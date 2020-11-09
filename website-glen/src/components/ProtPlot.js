@@ -61,16 +61,25 @@ function ProtPlot() {
     }
 
     function handleFastaFile(file) {
+        //TODO Validate files
+        //only accept fasta file
+
         fastaFile = file;
     }
 
     function handleProteinGroupsFile(file) {
+        //TODO Validate files
+
         proteinGroupsFile = file;
     }
     function handleColorFile(file) {
+        //TODO Validate files
+
         colorFile = file;
     }
     function handleIgnoreDomainsFile(file) {
+        //TODO Validate files
+
         ignoreDomainsFile = file;
     }
 
