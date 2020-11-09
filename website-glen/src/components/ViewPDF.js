@@ -1,17 +1,36 @@
-import React from 'react';
-import { List } from 'semantic-ui-react';
+import React, { useEffect, useState } from 'react';
 import { PDF } from './PDF';
+import { Grid, Paper } from '@material-ui/core';
 
-export const ViewPDF = ({ images }) => {
+export const ViewPDF = () => {
+    const url = window.location.pathname;
+    let uid =  url.split("/view-results/")[1]
+    console.log(uid)
+    const [images, setImages] = useState([]);
+    useEffect(() => {
+        fetch('/images/' + uid).then(response => 
+            response.json().then(data => {
+                setImages(data.images);
+                console.log(images);
+            })
+        );
+    }, []);
     return (
-       <List>
-           {images.map(image => {
-               return (
-                   <List.Item key={image.userID}>
-                       <PDF pdf={image.filepath}></PDF>
-                   </List.Item>
-               )
-           })}
-       </List>
+        <>
+            <Grid container spacing={3}>
+                {images.map(image => {
+                    return (
+                        <>
+                            <Grid item xs={6}>
+                                <Paper variant='outlined'>{"hello world"}</Paper>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <PDF pdf={image.file}></PDF>
+                            </Grid> 
+                        </>
+                    )
+                })}
+            </Grid>
+       </>
     );
 }

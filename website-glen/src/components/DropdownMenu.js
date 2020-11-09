@@ -5,7 +5,7 @@ import BuildIcon from '@material-ui/icons/Build';
 import HelpIcon from '@material-ui/icons/Help';
 import { Link } from 'react-router-dom';
 
-
+//TODO: close menu automatically when redirecting or clicking away
 import { CSSTransition } from 'react-transition-group';
 
 function DropdownMenu() {
