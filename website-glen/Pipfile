@@ -12,6 +12,7 @@ pandas = "*"
 matplotlib = "*"
 bio = "*"
 biopython = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.8"

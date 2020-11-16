@@ -142,7 +142,7 @@ function ProtPlot() {
         // }
         console.log("test")
         data.append(resultID, fastaFile, fastaFile.name);
-        await axios.post('/sendfiles', data, {
+        await axios.post('/api/sendfiles', data, {
             headers: {
                 //'Content-Type': `multipart/form-data; boundary=${data._boundary}`,
                 'Content-Type': 'multipart/form-data',
