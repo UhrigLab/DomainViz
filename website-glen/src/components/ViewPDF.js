@@ -8,7 +8,7 @@ export const ViewPDF = () => {
     console.log(uid)
     const [images, setImages] = useState([]);
     useEffect(() => {
-        fetch('/images/' + uid).then(response => 
+        fetch('/api/images/' + uid).then(response => 
             response.json().then(data => {
                 setImages(data.images);
                 console.log(images);
