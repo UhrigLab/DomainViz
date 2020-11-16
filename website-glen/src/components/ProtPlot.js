@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
 import UploadFile from './UploadFile';
+import AccordionSetup from './AccordionSetup';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -87,11 +88,13 @@ function ProtPlot() {
     async function sendPartOneFiles() {
         //Save file to server so the backend can access it 
         const data = new FormData();
-        
+
         if (fastaFile == null) {
             alert("Please upload a file before clicking go.");
             return;
         }
+        //Validate fastaFile:
+
 
         // if (proteinGroupsFile !== null) {
         //     data.append(resultID, proteinGroupsFile, proteinGroupsFile.name);
@@ -160,10 +163,10 @@ function ProtPlot() {
             // textFields.cutoffTextField = '';
             // checkboxes.absoluteResultsCheckbox = false;
         }).catch(error => {
-                console.log(error);
-            });
+            console.log(error);
+        });
     }
-    
+
     return (
         <div className='protplot'>
             <h3>PropPlot page</h3>
@@ -172,85 +175,60 @@ function ProtPlot() {
             <div>
                 <Grid container spacing={3} alignItems='center'>
                     <Grid item xs={12}>
-                        <Paper className={classes.paper} variant='outlined'>Instructions: Use propplot.py in a two step process, first call (prepare input for Prosite and PFAM):
-
-                        propplot.py collect Path/to/folder/containing/fasta/sequences OutputFilenameLead.fa
-
-                        This prepares the input files for both PFAM and Prosite.
-
-                        Follow the screen output to the webpages given to run your PFAM and Prosite run(s).
-
-                        Copy results from your mails into two single text files. One for all PFAM results and one for all Prosite results.
-
-                        python propplot.py collect /Users/myuser/propplotdata/data/ Testdata.today -w 0
-
-                        Second call (analyze Prosite and PFAM results and plot them)
-
-                        python propplot.py process Path/to/folder/containing/fasta/sequences OutputFilenameLead prosite Path/to/prositeresultfile
-                        or
-                        python propplot.py process Path/to/folder/containing/fasta/sequences OutputFilenameLead pfam Path/to/pfamresultfile
-                        or
-                        python propplot.py process Path/to/folder/containing/fasta/sequences OutputFilenameLead prosite Path/to/prositeresultfile pfam Path/to/pfamresultfile
-
-                        order of pfam / prosite is unimportant, but at least one option must be given.
-
-                        Example call:
-
-                        python propplot.py process /Users/myuser/propplotdata/data/ Testdata.today prosite Path/to/prositeresultfile' </Paper>
+                        <Paper className={classes.paper} variant='outlined'>Use Prodoplot by first uploading your fasta file, and then adding options if desired, and finally press the Go button!</Paper>
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>Fasta File: The file needs to contain fasta sequences in files named either .fa or .fasta.</Paper>
+                        <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <UploadFile value='fasta' handleFile={handleFastaFile} />
                     </Grid>
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>Enter a number between 0 and 1. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).</Paper>
+                        <AccordionSetup id='cutofftxt' header='Enter a number between 0 and 1.' body='Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <TextField id='cutoff' name='cutoffTextField' value={textFields.cutoffTextField} type='number' label='Cutoff' onChange={handleTextField} />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>(Optional) Protein Groups File: A tab separated file that in the first column are the sequence headers, and in the second column are the names for the group that the sequence belongs to. This allows one to run all fasta sequences in one go, but then split the sequences and results into different groups of sequences, for example by grouping them into groups of sequences from different clades of organisms.</Paper>
+                        <AccordionSetup id='proteingroupstxt' header='(Optional) Protein Groups File:' body='A tab separated file that in the first column are the sequence headers, and in the second column are the names for the group that the sequence belongs to. This allows one to run all fasta sequences in one go, but then split the sequences and results into different groups of sequences, for example by grouping them into groups of sequences from different clades of organisms.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <UploadFile value='proteingroups' handleFile={handleProteinGroupsFile} color='default' />
                     </Grid>
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>Enter a number between 0 and 1. Only domains that have a maximum prevalence at a relative place in the protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have this domain at the same relative position).</Paper>
+                        <AccordionSetup id='max-cutofftxt' header='Enter a number between 0 and 1.' body='Only domains that have a maximum prevalence at a relative place in the protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have this domain at the same relative position).'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <TextField id='max-cutoff' name='maxCutoffTextField' value={textFields.maxCutoffTextField} type='number' label='Max Cutoff' onChange={handleTextField} />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>(Optional) Color File: A tab separated file that in the first column has a list of domain names with hexcodes (e.g. #fffff), and in the second column ######ASK_PASCAL what the rest means####### to have custom coloring.</Paper>
+                        <AccordionSetup id='colortxt' header='(Optional) Color File:' body='A tab separated file that has a list of domain names in the first column, and a list of the hexcodes (e.g. #fffff) in the second column. This is required if you want custom colors on your output graphs.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <UploadFile value='color' handleFile={handleColorFile} color='default' />
                     </Grid>
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>Enter a number larger than 0. Represents the number of inches per 100pb that the plot is used to display.</Paper>
+                        <AccordionSetup id='scale-figuretxt' header='Enter a number larger than 0.' body='The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <TextField id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' label='Scale Figure' onChange={handleTextField} />
                     </Grid>
 
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>(Optional) Ignore Domains File: A tab separated file that in the first column has list of domain names that should be ignored when plotting.</Paper>
-                    </Grid>
+                        <AccordionSetup id='ignoredomainstxt' header='(Optional) Ignore Domains File:' body='A tab separated file that in the first column has list of domain names that should be ignored when plotting.'></AccordionSetup>                    </Grid>
                     <Grid item xs={2}>
                         <UploadFile value='ignoredomains' handleFile={handleIgnoreDomainsFile} color='default' />
                     </Grid>
                     <Grid item xs={4}>
-                        <Paper className={classes.paper} variant='outlined'>Check the box to plot absolute numbers on y axis of plots instead of relative ones.</Paper>
+                        <AccordionSetup id='absoluteresultstxt' header='Do you want absolute results?' body='Absolute results means that we will plot absolute numbers on y axis of plots instead of relative ones. If the box is unchecked, we plot relative results, if it is checked, we plot absolute results.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
                         <FormControlLabel
                             control={<Checkbox checked={checkboxes.absoluteResultsCheckbox} onChange={handleCheckBox} name="absoluteResultsCheckbox" />}
-                            label="AbsoluteResults?" />
+                            label="Yes/No" />
                     </Grid>
 
                     <Grid item xs={12}>

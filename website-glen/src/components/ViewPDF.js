@@ -7,6 +7,7 @@ export const ViewPDF = () => {
     let uid =  url.split("/view-results/")[1]
     console.log(uid)
     const [images, setImages] = useState([]);
+    const groupsize = 3;
     useEffect(() => {
         fetch('/api/images/' + uid).then(response => 
             response.json().then(data => {
@@ -18,13 +19,13 @@ export const ViewPDF = () => {
     return (
         <>
             <Grid container spacing={3}>
-                {images.map(image => {
+                {images.map((image, index) => {
                     return (
                         <>
-                            <Grid item xs={6}>
-                                <Paper variant='outlined'>{"hello world"}</Paper>
+                            <Grid item xs={2}>
+                                <Paper variant='outlined'>{"Group "+(index/groupsize)}</Paper>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={2}>
                                 <PDF pdf={image.file}></PDF>
                             </Grid> 
                         </>

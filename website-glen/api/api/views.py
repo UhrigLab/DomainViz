@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request, redirect
 from flask.helpers import url_for
 from api.__init__ import db
-#from .models import ImageFile
 from api.models import PDFModel
 
 import os, subprocess, base64, glob
@@ -41,14 +40,19 @@ def sendfiles():
     
     file_data = request.files[result_id]
     # TODO validate file
-    file_path = 'api/tmp/' 
+    #DEVELOPMENT
+    file_path = 'api/api/tmp/' 
+    #PRODUCTION
+    #file_path = 'api/tmp/'
     file_data.save(os.path.abspath(file_path + file_data.filename))
+    print("\n\n\n\n\n")
 
     # call Pascals script for fasta files here
-    
-    call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
-    #subprocess.call("ls -la", shell=True, stdout=subprocess.PIPE)    
-    #subprocess.Popen(["api/propplotenv/bin/python", "api/propplot_v1_2.py " + "-id " + result_id + "-in " + file_path + file_data.filename + "-sf " + file_path + "-dbf api/dbs/"])    
+    #DEVELOPMENT
+    call = "api/api/propplotenv/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
+
+    #PRODUCTION
+    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
     subprocess.call(call, shell=True)
 
     # save the pdfs to the database
@@ -67,10 +71,11 @@ def sendfiles():
     
     db.session.commit()
 
+    # I have learned that we dont want to do this as the user may need to be able to access these files and may want to downlaod them
     # delete temp files
-    for f in glob.glob('api/tmp/'+result_id+'*'):
-        print("Removing: " + str(f))
-        os.remove(f)
+    # for f in glob.glob('api/tmp/'+result_id+'*'):
+    #     print("Removing: " + str(f))
+    #     os.remove(f)
 
     return "Done", 201
 
