@@ -12,13 +12,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UploadFile({ value, handleFile }) {
+function UploadFile({ value, handleFile, acceptedTypes=".tsv" }) {
   const classes = useStyles();
 
   return (
     <>
       <input
-        accept=".tsv,.fa,.fasta"
+        accept={acceptedTypes}
         className={classes.input}
         id={value}
         type="file"

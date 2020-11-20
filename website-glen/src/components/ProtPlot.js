@@ -7,9 +7,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { Button, Checkbox, FormControlLabel, TextField } from '@material-ui/core';
-//TODO: Change Paper elements to be click-to-open elements for ease of viewing
+import {Alert, AlertTitle} from '@material-ui/lab';
+import { Route, useHistory } from 'react-router';
+
 //TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
-//TODO: create and insert proper instructions
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -39,6 +40,7 @@ let guid = () => {
 function ProtPlot() {
     const classes = useStyles();
     const resultID = guid();
+    const history = useHistory()
 
     let fastaFile = null;
     let proteinGroupsFile = null;
@@ -143,7 +145,7 @@ function ProtPlot() {
         //         data.append(textFields.scaleFigureTextField.name, parseFloat(textFields.scaleFigureTextField));
         //     }
         // }
-        console.log("test")
+        alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
         data.append(resultID, fastaFile, fastaFile.name);
         await axios.post('/api/sendfiles', data, {
             headers: {
@@ -153,8 +155,8 @@ function ProtPlot() {
         }).then(response => {
             console.log("done")
             console.log(response);
-            // TODO: Route to images/resultID
-            alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
+            alert("Success!");
+            history.push("/view-results/" + resultID);
             // proteinGroupsFile = null;
             // colorFile = null;
             // ignoreDomainsFile = null;
@@ -182,7 +184,7 @@ function ProtPlot() {
                         <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
-                        <UploadFile value='fasta' handleFile={handleFastaFile} />
+                        <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
                     </Grid>
                     <Grid item xs={4}>
                         <AccordionSetup id='cutofftxt' header='Enter a number between 0 and 1.' body='Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>

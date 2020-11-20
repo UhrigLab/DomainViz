@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, TextField } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
+import { Button, TextField, Typography } from '@material-ui/core';
+import { Link, useHistory } from 'react-router-dom';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+
 const useStyles = makeStyles((theme) => ({
   root: {
       flexGrow: 1,
@@ -33,22 +35,38 @@ function Home() {
   function getImages() {
     history.push('/view-results/' + textFields.uidTextField);
   }
+  function gotoProtplot() {
+    history.push('/protplot')
+  }
   return (
     <>
       <h3>Home page</h3>
       <Grid container spacing={3} alignItems='center'>
         {/* //TODO: move paper element to in front of User ID input */}
         <Grid item xs={12}>
-          <Paper className={classes.paper} variant='outlined'>Already have a code? Enter it here:</Paper>
+          <Paper className={classes.paper} variant='outlined'>
+            <Typography variant='h6'>Welcome to ProDoPlot, Hosted by the University of Alberta.</Typography>
+          </Paper>
         </Grid>
-        <Grid item xs={6}>
+
+        <Grid item xs={5}>
+          <Typography variant='body'>Already have a code? Enter it here:</Typography>
+          {/* <Paper className={classes.paper} variant='outlined'>Already have a code? Enter it here:</Paper> */}
+        </Grid>
+        <Grid item xs={1}>
           <TextField id='uid' name='uidTextField' value={textFields.uidTextField} label='User ID' type="text" onChange={handleTextField} />
         </Grid>
-
         <Grid item xs={6}>
-          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Go</Button>
+          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Show me my Results!</Button>
         </Grid>
 
+        <Grid item xs={12}></Grid>
+        <Grid item xs={6}>
+          <Typography variant='body'>Don't have a code?  Click on the button to go to the ProDoPlot tool and get to work!</Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={gotoProtplot}>Go to ProDoPlot!</Button>
+        </Grid>
       </Grid>
     </>
   );

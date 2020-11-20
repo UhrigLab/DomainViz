@@ -64,7 +64,7 @@ function App() {
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
           <Route path="/protplot" component={ProtPlot} />
-          <Route path="/motif-x" component={MotifX} />
+          {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
       </BrowserRouter>
 

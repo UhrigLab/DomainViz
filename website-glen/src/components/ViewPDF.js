@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PDF } from './PDF';
-import { Grid, Paper } from '@material-ui/core';
+import { Typography, Grid, Paper } from '@material-ui/core';
 
 export const ViewPDF = () => {
     const url = window.location.pathname;
@@ -19,11 +19,16 @@ export const ViewPDF = () => {
     return (
         <>
             <Grid container spacing={3}>
+            <Grid item xs={12}></Grid>
+            <Grid item xs={12}></Grid>
+            <Grid item xs={12}></Grid>
+
+
                 {images.map((image, index) => {
                     return (
                         <>
                             <Grid item xs={2}>
-                                <Paper variant='outlined'>{"Group "+(index/groupsize)}</Paper>
+                                <Typography variant='h5'>{"Group "+(index/groupsize)}</Typography>
                             </Grid>
                             <Grid item xs={2}>
                                 <PDF pdf={image.file}></PDF>
