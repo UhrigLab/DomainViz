@@ -172,8 +172,6 @@ function ProtPlot() {
     return (
         <div className='protplot'>
             <h3>PropPlot page</h3>
-            <p>
-            </p>
             <div>
                 <Grid container spacing={3} alignItems='center'>
                     <Grid item xs={12}>

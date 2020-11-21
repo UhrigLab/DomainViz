@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, redirect
 from flask.helpers import url_for
 from api.__init__ import db
 from api.models import PDFModel
+from api.utils import get_max_cookie
 
 import os, subprocess, base64, glob
 
@@ -9,6 +10,7 @@ main = Blueprint('main', __name__, static_folder="../build", static_url_path='/'
 @main.route('/')
 def index():
     return main.send_static_file('index.html')
+
 @main.route('/api/images/<username>')
 def images(username):
     print(username)
@@ -25,7 +27,12 @@ def images(username):
         else:
             print("Result ID: " + str(image_data.resultID) + " did not match requested: " + result_id)
 
-    return jsonify({'images' : images})
+    if len(images) == 0 and get_max_cookie(result_id):
+        return jsonify({'failed' : get_max_cookie(result_id)})
+    elif len(images) == 0:
+        return jsonify({'failed' : 'null'})
+    else:
+        return jsonify({'images' : images})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():

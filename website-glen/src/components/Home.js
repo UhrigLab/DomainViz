@@ -40,9 +40,8 @@ function Home() {
   }
   return (
     <>
-      <h3>Home page</h3>
+      <h3>Home Page</h3> 
       <Grid container spacing={3} alignItems='center'>
-        {/* //TODO: move paper element to in front of User ID input */}
         <Grid item xs={12}>
           <Paper className={classes.paper} variant='outlined'>
             <Typography variant='h6'>Welcome to ProDoPlot, Hosted by the University of Alberta.</Typography>
@@ -51,13 +50,12 @@ function Home() {
 
         <Grid item xs={5}>
           <Typography variant='body'>Already have a code? Enter it here:</Typography>
-          {/* <Paper className={classes.paper} variant='outlined'>Already have a code? Enter it here:</Paper> */}
         </Grid>
         <Grid item xs={1}>
           <TextField id='uid' name='uidTextField' value={textFields.uidTextField} label='User ID' type="text" onChange={handleTextField} />
         </Grid>
         <Grid item xs={6}>
-          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Show me my Results!</Button>
+          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Go to my Results!</Button>
         </Grid>
 
         <Grid item xs={12}></Grid>
