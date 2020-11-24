@@ -1,16 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { PDF } from './PDF';
 import { Typography, Grid, Paper, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+        flexGrow: 1,
+    },
+    button: {
+        padding: theme.spacing(1),
+        textAlign: 'center',
+    },
+    paper: {
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    },
+  }));
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
+    const [progress, setProgress] = useState(0);
+    const [showProgressBar, setShowProgressBar] = useState(false)
+    const [failed, setFailed] = useState(false);
     const groupsize = 3;
+    const classes = useStyles();
 
     let uid = url.split("/view-results/")[1];
-    let showProgressBar = false;
-    let progress = 0;
-    let failed = false;
     useEffect(() => {
         const interval = setInterval(() => {
             if (images.length == 0 && !failed) {
@@ -23,18 +40,18 @@ export const ViewPDF = () => {
                             return () => clearInterval(interval);
                         }
                         else {
-                            if (data.failed == 'null') {
+                            if (data.failed === 'null') {
                                 alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
-                                failed=true;
+                                setFailed(true);
                             }
-                            else if (data.failed == -1) {
+                            else if (data.failed === -1) {
                                 alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
-                                failed=true;
+                                setFailed(true);
                             }
                             else if (data.failed < 5) {
-                                alert("Your data is in progress, you may watch the progress bar below");
-                                showProgressBar = true;
-                                progress = data.failed;
+                                alert("Your data is in progress, please wait.");
+                                setShowProgressBar(true);
+                                setProgress(data.failed);
                             }
                         }
                     })
@@ -47,7 +64,7 @@ export const ViewPDF = () => {
         return (
             <>
                 <Grid container spacing={3}>
-                    <Grid item xs={12}></Grid>
+                    <Grid style={{marginTop: "70px"}} item xs={12}></Grid>
                     <Grid item xs={12}></Grid>
                     <Grid item xs={12}></Grid>
                     {images.map((image, index) => {
@@ -69,19 +86,19 @@ export const ViewPDF = () => {
     }
     else if (showProgressBar) {
         return (
-            //TODO implement progress bar
             <>
-                <h3>A</h3>
-                <CircularProgress variant='static' value={progress}></CircularProgress>
+                <Paper className={classes.paper} variant='outlined' style={{marginTop: "70px"}}>                
+                    <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
+                </Paper>
+                <CircularProgress variant='static' value={progress*20} style={{marginTop: "70px"}}></CircularProgress>
             </>
         );
     }
     else {
         return (
             <>
-                <h3>A</h3>
-                <Paper variant='outlined'>                
-                    <Typography variant='h5'>Please return to the home page and try again.</Typography>
+                <Paper className={classes.paper} variant='outlined' style={{marginTop: "70px"}}>                
+                    <Typography variant='h5'>Loading, please wait...</Typography>
                 </Paper>
             </>
         );

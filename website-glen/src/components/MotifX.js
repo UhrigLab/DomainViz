@@ -5,7 +5,7 @@ import React from 'react';
 function MotifX() {
   return (
     <div>
-      <h3>MotifX page</h3>
+      <h3 style={{marginTop: "70px"}}>MotifX page</h3>
     </div>
   );
 }

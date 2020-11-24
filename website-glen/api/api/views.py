@@ -26,7 +26,7 @@ def images(username):
             print("added image.")
         else:
             print("Result ID: " + str(image_data.resultID) + " did not match requested: " + result_id)
-
+    
     if len(images) == 0 and get_max_cookie(result_id):
         return jsonify({'failed' : get_max_cookie(result_id)})
     elif len(images) == 0:

@@ -5,6 +5,7 @@ import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, IconButton, Toolbar, Typography, Button } from '@material-ui/core';
+import {spacing} from '@material-ui/system';
 import {
   BrowserRouter,
   Switch,
@@ -28,14 +29,24 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  toolbar: theme.mixins.toolbar,
 }));
 
 function App() {
   const classes = useStyles();
+  // const theme = {
+  //   spacing: 10,
+  // }
   return (
     <div className="App">
       <BrowserRouter>
-        <AppBar postion='static'>
+        <AppBar postion='fixed' className={classes.appBar}>
           <Toolbar>
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
               <MenuIcon />

@@ -171,11 +171,10 @@ function ProtPlot() {
 
     return (
         <div className='protplot'>
-            <h3>PropPlot page</h3>
             <div>
                 <Grid container spacing={3} alignItems='center'>
                     <Grid item xs={12}>
-                        <Paper className={classes.paper} variant='outlined'>Use Prodoplot by first uploading your fasta file, and then adding options if desired, and finally press the Go button!</Paper>
+                        <Paper className={classes.paper} variant='outlined' style={{marginTop: "70px"}}>Use Prodoplot by first uploading your fasta file, and then adding options if desired, and finally press the Go button!</Paper>
                     </Grid>
 
                     <Grid item xs={4}>
