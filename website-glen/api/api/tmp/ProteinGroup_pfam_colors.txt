@@ -1,6 +1,0 @@
-Bromodomain	#1f77b4
-Radical_SAM	#ff7f0e
-Acetyltransf_1	#2ca02c
-Radical_SAM_C	#d62728
-Acetyltransf_10	#9467bd
-Hat1_N	#8c564b
