@@ -11,8 +11,6 @@ export const PDF = ({pdf}) => {
     }
 
     let pdf_string = 'data:application/pdf;base64,' + pdf;
-    console.log(pdf_string)
-
 
     return (
         <Document

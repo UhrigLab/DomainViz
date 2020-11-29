@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, request, redirect
-from flask.helpers import url_for
+from flask import Blueprint, jsonify, request, redirect, current_app
+from flask.helpers import send_file, send_from_directory, url_for
+from zipfile import ZipFile
+import io
 from api.__init__ import db
 from api.models import PDFModel
 from api.utils import get_max_cookie
@@ -13,7 +15,6 @@ def index():
 
 @main.route('/api/images/<username>')
 def images(username):
-    print(username)
     result_id = username
     image_list = PDFModel.query.all()
     images = []
@@ -36,29 +37,59 @@ def images(username):
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
-    # data comes in the format:
-    # b'-----------------------------197130814939513389033381765664\r\nContent-Disposition: form-data; name="userID"; filename="XXXX.fa"\r\nContent-Type: application/octet-stream\r\n\r\nThese are the words I am writing.\r\n-----------------------------197130814939513389033381765664--\r\n'
-    result_id = request.get_data()
-    result_id = result_id.decode("utf-8")
+    # retrieve the data from the POST
+    result_id = ""
+    fasta_file = None
+    i=0 # the first key will always be the result id, and its value will always be the fasta file
+    for key in request.files.keys():
+        if i==0:
+            #retrieve fasta file
+            result_id=key
+            fasta_file=request.files[key]
+            break
+    if fasta_file == None:
+        return "No fasta file", 500
     
-    # remove the content not including the name sent by the front-end, which is the unique userID
-    result_id = result_id.split(sep="name=\"")[1]
-    result_id = result_id.split(sep="\"")[0]
+    # try to retrieve the other 3 files, if they exist
+    protein_groups_file = None
+    color_file = None
+    ignore_domains_file = None
+    try:
+        protein_groups_file = request.files["proteinGroups"]
+    except:
+        print("no protein groups file")
+    try:
+        color_file = request.files["colorFile"]
+    except:
+        print("no color file")
+    try:
+        ignore_domains_file = request.files["ignoreDomains"]
+    except:
+        print("no ignore domains file")
+    # TODO validate files
+
+
+    absolute_results=request.form["absoluteResults"]
+    cutoff = request.form["cutoff"]
+    max_cutoff = request.form["maxCutoff"]
+    scale_figure = request.form["scaleFigure"]
+
     
-    file_data = request.files[result_id]
-    # TODO validate file
     #DEVELOPMENT
     file_path = 'api/api/tmp/' 
     #PRODUCTION
     #file_path = 'api/tmp/'
-    file_data.save(os.path.abspath(file_path + file_data.filename))
+
+
+    fasta_file.save(os.path.abspath(file_path + fasta_file.filename))
 
     # call Pascals script for fasta files here
     #DEVELOPMENT
-    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
+    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_file.filename + " -sf " + file_path + " -dbf api/dbs/"
 
     #PRODUCTION
     #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/"
+    
     subprocess.call(call, shell=True)
 
     # save the pdfs to the database
@@ -77,13 +108,33 @@ def sendfiles():
     
     db.session.commit()
 
-    # I have learned that we dont want to do this as the user may need to be able to access these files and may want to downlaod them
-    # delete temp files
-    # for f in glob.glob('api/tmp/'+result_id+'*'):
-    #     print("Removing: " + str(f))
-    #     os.remove(f)
-
     return "Done", 201
+
+
+@main.route('/api/download/<username>', methods=['GET', 'POST'])
+def download(username):
+    result_id = username
+    #DEVELOPMENT
+    file_path = 'api/api/tmp/' 
+    #PRODUCTION
+    #file_path = 'api/tmp/'
+    print("zipfile")
+    # bytes_file = BytesIO()
+    result_zip = ZipFile(file_path + result_id + '.zip', 'w')
+
+    for f in glob.glob(file_path+result_id+'*.pdf'):
+        result_zip.write(f)
+        print("added pdf: " + f)
+    for f in glob.glob(file_path+result_id+'*.csv'):
+        result_zip.write(f)
+        print('added csv: ' + f)
+    for f in glob.glob(file_path+result_id+'*.tsv'):
+        result_zip.write(f)
+        print('added csv: ' + f)
+    result_zip.close()
+    print("closed")
+    
+    return send_file(os.path.abspath(file_path + result_id + '.zip'), as_attachment=True)
 
 #after request [POST] requests only
 #validate file exists, if it does, delete file
