@@ -58,8 +58,8 @@ function ProtPlot() {
     };
 
     const [textFields, setTextFields] = useState({
-        cutoffTextField: '0.0',
-        maxCutoffTextField: '0.0',
+        cutoffTextField: '0.05',
+        maxCutoffTextField: '0.05',
         scaleFigureTextField: '1',
     });
     const handleTextField = (event) => {
@@ -192,7 +192,7 @@ function ProtPlot() {
                         <AccordionSetup id='scale-figuretxt' header='Enter a number larger than 0.' body='The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
                     </Grid>
                     <Grid item xs={2}>
-                        <TextField id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' label='Scale Figure' onChange={handleTextField} />
+                        <TextField id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' label='Scale Figure' inputProps={{min: 0}} onChange={handleTextField} />
                     </Grid>
 
                     <Grid item xs={4}>
