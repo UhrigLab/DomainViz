@@ -91,26 +91,7 @@ def sendfiles():
         print("no ignore domains file")
     # TODO validate files
 
-
-    
     subprocess.Popen(call, shell=True)
-
-    # # TODO remove database
-    # # save the pdfs to the database 
-    # prosite_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_prosite.pdf"), 'rb')
-    # prosite_db_entry = PDFModel(resultID=result_id, file=prosite_file.read())
-
-    # pfam_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_pfam.pdf"), 'rb')
-    # pfam_db_entry = PDFModel(resultID=result_id, file=pfam_file.read())
-
-    # combined_file = open(os.path.abspath(file_path + result_id + "_ProteinGroup_combined.pdf"), 'rb')
-    # combined_db_entry = PDFModel(resultID=result_id, file=combined_file.read())
-    
-    # db.session.add(prosite_db_entry)
-    # db.session.add(pfam_db_entry)
-    # db.session.add(combined_db_entry)
-    
-    # db.session.commit()
 
     return "Done", 201
 

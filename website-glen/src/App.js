@@ -59,9 +59,9 @@ function App() {
             {/* <Link to='/'>
               <Button color='inherit'>Home</Button>
             </Link> */}
-            {/* <Link to='/protplot'> */}
+            {/* <Link to='/domainvis'> */}
             <Link to='/'>
-              <Button color='inherit'>ProDoPlot</Button>
+              <Button color='inherit'>DomainVis</Button>
             </Link>
             {/* <Link to='/motif-x'>
               <Button color='inherit'>MotifX</Button>
@@ -78,7 +78,7 @@ function App() {
           <Route path="/" exact component={ProtPlot} /> 
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          {/* <Route path="/protplot" component={ProtPlot} /> */}
+          {/* <Route path="/domainvis" component={ProtPlot} /> */}
           <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
           {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
