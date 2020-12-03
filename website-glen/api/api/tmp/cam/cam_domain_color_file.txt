@@ -1,5 +1,0 @@
-PS50011	#1f77b4
-Pkinase	#ff7f0e
-Pkinase_Tyr	#2ca02c
-PS00107	#d62728
-PS00108	#9467bd

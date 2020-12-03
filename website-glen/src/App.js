@@ -18,6 +18,7 @@ import Home from './components/Home';
 import About from './components/About';
 import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
+import ProtPlotDEV from './components/ProtPlotDev'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,17 +49,19 @@ function App() {
       <BrowserRouter>
         <AppBar postion='fixed' className={classes.appBar}>
           <Toolbar>
+            {/* TODO: replace with svg icon from devang */}
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>
               Uhrig Lab
             </Typography>
-            <Link to='/'>
+            {/* <Link to='/'>
               <Button color='inherit'>Home</Button>
-            </Link>
-            <Link to='/protplot'>
-              <Button color='inherit'>ProDoPlot</Button>
+            </Link> */}
+            {/* <Link to='/domainvis'> */}
+            <Link to='/'>
+              <Button color='inherit'>DomainVis</Button>
             </Link>
             {/* <Link to='/motif-x'>
               <Button color='inherit'>MotifX</Button>
@@ -71,10 +74,12 @@ function App() {
         </AppBar>
 
         <Switch>
-          <Route path="/" exact component={Home} />
+          {/* <Route path="/" exact component={Home} /> TODO TEMP: this should be enabled, and the following line should be disabled in final product*/}
+          <Route path="/" exact component={ProtPlot} /> 
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          <Route path="/protplot" component={ProtPlot} />
+          {/* <Route path="/domainvis" component={ProtPlot} /> */}
+          <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
           {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
       </BrowserRouter>

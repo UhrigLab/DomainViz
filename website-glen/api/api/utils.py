@@ -1,5 +1,9 @@
 import os, glob
-file_path = 'api/api/tmp/'
+#DEVELOPMENT
+file_path = 'api/api/tmp/' 
+#PRODUCTION
+#file_path = 'api/tmp/'
+
 
 # A function that returns the highest entry cookie for the result_id "id". 
 # NOTE: This function is only ever called AFTER cookie_exists, so we assume a cookie does exist.

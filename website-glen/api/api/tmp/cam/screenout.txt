@@ -1,8 +1,0 @@
-python3 api/api/propplot_v1_2.py -id cam -in api/api/tmp/SRPK1kp_prealing.fa -sf api/api/tmp/cam/ -dbf api/dbs/
-Reading arguments:
-Running Script:
-Headers: 105, Sequences: 105
-Plot data of Prosite for ProteinGroup
-Plot data of PFAM for ProteinGroup
-Plot data of Prosite and PFAM for ProteinGroup
-done

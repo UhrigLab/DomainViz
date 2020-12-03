@@ -3,8 +3,7 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, TextField, Typography } from '@material-ui/core';
-import { Link, useHistory } from 'react-router-dom';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,14 +35,15 @@ function Home() {
     history.push('/view-results/' + textFields.uidTextField);
   }
   function gotoProtplot() {
-    history.push('/protplot')
+    history.push('/protplot');
   }
+  
   return (
     <>
       <Grid container spacing={3} alignItems='center'>
         <Grid item xs={12}>
           <Paper className={classes.paper} variant='outlined' style={{marginTop: "70px"}}>
-            <Typography variant='h6'>Welcome to ProDoPlot, Hosted by the University of Alberta.</Typography>
+            <Typography variant='h6'>Welcome to DomainVis, Hosted by the University of Alberta.</Typography>
           </Paper>
         </Grid>
 
@@ -59,10 +59,10 @@ function Home() {
 
         <Grid item xs={12}></Grid>
         <Grid item xs={6}>
-          <Typography variant='body1'>Don't have a code?  Click on the button to go to the ProDoPlot tool and get to work!</Typography>
+          <Typography variant='body1'>Don't have a code? Click on the button to go to the DomainVis tool and get to work!</Typography>
         </Grid>
         <Grid item xs={6}>
-          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={gotoProtplot}>Go to ProDoPlot!</Button>
+          <Button variant='contained' color='primary' component='span' className={classes.button} onClick={gotoProtplot}>Go to DomainVis!</Button>
         </Grid>
       </Grid>
     </>
