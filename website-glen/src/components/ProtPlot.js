@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
 import UploadFile from './UploadFile';
@@ -47,11 +47,12 @@ function ProtPlot() {
     const resultID = guid();
     const history = useHistory()
 
-    let fastaFile = null;
+    const [fastaFile, setFastaFile] = useState(null);
     let fileReader;
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
+        fastaFileLoadedCheckbox: false,
     });
     const handleCheckBox = (event) => {
         setCheckboxes({ ...checkboxes, [event.target.name]: event.target.checked });
@@ -66,13 +67,20 @@ function ProtPlot() {
         setTextFields({ ...textFields, [event.target.name]: event.target.value })
     }
 
+    function uploadTestFastaFile() {
+        //TODO change this - set fastafile to "test" and fix in views.py
+        setFastaFile({
+            file: "test",
+            name: "test"
+        })
+    }
     const handleFileRead = (e) => {
         const content = fileReader.result;
         //TODO Validate file content
         console.log(content)
     }
     function handleFastaFile(file) {
-        //only accept fasta file
+        //Validate fastaFile:
         let valid = true;
         if (((file.size / 1024) / 1024).toFixed(4) > 10) {
             alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
@@ -83,7 +91,7 @@ function ProtPlot() {
         fileReader.readAsText(file);
 
         if (valid) {
-            fastaFile = file;
+            setFastaFile(file);
             alert("Sucessfully uploaded file: " + file.name)
         }
         else {
@@ -99,9 +107,13 @@ function ProtPlot() {
             alert("Please upload a file before clicking go.");
             return;
         }
-        data.append(resultID, fastaFile, fastaFile.name);
+        if (fastaFile.name === "test") {
+            data.append(resultID, fastaFile.name)
+        }
+        else {
+            data.append(resultID, fastaFile, fastaFile.name);
+        }
 
-        //Validate fastaFile:
 
         if (checkboxes.absoluteResultsCheckbox) {
             console.log(checkboxes.absoluteResultsCheckbox.toString())
@@ -140,7 +152,6 @@ function ProtPlot() {
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
-        alert("Your unique id is: " + resultID + "\n Please save this, as you won't be able to view or download your files without it.")
 
         await axios.post('/api/sendfiles', data, {
             headers: {
@@ -164,14 +175,18 @@ function ProtPlot() {
             <div>
                 <Grid container spacing={3} alignItems='center'>
                     <Grid item xs={12}>
-                        <Paper className={classes.paper} variant='outlined' style={{ marginTop: "70px" }}>Use DomainVis by first uploading your fasta file, and then adding options if desired, and finally press the Go button!</Paper>
+                        <Paper className={classes.paper} variant='outlined' style={{ marginTop: "90px" }}>Use DomainVis by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
                     </Grid>
 
                     <Grid item xs={4}>
                         <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={1}>
                         <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
+                        <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile} style={{marginTop: "10px"}}>Load Example</Button>
+                    </Grid>
+                    <Grid item xs={1}>
+                        <Checkbox disabled checked={(fastaFile==null) ? false : true} name="fastaFileLoadedCheckbox" />
                     </Grid>
                     <Grid item xs={4}>
                         <AccordionSetup id='cutofftxt' header='Enter a number between 0 and 1.' body='Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>

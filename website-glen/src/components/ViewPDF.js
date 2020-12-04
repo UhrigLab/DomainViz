@@ -1,7 +1,6 @@
 import { React, useEffect, useState } from 'react';
 import { PDFMap } from './utils/PDFMap';
-import { ProgressBar } from './utils/ProgressBar';
-import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 
@@ -23,6 +22,7 @@ const useStyles = makeStyles((theme) => ({
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
+    const [message, setMessage] = useState('');
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false)
     const [failed, setFailed] = useState(false);
@@ -37,17 +37,16 @@ export const ViewPDF = () => {
     }
     const handleClickOpen = () => {
         setOpen(true);
-      };
-    
-      const handleClose = () => {
+    };
+
+    const handleClose = () => {
         setOpen(false);
-      };
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
             fetch('/api/images/' + uid).then(response =>
                 response.json().then(data => {
-                    console.log(data);
                     if (data.hasOwnProperty('images')) {
                         setImages(data.images);
                         clearInterval(interval);
@@ -62,10 +61,22 @@ export const ViewPDF = () => {
                             alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
                             setFailed(true);
                             clearInterval(interval);
+                            try {
+                                setMessage(data.info);
+                                console.log(message)
+                            } catch {
+                                console.log("No message was found with this cookie.")
+                            }
                         }
-                        else if (data.failed < 5) {
+                        else if (data.failed < 100) {
                             setShowProgressBar(true);
                             setProgress(data.failed);
+                            try {
+                                setMessage(data.info);
+                                console.log(message)
+                            } catch {
+                                console.log("No message was found with this cookie.")
+                            }
                         }
                     }
                 })
@@ -77,7 +88,7 @@ export const ViewPDF = () => {
     return (
         <>
             <Grid container spacing={3}>
-                <Grid style={{ marginTop: "70px" }} item xs={12}></Grid>
+                <Grid style={{ marginTop: "90px" }} item xs={12}></Grid>
 
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
@@ -89,7 +100,19 @@ export const ViewPDF = () => {
                     <PDFMap images={images} uid={uid} />
                 }
                 {(images.length == 0 && showProgressBar && !failed) &&
-                    <ProgressBar progress />
+                    <>
+                        <Grid item xs={12}>
+                            <Paper className={classes.paper} variant='outlined'>
+                                {(message.replace("/\s/g", '').length) //If the message only contains whitespace, display the loading text
+                                    ? <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
+                                    : <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                }
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CircularProgress variant='static' value={progress}></CircularProgress>
+                        </Grid>
+                    </>
                 }
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
@@ -112,7 +135,7 @@ export const ViewPDF = () => {
                         <DialogTitle id="alert-dialog-title">{"Have you saved your result id?"}</DialogTitle>
                         <DialogContent>
                             <DialogContentText id="alert-dialog-description">
-                                If you want to return to view your results again, you must save your result id. 
+                                If you want to return to view your results again, you must save your result id.
                                 If you do not save your result id, YOU WILL NOT BE ABLE TO VIEW THIS PAGE AGAIN
                             </DialogContentText>
                         </DialogContent>

@@ -1,6 +1,6 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Author: Pascal Schläpfer, ETH Zürich, November 20th 2020                                                            #
+#   Author: Pascal Schläpfer, ETH Zürich, December 4th 2020                                                            #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
 #   Acknowledgements:                                                                                                  #
@@ -89,7 +89,7 @@ except ImportError:
     print('Error, module matplotlib is required.')
     sys.exit()
 matplotlib.use('Agg')  # This is to avoid issues when running the script and producing pdfs when being connected to
-    # server over ssh.
+# server over ssh.
 
 # test if matplotlib is installed in python
 try:
@@ -143,6 +143,21 @@ try:
 except ImportError:
     print('Error, module urllib is required.')
     sys.exit()
+
+# test if math is installed in python
+try:
+    import math
+except ImportError:
+    print('Error, module math is required.')
+    sys.exit()
+
+# test if time is installed in python
+try:
+    import time
+except ImportError:
+    print('Error, module time is required.')
+    sys.exit()
+
 
 ########################################################################################################################
 #                                                                                                                      #
@@ -202,7 +217,19 @@ except ImportError:
 
 def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroupfile, vcolorfile, vignoredomainfile,
                    vcutoff, vmaxcutoff, vscalingfigure, vabsolute, vwarnings, vfrom_scratch):
+    # Write initial cookie
+    f_write_cookie(0, vsavefolder, vjobid, 'Job initialized')
+    
+    # Write initial job:
+    f_write_log(vsavefolder, vjobid, 'Job initialized with following paramters\nJobid: ' + vjobid + '\nInputfile: ' +
+                vinputfile + '\nIgnoredb: ' + vignoredb + '\nSavefolder: ' + vsavefolder + '\nDbfolder: ' + vdbfolder +
+                '\nGroupfile: ' + vgroupfile + '\nColorfile: ' + vcolorfile + '\nIgnoredomainfile: ' +
+                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nScalingfigure: ' +
+                vscalingfigure + '\nAbsolute: ' + vabsolute + '\nWarnings: ' + vwarnings + '\nFrom_scratch: ' +
+                vfrom_scratch + '\n\n', 'w')
+
     # Modify parameters
+    f_write_log(vsavefolder, vjobid, 'Modifying parameters: ', 'a')
     if vignoredb == '0':
         vignoredb = False
     elif vignoredb == '1':
@@ -230,91 +257,125 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vfrom_scratch = True
     else:
         vfrom_scratch = False
+    f_success(vsavefolder, vjobid)
 
     # Additional internal constants
+    f_write_log(vsavefolder, vjobid, 'Add internal constants parameters: ', 'a')
     vlen_dbid = 5  # Length of db names (defines how many different db files are made.)
+    f_success(vsavefolder, vjobid)
 
     # Read in headers and sequences that were used to produce the prosite and or pfam results
-    vheaders, vsequences = f_read_in_file(vinputfile)
-    print('Headers: ' + str(len(vheaders)) + ', Sequences: ' + str(len(vsequences)))
+    f_write_log(vsavefolder, vjobid, 'Reading in fasta file:\n', 'a')
+    vheaders, vsequences = f_read_in_file(vinputfile, vsavefolder, vjobid)
+    if vwarnings:
+        print('Headers: ' + str(len(vheaders)) + ', Sequences: ' + str(len(vsequences)))
+    f_write_log(vsavefolder, vjobid, 'Fasta file read in successfully.\n', 'a')
 
     # Write first cookie
-    f_write_cookie(1, vsavefolder, vjobid)
+    f_write_cookie(1, vsavefolder, vjobid, 'Input file successfully read')
 
     # Get Prosite results
+    f_write_log(vsavefolder, vjobid, 'Gathering prosite domains:\n', 'a')
     vprositefile = join(vsavefolder, vjobid + '_prosite_res.tsv')
 
     # Check if Prosite results have been produced that can be loaded.
+    f_write_log(vsavefolder, vjobid, 'Check if prosite domain results file exists: ', 'a')
     try:
         vfh_colors = open(vprositefile, 'r')
         vprosite_already_done = True
         vfh_colors.close()
+        f_success(vsavefolder, vjobid)
     except IOError:
         vprosite_already_done = False
+        f_no(vsavefolder, vjobid)
 
     # Check if results should be run from scratch
     if vfrom_scratch:
+        f_write_log(vsavefolder, vjobid, 'All results for Prosite will be run from scratch (no dbs, no previous '
+                                         'saves).\n', 'a')
         vprosite_already_done = False
 
     # Getting results from Prosite
     if not vprosite_already_done:
-        vfh_prosite_output = open(vprositefile, 'w')  # Emptying the color output file.
+        f_write_log(vsavefolder, vjobid, 'Create new Prosite output file: ', 'a')
+        vfh_prosite_output = open(vprositefile, 'w')  # Emptying the prosite output file.
         vfh_prosite_output.close()
+        f_success(vsavefolder, vjobid)
 
         # Defining storing places of dbs
         if vdbfolder == '':
             vdbfiles = 'Prosite_db'
         else:
             vdbfiles = join(vdbfolder, 'Prosite_db')
+        f_write_log(vsavefolder, vjobid, 'Prosite DB files stored at: ' + vdbfiles + '\n', 'a')
 
         # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False  # Defines if the header was found in the db
             vdbid = vsequences[vheader_id][0:vlen_dbid]  # Defines the db file that should be searched.
             if not vignoredb:  # If the db should be searched.
+                f_write_log(vsavefolder, vjobid, 'Searching in Prosite DB ' + vdbid + ': ', 'a')
                 try:  # Check if db exists.
                     vfh_db_prosite = open(vdbfiles + '_' + vdbid, 'r')  # Open db.
+                    f_write_log(vsavefolder, vjobid, 'exists\n', 'a')
                     for ventry in vfh_db_prosite:  # Go through all entries of db.
                         ventry = ventry.rstrip('\n')  # Get rid of new line character at the end.
                         vsplitentry = ventry.split('\t')  # Split record into its attributes.
                         if vsequences[vheader_id] == vsplitentry[0]:  # check if first attribute is sequence of
                             # interest.
                             vfound = True  # if it is, say that the sequence was found in the db.
+                            f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
                             f_write_pfam_prosite_res(vprositefile, vheader, vsplitentry, False, True, vsavefolder,
                                                      vjobid)  # Write the record to the output file.
                     vfh_db_prosite.close()
                 except IOError:  # If the db can not be read, it likely does not exist.
+                    f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
                     if vwarnings:
                         print(vdbfiles + '_' + vdbid + ' does not yet exist.')
 
             if not vfound:  # If the sequence has not been found in a db.
-                ventry_found = f_run_sequences_through_prosite(vheader, vsequences[vheader_id])  # Search for the
-                # sequence in prosite.
+                f_write_log(vsavefolder, vjobid, 'Sending sequence to Prosite\n', 'a')
+                ventry_found = f_run_sequences_through_prosite(vheader, vsequences[vheader_id], vsavefolder, vjobid,
+                                                               vwarnings)
+                # Search for the sequence in prosite.
                 f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid)  # Write the results into
                 # the db.
                 f_write_pfam_prosite_res(vprositefile, vheader, ventry_found, False, False, vsavefolder, vjobid)
                 # Write the results into the results file.
+            # Update cookies
+            vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 1
+            if vcid > 1:
+                f_write_cookie(vcid, vsavefolder, vjobid, '')
 
     vprositedata = f_read_tsv(vprositefile, vsavefolder, vjobid)  # Read the data of prosite from the result file.
+    f_write_log(vsavefolder, vjobid, 'Successfully gathered Prosite domain results.\n', 'a')
+    f_write_cookie(22, vsavefolder, vjobid, 'Finished searching Prosite')
 
-    # Write second cookie
-    f_write_cookie(2, vsavefolder, vjobid)
+    # Get PFAM results
+    f_write_log(vsavefolder, vjobid, 'Gathering PFAM domains:\n', 'a')
+    vpfamfile = join(vsavefolder, vjobid + '_pfam_res.tsv')
 
     # Check if PFAM results have been produced that can be loaded.
-    vpfamfile = join(vsavefolder, vjobid + '_pfam_res.tsv')
+    f_write_log(vsavefolder, vjobid, 'Check if PFAM domain results file exists: ', 'a')
     try:
         vfh_colors = open(vpfamfile, 'r')
         vpfam_already_done = True
         vfh_colors.close()
+        f_success(vsavefolder, vjobid)
     except IOError:
         vpfam_already_done = False
+        f_no(vsavefolder, vjobid)
 
     # Check if results should be run from scratch
     if vfrom_scratch:
+        f_write_log(vsavefolder, vjobid, 'All results for PFAM will be run from scratch (no dbs, no previous '
+                                         'saves).\n', 'a')
         vpfam_already_done = False
 
     # Getting results from PFAM (see above Prosite for reference. Only commenting when different.)
     if not vpfam_already_done:
+        f_write_log(vsavefolder, vjobid, 'Create new PFAM output file: ', 'a')
         vfh_pfam_output = open(vpfamfile, 'w')  # writing the header of the pfam result file.
         vfh_pfam_output.write('Sequence id\tFamily id\tFamily Accession\tClan\tEnv. Start\tEnv. End\tAli. Start\t'
                               'Ali. End\tModel Start\tModel End\tBit Score\tInd. E-value\tCond. E-value\tDescription\t'
@@ -324,21 +385,29 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                               'outcompeted\tsignificant\tuniq\n')
         vfh_pfam_output.close()
 
+        # Defining storing places of dbs
         if vdbfolder == '':
             vdbfiles = 'PFAM_db'
         else:
             vdbfiles = join(vdbfolder, 'PFAM_db')
+        f_write_log(vsavefolder, vjobid, 'PFAM DB files stored at: ' + vdbfiles + '\n', 'a')
+
+        # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False
             vdbid = vsequences[vheader_id][0:vlen_dbid]
             if not vignoredb:
+                f_write_log(vsavefolder, vjobid, 'Searching in PFAM DB ' + vdbid + ': ', 'a')
                 try:
                     vfh_db_pfam = open(vdbfiles + '_' + vdbid, 'r')
+                    f_write_log(vsavefolder, vjobid, 'exists\n', 'a')
                     for ventry in vfh_db_pfam:
                         ventry = ventry.rstrip('\n')
                         vsplitentry = ventry.split('\t')
                         if vsequences[vheader_id] == vsplitentry[0]:
                             vfound = True
+                            f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
                             if vsplitentry[len(vsplitentry) - 1 - 1] == '1':  # Checks if result was significant.
                                 # and vsplitentry[len(vsplitentry) - 1 - 2] == '0':  # This indicates that only non
                                 # outcompeted domains would be found. Decided not to display both domains, but not
@@ -347,10 +416,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                                                          vjobid)
                     vfh_db_pfam.close()
                 except IOError:
+                    f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
                     if vwarnings:
                         print(vdbfiles + '_' + vdbid + ' does not yet exist.')
             if not vfound:
-                ventry_found = f_run_sequences_through_pfam(vheader, vsequences[vheader_id], vsavefolder, vjobid)
+                f_write_log(vsavefolder, vjobid, 'Sending sequence to PFAM\n', 'a')
+                ventry_found = f_run_sequences_through_pfam(vheader, vsequences[vheader_id], vsavefolder, vjobid,
+                                                            vwarnings)
                 ventry_screened = []
                 for ventry in ventry_found:
                     if ventry[len(ventry) - 1 - 1] == '1':  # (see above)
@@ -359,48 +431,64 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid)
                 f_write_pfam_prosite_res(vpfamfile, vheader, ventry_screened, True, False, vsavefolder, vjobid)  # Only
                 # write significant results into the result file.
+            # Update cookies
+            vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 22
+            if vcid > 22:
+                f_write_cookie(vcid, vsavefolder, vjobid, '')
                 
     vpfamdata = f_read_tsv(vpfamfile, vsavefolder, vjobid)
-
-    # Write Third cookie
-    f_write_cookie(3, vsavefolder, vjobid)
+    f_write_log(vsavefolder, vjobid, 'Successfully gathered PFAM domain results.\n', 'a')
+    f_write_cookie(43, vsavefolder, vjobid, 'Finished searching PFAM')
 
     # Gather protein groups of protein data
     if vgroupfile == '':  # Default case, if no group association file is handed over.
+        f_write_log(vsavefolder, vjobid, 'No custom protein group file used\n', 'a')
         vgroup = []
         vgroup_u = []
         for vheader in vheaders:
+            f_write_log(vsavefolder, vjobid, 'Appending ' + vheader + ' to protein group "ProteinGroup".\n', 'a')
             if vwarnings:
-                print('Appending ' + vheader + ' to protein group ProteinGroup.')
+                print('Appending ' + vheader + ' to protein group "ProteinGroup".')
             vgroup.append('ProteinGroup')
             vgroup_u.append('ProteinGroup')
     else:
+        f_write_log(vsavefolder, vjobid, 'Reading in protein group file:\n', 'a')
         vgroup, vgroup_u = f_read_in_groupfile(vgroupfile, vheaders, vsavefolder, vjobid)
     vgroup_u = list(set(vgroup_u))
+    f_write_log(vsavefolder, vjobid, 'Read protein group file successfully\n', 'a')
 
     # Per group of protein: get median sequence length
+    f_write_log(vsavefolder, vjobid, 'Calculating median length of proteins for each protein group: ', 'a')
     vmedlengroup = []
     for vgitem in vgroup_u:
         vlenproteins = []
         for vg, vitem in enumerate(vgroup):
             if vitem == vgitem:
                 vlenproteins.append(len(vsequences[vg]))
-        vmedlengroup.append(median(vlenproteins))
+        vmedlengroup.append(math.ceil(median(vlenproteins)))
+    f_success(vsavefolder, vjobid)
 
     # Get specific coloring
     if vcolorfile != '':
+        f_write_log(vsavefolder, vjobid, 'Reading in color file:\n', 'a')
         vcolor_domain, vcolor_hexcode = f_read_in_colorfile(vcolorfile, vsavefolder, vjobid)
+        f_write_log(vsavefolder, vjobid, 'Read color file successfully\n', 'a')
     else:
+        f_write_log(vsavefolder, vjobid, 'No custom color file used\n', 'a')
         vcolor_domain = []
         vcolor_hexcode = []
 
     # Get list of domains to ignore
     if vignoredomainfile != '':
+        f_write_log(vsavefolder, vjobid, 'Reading in ignore domain file:\n', 'a')
         vignore_domain = f_read_in_ignoredomainfile(vignoredomainfile, vsavefolder, vjobid)
+        f_write_log(vsavefolder, vjobid, 'Read ignore domain file successfully\n', 'a')
     else:
+        f_write_log(vsavefolder, vjobid, 'No custom ignore domain file used\n', 'a')
         vignore_domain = []
 
     # Get unique list of Prosite domains
+    f_write_log(vsavefolder, vjobid, 'Produce unique list of Prosite domains: ', 'a')
     vprositedomains_u = []
     vprositedomains_u_color = []
     vprositedomains_u_ignore = []
@@ -426,8 +514,10 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                         vfound = 1
             if vfound == 0:
                 vprositedomains_u_ignore.append(0)
+    f_success(vsavefolder, vjobid)
 
     # Get unique list of Pfam domains
+    f_write_log(vsavefolder, vjobid, 'Produce unique list of PFAM domains: ', 'a')
     vpfamdomains_u = []
     vpfamdomains_u_color = []
     vpfamdomains_u_ignore = []
@@ -454,13 +544,18 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                         vfound = 1
             if vfound == 0:
                 vpfamdomains_u_ignore.append(0)
+    f_success(vsavefolder, vjobid)
 
     # Remove beginning ('>') from fasta
+    f_write_log(vsavefolder, vjobid, 'Processing fasta headers\n', 'a')
     vheaders_no_fastastart = []
     for vitem in vheaders:
         vheaders_no_fastastart.append(vitem.lstrip('>'))
 
+    f_write_cookie(60, vsavefolder, vjobid, 'Finished reading and processing additional data')
+
     # Per group of protein: get annotations of Prosite and PFAM domains and make one plot per protein group.
+    f_write_log(vsavefolder, vjobid, 'Collecting Prostie and PFAM domain information per protein group\n', 'a')
     vprositedomainsofgroup_all = []
     vprositedomainsingenes_all = []
     vpfamdomainsofgroup_all = []
@@ -474,21 +569,39 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     vprositedomainsingenes = np.zeros((0, 0), dtype=float)
     vpfamdomainsofgroup = np.zeros((0, 0), dtype=float)
     vpfamdomainsingenes = np.zeros((0, 0), dtype=float)
+
+    # Define domain colors
     if vsavefolder != '':
-        vfh_colors = open(join(vsavefolder, vjobid + '_domain_color_file.txt'), 'w')
+        vdomaincolorfile = join(vsavefolder, vjobid + '_domain_color_file.txt')
     else:
-        vfh_colors = open(vjobid + '_domain_color_file.txt', 'w')
+        vdomaincolorfile = vjobid + '_domain_color_file.txt'
+    f_write_log(vsavefolder, vjobid, 'Storing domain color information in ' + vdomaincolorfile + '\n', 'a')
+    vfh_colors = open(vdomaincolorfile, 'w')
 
-    # Write fourth cookie
-    f_write_cookie(4, vsavefolder, vjobid)
-
+    # Prepare switches for each domain to decide if they should be processed
     vprositedomains_u_process = []
     for _ in vprositedomains_u:
         vprositedomains_u_process.append(True)
     vpfamdomains_u_process = []
     for _ in vpfamdomains_u:
         vpfamdomains_u_process.append(True)
+
+    # Prepare dummy figure that contains all domains of all groups to get consistent coloring
+    f_write_log(vsavefolder, vjobid, 'Prepare dummy figure of all domains and proteins: ', 'a')
+    vstandardwidth = 10
+    vstandardheight = 8
+    vpaddingwidth = 1.0
+    vpaddingheight = 0.7
+    fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
+    h = [Size.Fixed(vpaddingwidth),
+         Size.Fixed(vscalingfigure * max(vmedlengroup) / 100)]
+    v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
+    divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+    ax = Axes(fig, divider.get_position())
+    ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
+    fig.add_axes(ax)
     for vug, vgitem in enumerate(vgroup_u):  # Go through all groups of proteins
+        f_write_log(vsavefolder, vjobid, 'Processing protein group ' + vgitem + '\n', 'a')
         vn_prot_per_group = 0  # Initialize the counting of sequences per group
         if vprositefile != '':
             vprositedomainsofgroup = np.zeros((len(vprositedomains_u), vmedlengroup[vug]), dtype=float)  # Initialize
@@ -500,6 +613,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             # number of unique prosite domains and median length of proteins
             vpfamdomainsingenes = np.zeros((len(vpfamdomains_u), len(vheaders)), dtype=int)  # Stores if a domain has
             # been found for a gene
+        vseqaddedfromprosite = 0
+        vseqaddedfrompfam = 0
         for vh, vitem in enumerate(vheaders_no_fastastart):  # Go through all sequences
             if vgroup[vh] == vgitem:  # If the sequence has the same group association as is currently searched
                 vn_prot_per_group = vn_prot_per_group + 1  # Count the number of sequence per this group up by one
@@ -517,6 +632,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                                                                       - 1)] += 1  # Mark the placing of the domain
                                     vprositedomainsingenes[vp, vh] = 1  # Define that the domain has been found for that
                                     # gene
+                                    vseqaddedfromprosite += 1
                 if vpfamfile != '':
                     # Process PFAM
                     for vheader_id in range(len(vpfamdata.columns)):  # Go through all pfam data
@@ -529,6 +645,10 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                                                                    - 1)] += 1  # Mark the placing of the domain
                                     vpfamdomainsingenes[vp, vh] = 1  # Define that the domain has been found for
                                     # that gene
+                                    vseqaddedfrompfam += 1
+        f_write_log(vsavefolder, vjobid, 'Added domain information from ' + str(vseqaddedfromprosite) + ' sequences for'
+                                         ' Prosite.\nAdded domain information from ' + str(vseqaddedfrompfam) +
+                                         ' sequences for PFAM.\n', 'a')
         vprositedomainsingenes_all.append(vprositedomainsingenes)
         vpfamdomainsingenes_all.append(vpfamdomainsingenes)
 
@@ -542,6 +662,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vsize_of_pfam_data_all.append(vsize_of_pfam_data)
 
         # Normalization of data
+        f_write_log(vsavefolder, vjobid, 'Compute relative prevalence of domains per group: ', 'a')
         vprositedomainsofgroup_rel = np.zeros((0, 0), dtype=float)
         vpfamdomainsofgroup_rel = np.zeros((0, 0), dtype=float)
         if vprositefile != '':
@@ -559,17 +680,22 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vprositedomainsofgroup_rel_all.append(vprositedomainsofgroup_rel)
         vpfamdomainsofgroup_rel_all.append(vpfamdomainsofgroup_rel)
         vn_prot_per_group_all.append(vn_prot_per_group)
+        f_success(vsavefolder, vjobid)
 
         # If not using absolute values
         if not vabsolute:
+            f_write_log(vsavefolder, vjobid, 'Use relative prevalence of domains per group.\n', 'a')
             if vprositefile != '':
                 vprositedomainsofgroup = vprositedomainsofgroup_rel
             if vpfamfile != '':
                 vpfamdomainsofgroup = vpfamdomainsofgroup_rel
+        else:
+            f_write_log(vsavefolder, vjobid, 'Use absolute prevalence of domains per group.\n', 'a')
         vprositedomainsofgroup_all.append(vprositedomainsofgroup)
         vpfamdomainsofgroup_all.append(vpfamdomainsofgroup)
 
         # Save of data
+        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .csvs: ', 'a')
         if vprositefile != '':
             if vsavefolder != '':
                 np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.csv'), vprositedomainsofgroup,
@@ -581,63 +707,53 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.csv'), vpfamdomainsofgroup, delimiter="\t")
             else:
                 np.savetxt(vjobid + '_' + vgitem + '_pfam.csv', vpfamdomainsofgroup, delimiter="\t")
+        f_success(vsavefolder, vjobid)
 
-        # Plot dummy figure with all domains of all groups to get coloring identical
-        if vprositefile != '' and vpfamfile != '':
-            vstandardwidth = 10
-            vstandardheight = 8
-            vpaddingwidth = 1.0
-            vpaddingheight = 0.7
-            fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
-            h = [Size.Fixed(vpaddingwidth),
-                 Size.Fixed(vscalingfigure * vmedlengroup[vug] / 100)]
-            v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
-            divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
-            ax = Axes(fig, divider.get_position())
-            ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
-            fig.add_axes(ax)
-            vmaxes = []
-            for vprd in range(vsize_of_prosite_data[0]):
-                vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
-            for vpfd in range(vsize_of_pfam_data[0]):
-                vmaxes.append(max(vpfamdomainsofgroup_rel[vpfd]))
-            vmaxids = np.argsort(vmaxes)[::-1]
-            bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
-            for vmaxi in vmaxids:
-                if vmaxi < vsize_of_prosite_data[0]:
-                    if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
-                            sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
-                            vprositedomains_u_ignore[vmaxi] == 0 and vprositedomains_u_process[vmaxi]:
-                        if vprositedomains_u_color[vmaxi] == '':
-                            vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
-                                              label=vprositedomains_u[vmaxi])
-                        else:
-                            vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
-                                              label=vprositedomains_u[vmaxi],
-                                              color=vprositedomains_u_color[vmaxi])
-                        vcurrcolor = f_get_hex(vcurrbar.patches[0].get_facecolor())
-                        vprositedomains_u_color[vmaxi] = vcurrcolor
-                        vfh_colors.write(vprositedomains_u[vmaxi] + '\t' + vcurrcolor + '\n')
-                        vprositedomains_u_process[vmaxi] = False
-                else:
-                    vimod = vmaxi - vsize_of_prosite_data[0]
-                    if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
-                            sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
-                            vpfamdomains_u_ignore[vimod] == 0 and vpfamdomains_u_process[vimod]:
-                        if vpfamdomains_u_color[vimod] == '':
-                            vcurrbar = ax.bar(bin_edges[:-1], vpfamdomainsofgroup[vimod], width=1, alpha=0.7,
-                                              label=vpfamdomains_u[vimod])
-                        else:
-                            vcurrbar = ax.bar(bin_edges[:-1], vpfamdomainsofgroup[vimod], width=1, alpha=0.7,
-                                              label=vpfamdomains_u[vimod], color=vpfamdomains_u_color[vimod])
-                        vcurrcolor = f_get_hex(vcurrbar.patches[0].get_facecolor())
-                        vpfamdomains_u_color[vimod] = vcurrcolor
-                        vfh_colors.write(vpfamdomains_u[vimod] + '\t' + vcurrcolor + '\n')
-                        vpfamdomains_u_process[vimod] = False
+        # Plot domains into figure with all domains of all groups to get coloring identical
+        f_write_log(vsavefolder, vjobid, 'Add domains into dummy figure to get consistent domain data of group as'
+                                         ' .csvs: ', 'a')
+        vmaxes = []
+        for vprd in range(vsize_of_prosite_data[0]):
+            vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
+        for vpfd in range(vsize_of_pfam_data[0]):
+            vmaxes.append(max(vpfamdomainsofgroup_rel[vpfd]))
+        vmaxids = np.argsort(vmaxes)[::-1]
+        bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
+        for vmaxi in vmaxids:
+            if vmaxi < vsize_of_prosite_data[0]:
+                if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
+                        sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
+                        vprositedomains_u_ignore[vmaxi] == 0 and vprositedomains_u_process[vmaxi]:
+                    if vprositedomains_u_color[vmaxi] == '':
+                        vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
+                                          label=vprositedomains_u[vmaxi])
+                    else:
+                        vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
+                                          label=vprositedomains_u[vmaxi],
+                                          color=vprositedomains_u_color[vmaxi])
+                    vcurrcolor = f_get_hex(vcurrbar.patches[0].get_facecolor())
+                    vprositedomains_u_color[vmaxi] = vcurrcolor
+                    vfh_colors.write(vprositedomains_u[vmaxi] + '\t' + vcurrcolor + '\n')
+                    vprositedomains_u_process[vmaxi] = False
+            else:
+                vimod = vmaxi - vsize_of_prosite_data[0]
+                if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
+                        sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
+                        vpfamdomains_u_ignore[vimod] == 0 and vpfamdomains_u_process[vimod]:
+                    if vpfamdomains_u_color[vimod] == '':
+                        vcurrbar = ax.bar(bin_edges[:-1], vpfamdomainsofgroup[vimod], width=1, alpha=0.7,
+                                          label=vpfamdomains_u[vimod])
+                    else:
+                        vcurrbar = ax.bar(bin_edges[:-1], vpfamdomainsofgroup[vimod], width=1, alpha=0.7,
+                                          label=vpfamdomains_u[vimod], color=vpfamdomains_u_color[vimod])
+                    vcurrcolor = f_get_hex(vcurrbar.patches[0].get_facecolor())
+                    vpfamdomains_u_color[vimod] = vcurrcolor
+                    vfh_colors.write(vpfamdomains_u[vimod] + '\t' + vcurrcolor + '\n')
+                    vpfamdomains_u_process[vimod] = False
     vfh_colors.close()
 
     # Write fifth cookie
-    f_write_cookie(5, vsavefolder, vjobid)
+    f_write_cookie(80, vsavefolder, vjobid, 'Finished collecting and formatting all data')
 
     for vug, vgitem in enumerate(vgroup_u):  # Go through all groups of proteins
         vprositedomainsofgroup = vprositedomainsofgroup_all[vug]
@@ -651,6 +767,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vsize_of_pfam_data = vsize_of_pfam_data_all[vug]
 
         # Plot data of Prosite
+        f_write_log(vsavefolder, vjobid, 'Plot Prosite domains of protein group ' + vgitem + '.\n', 'a')
         if vprositefile != '':
             print('Plot data of Prosite for ' + vgitem)
             vstandardwidth = 10
@@ -716,6 +833,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(vjobid + '_' + vgitem + '_prosite.pdf')
 
         # Plot data of PFAM
+        f_write_log(vsavefolder, vjobid, 'Plot PFAM domains of protein group ' + vgitem + '.\n', 'a')
         if vpfamfile != '':
             print('Plot data of PFAM for ' + vgitem)
             vstandardwidth = 10
@@ -783,6 +901,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(vjobid + '_' + vgitem + '_pfam.pdf')
 
         # Combined plot
+        f_write_log(vsavefolder, vjobid, 'Plot all domains of protein group ' + vgitem + '.\n', 'a')
         if vprositefile != '' and vpfamfile != '':
             print('Plot data of Prosite and PFAM for ' + vgitem)
             vstandardwidth = 10
@@ -880,12 +999,68 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_combined.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_combined.pdf')
-
+    # Write fifth cookie
+    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
+    f_write_log(vsavefolder, vjobid, 'Job ' + vjobid + ' ran successfully.\n', 'a')
     print('done')
 
 
-def func(x):
-    return (x - 3) * (x - 5) * (x - 7) + 85
+########################################################################################################################
+#                                                                                                                      #
+#  f_success                                                                                                           #
+#  Writes success.\n into log file.                                                                                    #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - Entry in [jobid]_log.log [file]: Log file.                                                                      #
+#                                                                                                                      #
+########################################################################################################################
+
+def f_success(vsavefolder, vjobid):
+    f_write_log(vsavefolder, vjobid, 'success.\n', 'a')
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_no                                                                                                           #
+#  Writes no.\n into log file.                                                                                    #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - Entry in [jobid]_log.log [file]: Log file.                                                                      #
+#                                                                                                                      #
+########################################################################################################################
+
+def f_no(vsavefolder, vjobid):
+    f_write_log(vsavefolder, vjobid, 'no.\n', 'a')
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_write_log                                                                                                         #
+#  Writes a log file to give output if something breaks.                                                               #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vmessage [string]: Message that is written into the file.                                                       #
+#    - vmode [string]: Should either be 'w' for write or 'a' for append.                                               #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - [jobid]_log.log [file]: Log file.                                                                               #
+#                                                                                                                      #
+########################################################################################################################
+
+def f_write_log(vsavefolder, vjobid, vmessage, vmode):
+    vfh_c = open(join(vsavefolder, vjobid + '_log.log'), vmode)
+    vfh_c.write(vmessage)
+    vfh_c.close()
 
 
 ########################################################################################################################
@@ -897,14 +1072,16 @@ def func(x):
 #    - vid [int]: Id of the cookie to be written.                                                                      #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vmessage [string]: Message that is written into the file.                                                       #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - cookie_[id] [file]: Cookie defining the progress (1 - 5) or failure (-1).                                       #
 #                                                                                                                      #
 ########################################################################################################################
 
-def f_write_cookie(vid, vsavefolder, vjobid):
+def f_write_cookie(vid, vsavefolder, vjobid, vmessage):
     vfh_c = open(join(vsavefolder, vjobid + '_cookie_' + str(vid)), 'w')
+    vfh_c.write(vmessage + '\n')
     vfh_c.close()
 
 
@@ -956,10 +1133,10 @@ def f_read_in_ignoredomainfile(vfile, vsavefolder, vjobid):
             vignore_domain.append(vsplit[0])
         vfile_fh.close()
     except IOError:
+        f_write_log(vsavefolder, vjobid, 'Can not read ignore domain file ' + vfile + '\n', 'a')
         print('Can not read file: ' + vfile)
-
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, 'Can not read ignore domain file ' + vfile)
         sys.exit()
     return vignore_domain
 
@@ -994,9 +1171,10 @@ def f_read_in_colorfile(vfile, vsavefolder, vjobid):
             vcolor_hexcode.append(vsplit[1])
         vfile_fh.close()
     except IOError:
-        print('Can not read file: ' + vfile)
+        f_write_log(vsavefolder, vjobid, 'Can not read color file ' + vfile + '\n', 'a')
+        print('Can not read color file: ' + vfile)
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, 'Can not read color file ' + vfile)
         sys.exit()
     return vcolor_domain, vcolor_hexcode
 
@@ -1039,15 +1217,21 @@ def f_read_in_groupfile(vfile, vheaders, vsavefolder, vjobid):
                     else:
                         print('Warning: group domain file has more than one entry for ' + vitem + '. Only first '
                               'instance is used.')
+                        f_write_log(vsavefolder, vjobid, 'Warning: group domain file has more than one entry '
+                                                         'for ' + vitem + '. Only first instance is used.\n', 'a')
             vfile_fh.close()
             if vhit == 0:
+                f_write_log(vsavefolder, vjobid, 'Warning: no protein group entry found for ' + vitem +
+                                                 '. Please add one in ' + vfile + '\nUsing "ProteinGroup" as group name'
+                                                 ' instead.\n', 'a')
                 print('Warning: no protein group entry found for ' + vitem + '. Please add one in ' + vfile)
                 vgroup.append('ProteinGroup')
                 vgroup_u.append('ProteinGroup')
     except IOError:
-        print('Can not read file: ' + vfile)
+        f_write_log(vsavefolder, vjobid, 'Unable to read protein group file ' + vfile + '\n', 'a')
+        print('Can not read protein group file: ' + vfile)
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, 'Can not read protein group file: ' + vfile)
         sys.exit()
     return vgroup, vgroup_u
 
@@ -1092,7 +1276,7 @@ def f_read_tsv(vfile, vsavefolder, vjobid):
     except IOError:
         print('Can not read file: ' + vfile)
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, '')
         sys.exit()
     return vtable
 
@@ -1104,6 +1288,8 @@ def f_read_tsv(vfile, vsavefolder, vjobid):
 #                                                                                                                      #
 #  Mandatory arguments:                                                                                                #
 #    - vfile [string]: String towards a fasta file.                                                                    #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vheaders [list]: List of headers of fasta file sequences.                                                       #
@@ -1112,7 +1298,7 @@ def f_read_tsv(vfile, vsavefolder, vjobid):
 ########################################################################################################################
 
 
-def f_read_in_file(vfile):
+def f_read_in_file(vfile, vsavefolder, vjobid):
     # Load all fasta sequences
     vheaders = []
     vsequences = []
@@ -1120,13 +1306,18 @@ def f_read_in_file(vfile):
     vfile_fh = open(vfile)
     vtempsequence = []
     vtempheader = []
+    vh = 0
     for vline in vfile_fh:
         vline = re.sub("[\n\r]", "", vline)
         if vline.startswith('>'):
+
             if vinit == 0:
                 if len(vtempsequence) > 0:
                     vheaders.append(vtempheader)
                     vsequences.append(vtempsequence)
+                    f_success(vsavefolder, vjobid)
+            vh += 1
+            f_write_log(vsavefolder, vjobid, 'Reading in header ' + str(vh) + ': ', 'a')
             vtempheader = vline
             vtempsequence = []
             vinit = 0
@@ -1139,6 +1330,8 @@ def f_read_in_file(vfile):
     if len(vtempsequence) > 0:
         vheaders.append(vtempheader)
         vsequences.append(vtempsequence)
+    f_write_log(vsavefolder, vjobid, 'Read ' + str(len(vheaders)) + ' headers and ' + str(len(vsequences)) +
+                                     ' sequences.\n', 'a')
     return vheaders, vsequences
 
 
@@ -1151,6 +1344,9 @@ def f_read_in_file(vfile):
 #  Mandatory arguments:                                                                                                #
 #    - vhead [string]: Fasta sequence header.                                                                          #
 #    - vseq [string]: Protein sequence.                                                                                #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings_prosite [boolean]: If warnings should be given out or not.                                            #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
@@ -1159,51 +1355,60 @@ def f_read_in_file(vfile):
 ########################################################################################################################
 
 
-def f_run_sequences_through_prosite(vhead, vseq):
-    # Parameters
-    vsilent = True
-    vwarnings_prosite = False
-
+def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_prosite):
     # Write that sequences are run to Prosite to the stdout
-    if not vsilent:
+    f_write_log(vsavefolder, vjobid, 'Submitted Prosite search for sequence "' + vseq[0:16] + '...".\n', 'a')
+    if vwarnings_prosite:
         print('@> Submitted Prosite search for sequence "' + vseq[0:16] + '...".')
 
-    # Run sequences
+    # Check for sequence length
     vout_all = []
-    try:
-        # If a 404 error occurs, then the reason might be that the mirror https://prosite.expasy.org changed to
-        # something else. Check if you use a search machine on the internet, and look for expasy and change it to the
-        # URL that you get.
-        vhandle = Bio.ExPASy.ScanProsite.scan(vseq, mirror='https://prosite.expasy.org', output='xml')
-        vresults = Bio.ExPASy.ScanProsite.read(vhandle)
-        if len(vresults) > 0:
-            for record in vresults:
+    if len(vseq) >= 16:
+        # Run sequence
+        try:
+            # If a 404 error occurs, then the reason might be that the mirror https://prosite.expasy.org changed to
+            # something else. Check if you use a search machine on the internet, and look for expasy and change it to
+            # the URL that you get.
+            vhandle = Bio.ExPASy.ScanProsite.scan(vseq, mirror='https://prosite.expasy.org', output='xml')
+            vresults = Bio.ExPASy.ScanProsite.read(vhandle)
+            if len(vresults) > 0:
+                for record in vresults:
+                    vout = [vseq]
+                    for _ in range(7):
+                        vout.append('')
+                    for key in record.keys():
+                        vout = f_dissect_prosite_key(vout, key, record[key])
+                        if isinstance(record[key], dict):
+                            for key2 in record[key].keys():
+                                vout = f_dissect_prosite_key(vout, key2, record[key][key2])
+                                if isinstance(vresults[key][key2], dict):
+                                    for key3 in record[key][key2].keys():
+                                        vout = f_dissect_prosite_key(vout, key3, record[key][key2][key3])
+                    vout_all.append(vout)
+            else:
+                f_write_log(vsavefolder, vjobid, 'Warning, sequence has no results\n', 'a')
                 vout = [vseq]
                 for _ in range(7):
                     vout.append('')
-                for key in record.keys():
-                    vout = f_dissect_prosite_key(vout, key, record[key])
-                    if isinstance(record[key], dict):
-                        for key2 in record[key].keys():
-                            vout = f_dissect_prosite_key(vout, key2, record[key][key2])
-                            if isinstance(vresults[key][key2], dict):
-                                for key3 in record[key][key2].keys():
-                                    vout = f_dissect_prosite_key(vout, key3, record[key][key2][key3])
                 vout_all.append(vout)
-        else:
+                if vwarnings_prosite:
+                    print(vhead + ' has no results in prosite.')
+        except ValueError:
+            f_write_log(vsavefolder, vjobid, 'Warning, sequence resulted in a ValueError.\n', 'a')
             vout = [vseq]
             for _ in range(7):
                 vout.append('')
             vout_all.append(vout)
             if vwarnings_prosite:
                 print(vhead + ' has no results in prosite.')
-    except ValueError:
+    else:
+        f_write_log(vsavefolder, vjobid, 'Warning, sequence too short (<16 amino acids).\n', 'a')
         vout = [vseq]
         for _ in range(7):
             vout.append('')
         vout_all.append(vout)
         if vwarnings_prosite:
-            print(vhead + ' has no results in prosite.')
+            print(vhead + ' is too short to be run through Prosite (<16 amino acids).')
     return vout_all
 
 
@@ -1218,6 +1423,7 @@ def f_run_sequences_through_prosite(vhead, vseq):
 #    - vseq [string]: Protein sequence.                                                                                #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings_pfam [boolean]: If warnings should be given out or not.                                               #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
@@ -1226,42 +1432,50 @@ def f_run_sequences_through_prosite(vhead, vseq):
 ########################################################################################################################
 
 
-def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid):
-    # Parameters
-    vsilent = True
-    vwarnings_pfam = False
-
+def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfam):
     # Write that sequences are run to PFAM to the stdout
-    if not vsilent:
+    f_write_log(vsavefolder, vjobid, 'Submitted PFAM search for sequence "' + vseq[0:16] + '...".\n', 'a')
+    if not vwarnings_pfam:
         print('@> Submitted PFAM search for sequence "' + vseq[0:16] + '...".')
 
-    # Run sequences
+    # Check for sequence length
     vout_all = []
-    try:
-        vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid)  # Call PFAM with sequence
-        if len(vresults) > 0:  # If at least one result was found
-            for vr, vresult in enumerate(vresults):  # For every result (id vr)
-                vout = [vseq]  # Attach sequence as identifier
-                for _ in range(41):  # Prepare storing variable in case not all attributes can be filled
+    if len(vseq) >= 16:
+        # Run sequence
+        try:
+            vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, 0, 0)  # Call PFAM with sequence
+            if len(vresults) > 0:  # If at least one result was found
+                for vr, vresult in enumerate(vresults):  # For every result (id vr)
+                    vout = [vseq]  # Attach sequence as identifier
+                    for _ in range(41):  # Prepare storing variable in case not all attributes can be filled
+                        vout.append('')
+                    for vi_41, vitem in enumerate(vresult):  # Check for all attributes and fill them into the output
+                        vout = f_dissect_pfam_key(vout, vheader[vi_41], vitem)
+                    vout_all.append(vout)  # Append the output of this result to the output of all other results
+            else:  # In case no result was found, prepare standard output (see lines above for meaning)
+                f_write_log(vsavefolder, vjobid, 'Warning, sequence has no results\n', 'a')
+                vout = [vseq]
+                for _ in range(41):
                     vout.append('')
-                for vi_41, vitem in enumerate(vresult):  # Check for all attributes and fill them into the output
-                    vout = f_dissect_pfam_key(vout, vheader[vi_41], vitem)
-                vout_all.append(vout)  # Append the output of this result to the output of all other results
-        else:  # In case no result was found, prepare standard output (see lines above for meaning)
+                vout_all.append(vout)
+                if vwarnings_pfam:
+                    print(vhead + ' has no results in pfam.')
+        except ValueError:  # If we were not able to run results through PFAM (see lines above for meaning)
+            f_write_log(vsavefolder, vjobid, 'Warning, sequence resulted in a ValueError.\n', 'a')
             vout = [vseq]
             for _ in range(41):
                 vout.append('')
             vout_all.append(vout)
             if vwarnings_pfam:
                 print(vhead + ' has no results in pfam.')
-    except ValueError:  # If we were not able to run results through PFAM (see lines above for meaning)
+    else:
+        f_write_log(vsavefolder, vjobid, 'Warning, sequence too short (<16 amino acids).\n', 'a')
         vout = [vseq]
-        for _ in range(41):
+        for _ in range(7):
             vout.append('')
         vout_all.append(vout)
         if vwarnings_pfam:
-            print(vhead + ' has no results in pfam.')
-
+            print(vhead + ' is too short to be run through PFAM (<16 amino acids).')
     return vout_all  # Return all results
 
 
@@ -1295,7 +1509,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
         except IOError:
             print('Can not open file ' + vfile + '.\n')
             # Write kill cookie
-            f_write_cookie(-1, vsavefolder, vjobid)
+            f_write_cookie(-1, vsavefolder, vjobid, '')
             sys.exit()
         vfh_xml = open(vfile, 'r')
     elif vtype == 'string':
@@ -1303,7 +1517,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
     else:
         print('Type of input ' + vtype + ' is unknown.\nShould be either file or string.')
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, '')
         sys.exit()
 
     # read in file line by line
@@ -1326,7 +1540,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
                 print('Line is not a correct xml line.')
                 print(vline)
                 # Write kill cookie
-                f_write_cookie(-1, vsavefolder, vjobid)
+                f_write_cookie(-1, vsavefolder, vjobid, '')
                 sys.exit()
     if vtype == 'file':
         vfh_xml.close()
@@ -1568,14 +1782,14 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 ########################################################################################################################
 
 
-def f_query_pfam(vseq, vsavefolder, vjobid):
+def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
+    vmax_iterations = 6
+    if viteration >= vmax_iterations:
+        raise ValueError('PFAM currently down (503 error).')
+    time.sleep(vwaittime)
 
     # Modify sequence
     vseq = ''.join(vseq.split())  # remove spaces within the sequence
-    if len(vseq) <= 16:  # Test minimal length requirement
-        print('Sequence too short. Must be at least 16 Amino acids long.')
-        return 0
-        # exit()
     vseq = '>Seq\n' + vseq  # Format sequence for running through hmmer.
 
     # Run sequence through hmmer site
@@ -1590,20 +1804,47 @@ def f_query_pfam(vseq, vsavefolder, vjobid):
     vurllib_request_result = urllib.request.Request(vresult_url_with_parameters)
 
     # Get results
+    vperform_conversion = True
+    vxml_result = ''
     try:
         vxml_result = urllib.request.urlopen(vurllib_request_result).read()
     except HTTPError as e:
+        vperform_conversion = False
         if e.code == 500:
             raise ValueError('No matching Pfam domains were found.')
+        elif e.code == 503:
+            # Currently unavailable
+            viteration += 1
+            if viteration == 1:
+                vwaittime = 5
+            else:
+                vwaittime *= 4
+            try:
+                f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime)
+            except ValueError:
+                f_write_log(vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.\n', 'a')
+                f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.')
+                raise ValueError('PFAM currently down (503 error).')
+        elif e.code == 404:
+            f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred while trying to reach PFAM.\n', 'a')
+            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) +
+                                                    ' occurred while trying to reach PFAM.')
+            raise ValueError('PFAM currently down (404 error).')
         else:
+            f_write_log(vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach PFAM.\n',
+                        'a')
             print('HTTPError ' + str(e.code) + ' occurred.')
             print(e.reason)
             # Write kill cookie
-            f_write_cookie(-1, vsavefolder, vjobid)
+            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach' 
+                                                    ' PFAM.')
             sys.exit()
 
     # Modify results such that it comes in form of a table
-    vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid)
+    vheader = []
+    vrecords = []
+    if vperform_conversion:
+        vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid)
     return vheader, vrecords
 
 
@@ -1630,17 +1871,20 @@ def f_query_pfam(vseq, vsavefolder, vjobid):
 def f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid):
     try:
         vdb_fh = open(vdbfiles + '_' + vdbid, 'a')
-        for entry in ventry_found:
+        for ve, entry in enumerate(ventry_found):
             for vj, item2 in enumerate(entry):
                 if vj == 0:
                     vdb_fh.write(str(item2))
                 else:
                     vdb_fh.write('\t' + str(item2))
             vdb_fh.write('\n')
+            f_write_log(vsavefolder, vjobid, 'Wrote entry ' + str(ve + 1) + ' into DB ' + vdbid + '\n', 'a')
     except IOError:
         print('Can not write file ' + vdbfiles + '_' + vdbid)
+        f_write_log(vsavefolder, vjobid, 'Can not write into DB file ' + vdbfiles + '_' + vdbid + '\nRun aborted\n',
+                    'a')
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, 'Can not write into DB file ' + vdbfiles + '_' + vdbid)
         sys.exit()
     vdb_fh.close()
 
@@ -1668,6 +1912,10 @@ def f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid):
 
 
 def f_write_pfam_prosite_res(vfile, vitem, ventry_found, ispfam, isfromdb, vsavefolder, vjobid):
+    if ispfam:
+        vdbname = 'PFAM'
+    else:
+        vdbname = 'Prosite'
     try:
         vdb_fh = open(vfile, 'a')
         if isfromdb:
@@ -1688,8 +1936,9 @@ def f_write_pfam_prosite_res(vfile, vitem, ventry_found, ispfam, isfromdb, vsave
                     else:
                         vdb_fh.write('\t' + str(item2))
                 vdb_fh.write('\n')
+                f_write_log(vsavefolder, vjobid, 'Added entry 1 from ' + vdbname + ' DB.\n', 'a')
         else:
-            for entry in ventry_found:
+            for ve, entry in enumerate(ventry_found):
                 vwriteit = True
                 for vj, item2 in enumerate(entry):
                     if vj == 1:
@@ -1707,10 +1956,13 @@ def f_write_pfam_prosite_res(vfile, vitem, ventry_found, ispfam, isfromdb, vsave
                         else:
                             vdb_fh.write('\t' + str(item2))
                     vdb_fh.write('\n')
+                    f_write_log(vsavefolder, vjobid, 'Added entry ' + str(ve + 1) + ' from ' + vdbname + ' results.\n',
+                                'a')
     except IOError:
-        print('Can not write file ' + vfile)
+        print('Can not write file ' + vfile + '\nRun aborted.\n')
+        f_write_log(vsavefolder, vjobid, 'Can not write ' + vdbname + ' output file: ' + vfile + '\n', 'a')
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid)
+        f_write_cookie(-1, vsavefolder, vjobid, 'Could not write ' + vdbname + ' file.')
         sys.exit()
     vdb_fh.close()
 
@@ -2304,7 +2556,7 @@ if __name__ == "__main__":
                       'scalefigure or -s followed by a value greater than 0.')
 
         # Run the script and produce the plots
-        print('Running Script:')
+        print('Running script:')
         f_run_propplot(vjobid_main, vinputfile_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
                        vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main, vscalefigure_main,
                        vabsoluteresults_main, vwarnings_main, vfrom_scratch_main)

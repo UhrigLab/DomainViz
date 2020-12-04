@@ -20,12 +20,17 @@ import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
 import ProtPlotDEV from './components/ProtPlotDev'
 
+import { ReactComponent as DomainVizIcon } from './components/svg/domainviz.svg';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   menuButton: {
     marginRight: theme.spacing(2),
+    width: 90,
+    height: 90,
+    // backgroundColor: '#7F7F7F' 
   },
   title: {
     flexGrow: 1,
@@ -51,7 +56,7 @@ function App() {
           <Toolbar>
             {/* TODO: replace with svg icon from devang */}
             <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-              <MenuIcon />
+              <DomainVizIcon/>
             </IconButton>
             <Typography variant="h6" className={classes.title}>
               Uhrig Lab

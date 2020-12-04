@@ -1,9 +1,11 @@
-from flask import Blueprint, jsonify, request, redirect, current_app
+from flask import Blueprint, jsonify, request, redirect, current_app, render_template
 from flask.helpers import send_file
 from zipfile import ZipFile
 import io
+
+from werkzeug.exceptions import InternalServerError
 #import py-fasta-validator # for validating fasta files
-from api.utils import get_max_cookie
+from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 
 import os, subprocess, base64, glob
 
@@ -11,8 +13,23 @@ import os, subprocess, base64, glob
 file_path = 'api/api/tmp/' 
 #PRODUCTION
 #file_path = 'api/tmp/'
+test_fasta_file = "TAFIIsample_NAR_MS.fa"
+
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
+
+#TODO fix error handling
+@main.errorhandler(InternalServerError)
+def handle_500(e):
+    original = getattr(e, "original_exception", None)
+
+    if original is None:
+        # direct 500 error, such as abort(500)
+        return render_template("500.html"), 500
+
+    # wrapped unhandled error
+    return render_template("500_unhandled.html", e=original), 500
+
 @main.route('/')
 def index():
     return main.send_static_file('index.html')
@@ -30,31 +47,43 @@ def images(username):
             image_file = b64_bytes.decode("utf-8")
             images.append({"resultID" : result_id, "file" : image_file})
             print("added image: " + f)
-    
-    if len(images) == 0 and get_max_cookie(result_id):
-        return jsonify({'failed' : get_max_cookie(result_id)})
+            file.close()
+    max_cookie = get_max_cookie(result_id)
+
+    if len(images) == 0 and max_cookie:
+        if get_cookie_info(result_id, max_cookie):
+            return jsonify({'failed' : max_cookie, 'info' : get_cookie_info(result_id, max_cookie)})
+        else:
+            return jsonify({'failed' : max_cookie})
     elif len(images) == 0:
         return jsonify({'failed' : 'null'})
     else:
+        cleanup_cookies(result_id)
         return jsonify({'images' : images})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
-
     # retrieve the fasta file from the POST
     result_id = ""
     fasta_file = None
+    fasta_filename = None
     i=0 # the first key will always be the result id, and its value will always be the fasta file
     for key in request.files.keys():
         if i==0:
             #retrieve fasta file
             result_id=key
             fasta_file=request.files[key]
+            fasta_file.save(os.path.abspath(file_path + fasta_file.filename))
+            fasta_filename = fasta_file.filename
             break
-    if fasta_file == None:
-        return "No fasta file", 500
-    fasta_file.save(os.path.abspath(file_path + fasta_file.filename))
 
+    if fasta_file == None:
+        for key in request.form.keys():
+            if i==0:
+                result_id=key
+                break
+        fasta_filename=test_fasta_file
+        print("Test fasta file being used")
     # retrieve the 4 parameters
     absolute_results=request.form["absoluteResults"]
     ar = "0"
@@ -64,11 +93,12 @@ def sendfiles():
     max_cutoff = request.form["maxCutoff"]
     scale_figure = request.form["scaleFigure"]
 
-     # call Pascals script for fasta files here
+    # call Pascals script for fasta files here
     #DEVELOPMENT
-    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_file.filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    print(call)
     #PRODUCTION
-    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + file_data.filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
     
     # try to retrieve the other 3 files, if they exist
     protein_groups_file = None
