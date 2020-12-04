@@ -203,12 +203,15 @@ function ProtPlot() {
                             label="Yes/No" />
                     </Grid>
 
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <Button variant='contained' color='primary' component='span' className={classes.button} onClick={sendPartOneFiles}>
-                            Go
+                            Send Task
                         </Button>
                     </Grid>
-                     {/* temp for production */}
+                    
+                    {/* temp for production */}
+                    <Grid item xs={12}/>
+                    <Grid item xs={12}/>
                     <Grid item xs={5}>
                         <Typography variant='body1'>Already have a code? Enter it here:</Typography>
                     </Grid>
@@ -216,9 +219,9 @@ function ProtPlot() {
                         <TextField id='uid' name='uidTextField' value={textFields.uidTextField} label='User ID' type="text" onChange={handleTextField} />
                     </Grid>
                     <Grid item xs={6}>
-                        <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Go to my Results!</Button>
+                        <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Go to my Results</Button>
                     </Grid>
-                     {/* end of temp */}
+                    {/* end of temp */}
                 </Grid>
             </div>
         </div>

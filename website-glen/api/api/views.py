@@ -21,12 +21,15 @@ def index():
 def images(username):
     result_id = username
     images = []
-    for f in glob.glob(file_path+result_id+'*.pdf'):
-        file = open(f, 'rb')
-        b64_bytes = base64.b64encode(file.read())
-        image_file = b64_bytes.decode("utf-8")
-        images.append({"resultID" : result_id, "file" : image_file})
-        print("added image: " + f)
+    for f in glob.glob(os.path.abspath(file_path+result_id+'*.pdf')):
+        file_id = f.split("tmp/")[1]
+        file_id = file_id.split("_")[0]
+        if result_id == file_id:
+            file = open(f, 'rb')
+            b64_bytes = base64.b64encode(file.read())
+            image_file = b64_bytes.decode("utf-8")
+            images.append({"resultID" : result_id, "file" : image_file})
+            print("added image: " + f)
     
     if len(images) == 0 and get_max_cookie(result_id):
         return jsonify({'failed' : get_max_cookie(result_id)})
