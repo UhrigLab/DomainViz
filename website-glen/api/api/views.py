@@ -10,11 +10,11 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-file_path = 'api/api/tmp/' 
+#file_path = 'api/api/tmp/' 
 #PRODUCTION
-#file_path = 'api/tmp/'
-test_fasta_file = "TAFIIsample_NAR_MS.fa"
+file_path = 'api/tmp/'
 
+test_fasta_file = "TAFIIsample_NAR_MS.fa"
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
 
@@ -95,10 +95,16 @@ def sendfiles():
 
     # call Pascals script for fasta files here
     #DEVELOPMENT
+<<<<<<< HEAD
+    #call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_file.filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    #PRODUCTION
+    call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_file.filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+=======
     call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
     print(call)
     #PRODUCTION
     #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+>>>>>>> b2020a92fceef0b7bdfb63219a75c91fe8cedf78
     
     # try to retrieve the other 3 files, if they exist
     protein_groups_file = None
