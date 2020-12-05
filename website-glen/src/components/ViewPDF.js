@@ -103,9 +103,9 @@ export const ViewPDF = () => {
                     <>
                         <Grid item xs={12}>
                             <Paper className={classes.paper} variant='outlined'>
-                                {(message.replace("/\s/g", '').length) //If the message only contains whitespace, display the loading text
-                                    ? <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
-                                    : <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                {(message.length) //If the message only contains whitespace, display the loading text
+                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                    : <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
                                 }
                             </Paper>
                         </Grid>
@@ -117,7 +117,13 @@ export const ViewPDF = () => {
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
                         {(images.length == 0 && !showProgressBar && failed) &&
-                            <Typography variant='h5'>Something went wrong. Please try again.</Typography>
+                            <>
+                                <Typography variant='h5'>Something went wrong. Please try again.</Typography>
+                                {(message.length) //If the message has information, display the message
+                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                    : <Typography variant='h5'>There was no information from this run.</Typography>
+                                }
+                            </>
                         }
                         {(images.length == 0 && !showProgressBar && !failed) &&
                             <Typography variant='h5'>Loading, please wait...</Typography>

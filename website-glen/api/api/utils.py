@@ -30,6 +30,7 @@ def get_cookie_info(id, current_cookie):
     cookie_info = f.read()
     f.close()
     # If the file is blank, this will return an empty string, which acts as "False" for the calling function
+    print(" ".join(cookie_info.split()))
     return cookie_info
 
 def cleanup_cookies(id):

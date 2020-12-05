@@ -52,7 +52,7 @@ def images(username):
 
     if len(images) == 0 and max_cookie:
         if get_cookie_info(result_id, max_cookie):
-            return jsonify({'failed' : max_cookie, 'info' : get_cookie_info(result_id, max_cookie)})
+            return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
         else:
             return jsonify({'failed' : max_cookie})
     elif len(images) == 0:
