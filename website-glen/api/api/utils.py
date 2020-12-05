@@ -23,3 +23,19 @@ def get_max_cookie(id):
         return max_cookie
     else:
         return False
+
+def get_cookie_info(id, current_cookie):
+    current_cookie = os.path.abspath(file_path + id + "_cookie_" + str(current_cookie))
+    f = open(current_cookie, 'r')
+    cookie_info = f.read()
+    f.close()
+    # If the file is blank, this will return an empty string, which acts as "False" for the calling function
+    return cookie_info
+
+def cleanup_cookies(id):
+    cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
+    for cookie in cookies:
+        try:
+            os.remove(cookie)
+        except:
+            print("Error while removing cookie: " + cookie)

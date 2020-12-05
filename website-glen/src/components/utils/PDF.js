@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Page } from 'react-pdf';
 import { Document } from 'react-pdf/dist/esm/entry.webpack';
 
