@@ -27,6 +27,7 @@ export const PDFMap = ({ images, uid }) => {
                 saveAs(response.url, uid + '.zip')
             });
         }
+        console.log(images)
 
         return (
         <>

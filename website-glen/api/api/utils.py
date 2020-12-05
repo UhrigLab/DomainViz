@@ -1,8 +1,8 @@
 import os, glob
 #DEVELOPMENT
-#file_path = 'api/api/tmp/' 
+file_path = 'api/api/tmp/' 
 #PRODUCTION
-file_path = 'api/tmp/'
+#file_path = 'api/tmp/'
 
 
 # A function that returns the highest entry cookie for the result_id "id". 
@@ -25,10 +25,14 @@ def get_max_cookie(id):
         return False
 
 def get_cookie_info(id, current_cookie):
-    current_cookie = os.path.abspath(file_path + id + "_cookie_" + str(current_cookie))
-    f = open(current_cookie, 'r')
-    cookie_info = f.read()
-    f.close()
+    try:
+        current_cookie = os.path.abspath(file_path + id + "_cookie_" + str(current_cookie))
+        f = open(current_cookie, 'r')
+        cookie_info = f.read()
+        f.close()
+    except:
+        print("Cookie: " + current_cookie + " could not be found.")
+        return False
     # If the file is blank, this will return an empty string, which acts as "False" for the calling function
     print(" ".join(cookie_info.split()))
     return cookie_info
