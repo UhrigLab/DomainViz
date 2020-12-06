@@ -55,7 +55,7 @@ function App() {
         <AppBar postion='fixed' className={classes.appBar}>
           <Toolbar>
             {/* TODO: replace with svg icon from devang */}
-            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+            <IconButton disabled edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
               <DomainVizIcon/>
             </IconButton>
             <Typography variant="h6" className={classes.title}>

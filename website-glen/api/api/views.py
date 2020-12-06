@@ -10,9 +10,9 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#file_path = 'api/api/tmp/' 
+file_path = 'api/api/tmp/' 
 #PRODUCTION
-file_path = 'api/tmp/'
+#file_path = 'api/tmp/'
 
 test_fasta_file = "TAFIIsample_NAR_MS.fa"
 
@@ -23,12 +23,16 @@ main = Blueprint('main', __name__, static_folder="../build", static_url_path='/'
 def handle_500(e):
     original = getattr(e, "original_exception", None)
 
-    if original is None:
-        # direct 500 error, such as abort(500)
-        return render_template("500.html"), 500
+    # if original is None:
+    #     # direct 500 error, such as abort(500)
+    #     return render_template("500.html"), 500
 
     # wrapped unhandled error
-    return render_template("500_unhandled.html", e=original), 500
+    return render_template("500.html", e=original), 500
+    
+@main.errorhandler(404)
+def handle_404(e):
+    return render_template("404.html", e=e), 404
 
 @main.route('/')
 def index():
@@ -52,7 +56,7 @@ def images(username):
 
     if len(images) == 0 and max_cookie:
         if get_cookie_info(result_id, max_cookie):
-            return jsonify({'failed' : max_cookie, 'info' : get_cookie_info(result_id, max_cookie)})
+            return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
         else:
             return jsonify({'failed' : max_cookie})
     elif len(images) == 0:
@@ -95,9 +99,9 @@ def sendfiles():
 
     # call Pascals script for fasta files here
     #DEVELOPMENT
-    #call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
     #PRODUCTION
-    call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
 
     # try to retrieve the other 3 files, if they exist
     protein_groups_file = None

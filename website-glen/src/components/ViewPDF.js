@@ -19,9 +19,12 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.secondary,
     },
 }));
+let interval;
+
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
+    const [displayImages, setDisplayImages] = useState(false)
     const [message, setMessage] = useState('');
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false)
@@ -44,23 +47,20 @@ export const ViewPDF = () => {
     };
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
             fetch('/api/images/' + uid).then(response =>
                 response.json().then(data => {
                     if (data.hasOwnProperty('images')) {
                         setImages(data.images);
-                        clearInterval(interval);
                     }
                     else {
                         if (data.failed === 'null') {
                             alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
                             setFailed(true);
-                            clearInterval(interval);
                         }
                         else if (data.failed === -1) {
                             alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
                             setFailed(true);
-                            clearInterval(interval);
                             try {
                                 setMessage(data.info);
                                 console.log(message)
@@ -84,6 +84,15 @@ export const ViewPDF = () => {
         }, 5000);
         return () => clearInterval(interval);
     }, []);
+    useEffect(() => {
+        if (images.length > 0) {
+            setDisplayImages(true);
+            clearInterval(interval);
+        }
+        else if (failed) {
+            clearInterval(interval);
+        }
+    }, [images, failed]);
 
     return (
         <>
@@ -95,17 +104,17 @@ export const ViewPDF = () => {
                         <Typography variant='h5'>{"Result id: " + uid}</Typography>
                     </Paper>
                 </Grid>
-
-                {(images.length > 0 && !showProgressBar && !failed) &&
+{/* TODO displayImages is not being detected properly by this operator */}
+                {(displayImages && !showProgressBar && !failed) &&
                     <PDFMap images={images} uid={uid} />
                 }
-                {(images.length == 0 && showProgressBar && !failed) &&
+                {(!displayImages && showProgressBar && !failed) &&
                     <>
                         <Grid item xs={12}>
                             <Paper className={classes.paper} variant='outlined'>
-                                {(message.replace("/\s/g", '').length) //If the message only contains whitespace, display the loading text
-                                    ? <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
-                                    : <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                {(message.length) //If the message only contains whitespace, display the loading text
+                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                    : <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
                                 }
                             </Paper>
                         </Grid>
@@ -116,10 +125,16 @@ export const ViewPDF = () => {
                 }
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
-                        {(images.length == 0 && !showProgressBar && failed) &&
-                            <Typography variant='h5'>Something went wrong. Please try again.</Typography>
+                        {(!displayImages && !showProgressBar && failed) &&
+                            <>
+                                <Typography variant='h5'>Something went wrong. Please try again.</Typography>
+                                {(message.length) //If the message has information, display the message
+                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                    : <Typography variant='h5'>There was no information from this run.</Typography>
+                                }
+                            </>
                         }
-                        {(images.length == 0 && !showProgressBar && !failed) &&
+                        {(!displayImages && !showProgressBar && !failed) &&
                             <Typography variant='h5'>Loading, please wait...</Typography>
                         }
                     </Paper>

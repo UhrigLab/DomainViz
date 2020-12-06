@@ -116,7 +116,6 @@ function ProtPlot() {
 
 
         if (checkboxes.absoluteResultsCheckbox) {
-            console.log(checkboxes.absoluteResultsCheckbox.toString())
             data.append('absoluteResults', checkboxes.absoluteResultsCheckbox);
         }
         else {
@@ -128,7 +127,6 @@ function ProtPlot() {
                 return;
             }
             else {
-                console.log(textFields.cutoffTextField);
                 data.append('cutoff', parseFloat(textFields.cutoffTextField));
             }
         }
@@ -138,7 +136,6 @@ function ProtPlot() {
                 return;
             }
             else {
-                console.log(textFields.maxCutoffTextField)
                 data.append('maxCutoff', parseFloat(textFields.maxCutoffTextField));
             }
         }
@@ -148,7 +145,6 @@ function ProtPlot() {
                 return;
             }
             else {
-                console.log(textFields.scaleFigureTextField)
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
@@ -158,8 +154,6 @@ function ProtPlot() {
                 'Content-Type': 'multipart/form-data',
             }
         }).then(response => {
-            console.log("done")
-            console.log(response);
             textFields.scaleFigureTextField = '';
             textFields.maxCutoffTextField = '';
             textFields.cutoffTextField = '';
