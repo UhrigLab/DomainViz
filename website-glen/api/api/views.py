@@ -23,12 +23,16 @@ main = Blueprint('main', __name__, static_folder="../build", static_url_path='/'
 def handle_500(e):
     original = getattr(e, "original_exception", None)
 
-    if original is None:
-        # direct 500 error, such as abort(500)
-        return render_template("500.html"), 500
+    # if original is None:
+    #     # direct 500 error, such as abort(500)
+    #     return render_template("500.html"), 500
 
     # wrapped unhandled error
-    return render_template("500_unhandled.html", e=original), 500
+    return render_template("500.html", e=original), 500
+    
+@main.errorhandler(404)
+def handle_404(e):
+    return render_template("404.html", e=e), 404
 
 @main.route('/')
 def index():
