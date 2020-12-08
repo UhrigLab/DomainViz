@@ -1,5 +1,6 @@
 import { React, useEffect, useState } from 'react';
 import { PDFMap } from './utils/PDFMap';
+import { MessageMap } from './utils/MessageMap';
 import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
@@ -25,7 +26,7 @@ export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
     const [displayImages, setDisplayImages] = useState(false)
-    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false)
     const [failed, setFailed] = useState(false);
@@ -62,20 +63,27 @@ export const ViewPDF = () => {
                             alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
                             setFailed(true);
                             try {
-                                setMessage(data.info);
-                                console.log(message)
+                                if (data.info.length > 0) {
+                                    if (!messages.includes(data.info)) {
+                                        setMessages(currentMessages => [...currentMessages, data.info]);
+                                    }
+                                }
                             } catch {
-                                console.log("No message was found with this cookie.")
+                                console.log("No message was found with this cookie: Cookie -1.")
                             }
                         }
                         else if (data.failed < 100) {
                             setShowProgressBar(true);
                             setProgress(data.failed);
                             try {
-                                setMessage(data.info);
-                                console.log(message)
+                                if (data.info.length > 0) {
+                                    if (!messages.includes(data.info.toString())) {
+                                        setMessages(currentMessages => [...currentMessages, data.info]);
+                                        console.log("updated messages")
+                                    }
+                                }
                             } catch {
-                                console.log("No message was found with this cookie.")
+                                console.log("No message was found with this cookie: Cookie " + data.failed + ".")
                             }
                         }
                     }
@@ -87,6 +95,7 @@ export const ViewPDF = () => {
     useEffect(() => {
         if (images.length > 0) {
             setDisplayImages(true);
+            setShowProgressBar(false);
             clearInterval(interval);
         }
         else if (failed) {
@@ -104,7 +113,6 @@ export const ViewPDF = () => {
                         <Typography variant='h5'>{"Result id: " + uid}</Typography>
                     </Paper>
                 </Grid>
-{/* TODO displayImages is not being detected properly by this operator */}
                 {(displayImages && !showProgressBar && !failed) &&
                     <PDFMap images={images} uid={uid} />
                 }
@@ -112,8 +120,8 @@ export const ViewPDF = () => {
                     <>
                         <Grid item xs={12}>
                             <Paper className={classes.paper} variant='outlined'>
-                                {(message.length) //If the message only contains whitespace, display the loading text
-                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                {(messages.length) //If the message only contains whitespace, display the loading text
+                                    ? <MessageMap messages={messages}></MessageMap>
                                     : <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
                                 }
                             </Paper>
@@ -128,8 +136,8 @@ export const ViewPDF = () => {
                         {(!displayImages && !showProgressBar && failed) &&
                             <>
                                 <Typography variant='h5'>Something went wrong. Please try again.</Typography>
-                                {(message.length) //If the message has information, display the message
-                                    ? <Typography variant='h5'>{"Information about the run: " + message}</Typography>
+                                {(messages.length) //If the message has information, display the message
+                                    ? <MessageMap messages={messages}></MessageMap>
                                     : <Typography variant='h5'>There was no information from this run.</Typography>
                                 }
                             </>

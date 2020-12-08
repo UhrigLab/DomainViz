@@ -24,20 +24,19 @@ export const PDFMap = ({ images, uid }) => {
 
         function gotoDownload() {
             fetch('/api/download/' + uid).then(response => {
-                saveAs(response.url, uid + '.zip')
+                saveAs(response.url, 'DomainViz_results.zip')
             });
         }
-        console.log(images)
 
         return (
         <>
             {images.map((image, index) => {
                 return (
                     <>
-                        <Grid item xs={2}>
+                        {/* <Grid item xs={2}>
                             <Typography variant='h5'>{"Group " + (index / groupsize)}</Typography>
-                        </Grid>
-                        <Grid item xs={2}>
+                        </Grid> */}
+                        <Grid item xs={4}>
                             <PDF pdf={image.file}></PDF>
                         </Grid>
                     </>

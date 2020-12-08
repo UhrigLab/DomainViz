@@ -1337,7 +1337,7 @@ def f_read_tsv(vfile, vsavefolder, vjobid):
     except IOError:
         print('Can not read file: ' + vfile)
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid, '')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Can not read result file.')
         sys.exit()
     return vtable
 
@@ -1577,7 +1577,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
         except IOError:
             print('Can not open file ' + vfile + '.\n')
             # Write kill cookie
-            f_write_cookie(-1, vsavefolder, vjobid, '')
+            f_write_cookie(-1, vsavefolder, vjobid, 'Can not open xml file.')
             sys.exit()
         vfh_xml = open(vfile, 'r')
     elif vtype == 'string':
@@ -1585,7 +1585,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
     else:
         print('Type of input ' + vtype + ' is unknown.\nShould be either file or string.')
         # Write kill cookie
-        f_write_cookie(-1, vsavefolder, vjobid, '')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Unknown input type of hmmer search.')
         sys.exit()
 
     # read in file line by line
@@ -1608,7 +1608,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
                 print('Line is not a correct xml line.')
                 print(vline)
                 # Write kill cookie
-                f_write_cookie(-1, vsavefolder, vjobid, '')
+                f_write_cookie(-1, vsavefolder, vjobid, 'Incorrect xml line found: ' + vline)
                 sys.exit()
     if vtype == 'file':
         vfh_xml.close()
@@ -1893,11 +1893,13 @@ def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
                 f_write_log(vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.\n', 'a')
                 f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.')
                 raise ValueError('PFAM currently down (503 error).')
+                sys.exit()
         elif e.code == 404:
             f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred while trying to reach PFAM.\n', 'a')
             f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) +
                                                     ' occurred while trying to reach PFAM.')
             raise ValueError('PFAM currently down (404 error).')
+            sys.exit()
         else:
             f_write_log(vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach PFAM.\n',
                         'a')

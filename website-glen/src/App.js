@@ -34,6 +34,13 @@ const useStyles = makeStyles((theme) => ({
   },
   title: {
     flexGrow: 1,
+    fontFamily: `"Raleway"`,
+    fontSize: 40,
+  },
+  linkButton: {
+    fontFamily: `"Raleway"`,
+    fontSize: 20,
+    fontStyle: "bold",
   },
   appBar: {
     transition: theme.transitions.create(['margin', 'width'], {
@@ -42,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   toolbar: theme.mixins.toolbar,
+
 }));
 
 function App() {
@@ -66,14 +74,20 @@ function App() {
             </Link> */}
             {/* <Link to='/domainvis'> */}
             <Link to='/'>
-              <Button color='inherit'>DomainVis</Button>
+              <Button color='inherit' className={classes.linkButton}>DomainVis</Button>
             </Link>
             {/* <Link to='/motif-x'>
               <Button color='inherit'>MotifX</Button>
             </Link> */}
             <Link to='/about'>
-              <Button color='inherit'>About Us</Button>
+              <Button color='inherit' className={classes.linkButton}>About Us</Button>
             </Link>
+            <Link to='/help'>
+              <Button color='inherit' className={classes.linkButton}>Help</Button>
+            </Link>
+            <a>
+              <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
+            </a>
 
           </Toolbar>
         </AppBar>
