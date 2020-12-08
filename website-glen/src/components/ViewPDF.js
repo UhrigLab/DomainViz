@@ -148,7 +148,7 @@ export const ViewPDF = () => {
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
-                    <Button variant='contained' color='primary' component='span' className={classes.button} onClick={handleClickOpen}>Done</Button>
+                    <Button variant='contained' color='primary' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
                     <Dialog
                         open={open}
                         onClose={handleClose}
