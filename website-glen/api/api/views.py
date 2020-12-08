@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, redirect, current_app, render_tem
 from flask.helpers import send_file
 from zipfile import ZipFile
 import io
+from os.path import basename
 
 from werkzeug.exceptions import InternalServerError
 #import py-fasta-validator # for validating fasta files
@@ -138,13 +139,13 @@ def download(username):
     result_zip = ZipFile(file_path + result_id + '.zip', 'w')
 
     for f in glob.glob(file_path+result_id+'*.pdf'):
-        result_zip.write(f)
+        result_zip.write(f, basename(f))
         print("added pdf: " + f)
     for f in glob.glob(file_path+result_id+'*.csv'):
-        result_zip.write(f)
+        result_zip.write(f, basename(f))
         print('added csv: ' + f)
     for f in glob.glob(file_path+result_id+'*.tsv'):
-        result_zip.write(f)
+        result_zip.write(f, basename(f))
         print('added csv: ' + f)
     result_zip.close()
     
