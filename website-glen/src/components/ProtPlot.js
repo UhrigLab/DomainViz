@@ -180,7 +180,7 @@ function ProtPlot() {
             <div>
                 <Grid container spacing={3} alignItems='center' justify='center'>
                     <Grid item xs={12}>
-                        <Paper className={classes.paper} variant='outlined' style={{ marginTop: "90px" }}>Use DomainVis by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
+                        <Paper className={classes.paper} variant='outlined' style={{ marginTop: "90px" }}>Use DomainViz by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
                     </Grid>
 
                     <Grid item xs={3}>

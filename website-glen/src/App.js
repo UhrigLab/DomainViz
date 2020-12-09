@@ -14,11 +14,13 @@ import {
 } from 'react-router-dom';
 
 import { ViewPDF } from './components/ViewPDF';
+import { Footer } from './components/Footer';
+
 import Home from './components/Home';
 import About from './components/About';
 import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
-import ProtPlotDEV from './components/ProtPlotDev'
+import ProtPlotDEV from './components/ProtPlotDev';
 
 import { ReactComponent as DomainVizIcon } from './components/svg/domainviz.svg';
 
@@ -74,7 +76,7 @@ function App() {
             </Link> */}
             {/* <Link to='/domainvis'> */}
             <Link to='/'>
-              <Button color='inherit' className={classes.linkButton}>DomainVis</Button>
+              <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
             </Link>
             {/* <Link to='/motif-x'>
               <Button color='inherit'>MotifX</Button>
@@ -97,11 +99,13 @@ function App() {
           <Route path="/" exact component={ProtPlot} /> 
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          {/* <Route path="/domainvis" component={ProtPlot} /> */}
+          {/* <Route path="/domainviz" component={ProtPlot} /> */}
           <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
           {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
       </BrowserRouter>
+
+      <Footer></Footer>
 
     </div>
 
