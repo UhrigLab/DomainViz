@@ -3,7 +3,6 @@ import { Typography, Grid, Button, Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import UalbertaLogo from './svg/UA-SCI-1C-SOLID-REVERSE.png'
-import CopyrightIcon from '@material-ui/icons/Copyright';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -21,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
         width: "300px"
     },
   }));
+
 export const Footer = () => {
         const classes = useStyles()
 
@@ -33,9 +33,8 @@ export const Footer = () => {
                 <Grid item xs={6}>
                     <Typography className={classes.typography} variant='body1'>Contact:</Typography>
                     <Typography className={classes.typography} variant='body1'>help_uhrigprotools@ualberta.ca</Typography>
-                    <Typography className={classes.typography} variant='body1'><CopyrightIcon style={{fill: "white"}}/> 2020 The Uhrig Lab</Typography>
+                    <Typography className={classes.typography} variant='body1'>{'\u00A9'} 2020 The Uhrig Lab</Typography>
                 </Grid>
-
             </Grid>
         </Container>
         

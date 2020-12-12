@@ -1,8 +1,6 @@
 import React from 'react';
 import './App.css';
 import 'fontsource-roboto';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, IconButton, Toolbar, Typography, Button } from '@material-ui/core';
 import {spacing} from '@material-ui/system';
@@ -17,7 +15,8 @@ import { ViewPDF } from './components/ViewPDF';
 import { Footer } from './components/Footer';
 
 import Home from './components/Home';
-import About from './components/About';
+import { About } from './components/About';
+import { Help } from './components/Help';
 import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
 import ProtPlotDEV from './components/ProtPlotDev';
@@ -101,6 +100,7 @@ function App() {
           <Route path="/view-results/" component={ViewPDF} />
           {/* <Route path="/domainviz" component={ProtPlot} /> */}
           <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
+          <Route path="/help" component={Help} />
           {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
       </BrowserRouter>

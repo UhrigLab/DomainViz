@@ -26,6 +26,7 @@ export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
     const [displayImages, setDisplayImages] = useState(false)
+    const [currentMessage, setCurrentMessage] = useState("")
     const [messages, setMessages] = useState([]);
     const [progress, setProgress] = useState(0);
     const [showProgressBar, setShowProgressBar] = useState(false)
@@ -64,9 +65,7 @@ export const ViewPDF = () => {
                             setFailed(true);
                             try {
                                 if (data.info.length > 0) {
-                                    if (!messages.includes(data.info)) {
-                                        setMessages(currentMessages => [...currentMessages, data.info]);
-                                    }
+                                    setCurrentMessage(data.info);
                                 }
                             } catch {
                                 console.log("No message was found with this cookie: Cookie -1.")
@@ -77,10 +76,7 @@ export const ViewPDF = () => {
                             setProgress(data.failed);
                             try {
                                 if (data.info.length > 0) {
-                                    if (!messages.includes(data.info.toString())) {
-                                        setMessages(currentMessages => [...currentMessages, data.info]);
-                                        console.log("updated messages")
-                                    }
+                                    setCurrentMessage(data.info);
                                 }
                             } catch {
                                 console.log("No message was found with this cookie: Cookie " + data.failed + ".")
@@ -98,10 +94,13 @@ export const ViewPDF = () => {
             setShowProgressBar(false);
             clearInterval(interval);
         }
-        else if (failed) {
+        if (failed) {
             clearInterval(interval);
         }
-    }, [images, failed]);
+        if (!messages.includes(currentMessage) && currentMessage.length > 0) {
+            setMessages(currentMessages => [...currentMessages, currentMessage]);
+        }
+    }, [images, failed, currentMessage]);
 
     return (
         <>
