@@ -11,9 +11,9 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#file_path = 'api/api/tmp/' 
+file_path = 'api/api/tmp/' 
 #PRODUCTION
-file_path = 'api/tmp/'
+#file_path = 'api/tmp/'
 
 test_fasta_file = "TAFIIsample_NAR_MS.fa"
 
@@ -97,12 +97,15 @@ def sendfiles():
     cutoff = request.form["cutoff"]
     max_cutoff = request.form["maxCutoff"]
     scale_figure = request.form["scaleFigure"]
+    custom_scaling = "1"
+    if scale_figure == "1":
+        custom_scaling = "0" 
 
     # call Pascals script for fasta files here
     #DEVELOPMENT
-    #call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     #PRODUCTION
-    call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -sbp " + scale_figure
+    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
 
     # try to retrieve the other 3 files, if they exist
     protein_groups_file = None

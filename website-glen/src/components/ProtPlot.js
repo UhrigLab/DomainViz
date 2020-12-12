@@ -60,6 +60,7 @@ function ProtPlot() {
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
         fastaFileLoadedCheckbox: false,
+        scaleFigureCheckbox: false,
     });
     const handleCheckBox = (event) => {
         setCheckboxes({ ...checkboxes, [event.target.name]: event.target.checked });
@@ -216,10 +217,15 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={3}>
-                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='Enter a number larger than 0. The default value is 1. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
+                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number larger than 0. The default value is 1. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
                 </Grid>
-                <Grid item xs={2}>
-                    <TextField id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0 }} onChange={handleTextField} />
+                <Grid item xs={1}>
+                    <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0 }} onChange={handleTextField} />
+                </Grid>
+                <Grid item xs={1}>
+                    <FormControlLabel
+                        control={<Checkbox checked={checkboxes.scaleFigureCheckbox} onChange={handleCheckBox} name="scaleFigureCheckbox" />}
+                        label="Yes" />
                 </Grid>
 
                 <Grid item xs={3}>
@@ -234,7 +240,7 @@ function ProtPlot() {
                 <Grid item xs={12}>
                     <Button variant='contained' color='primary' component='span' className={classes.button} onClick={sendPartOneFiles}>
                         Submit Task
-                        </Button>
+                    </Button>
                 </Grid>
 
                 <Grid item xs={6}>

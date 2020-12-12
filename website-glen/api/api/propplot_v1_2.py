@@ -1,6 +1,6 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Author: Pascal Schläpfer, ETH Zürich, December 7th 2020                                                            #
+#   Author: Pascal Schläpfer, ETH Zürich, December 8th 2020                                                            #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
 #   Acknowledgements:                                                                                                  #
@@ -196,10 +196,11 @@ except ImportError:
 #    - vcustom_scaling_on [string] gets converted into boolean: Allows for custom scaling of the figure. The standard  #
 #                                                               case is that this is not on, and thus the scaling is   #
 #                                                               the same regardless of the size of the protein. If     #
-#                                                               this is on, one can set sbp (default 100 bp per inch)  #
-#                                                               to scale the width of the figure.                      #
-#    - vscalingfigure [string] gets converted into float: Indicates the number of bp that are displayed per inch of    #
-#                                                         x-axis.                                                      #
+#                                                               this is on, one can set with option api (default 100   #
+#                                                               amino acids per inch) the number of amino acids        #
+#                                                               displayed per inch to scale the width of the figure.   #
+#    - vscalingfigure [string] gets converted into float: Indicates the number of amino acids per inch that are        #
+#                                                         displayed per inch of x-axis.                                #
 #    - vabsolute [string] gets converted into True/False: Indicates whether absolute numbers are displayed on the      #
 #                                                         y-axis.                                                      #
 #    - vwarnings [string] gets converted into True/False: Indicates whether warnings are written out.                  #
@@ -231,6 +232,7 @@ except ImportError:
 ########################################################################################################################
 
 
+# noinspection PyTypeChecker
 def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroupfile, vcolorfile, vignoredomainfile,
                    vcutoff, vmaxcutoff, vcustom_scaling_on, vscalingfigure, vabsolute, vwarnings, vfrom_scratch,
                    vnotolderthan):
@@ -247,10 +249,10 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     vcurrentdate = int(re.sub('-', '', str(date.fromtimestamp(time.time()))))
     
     # Write initial job:
-    f_write_log(vsavefolder, vjobid, 'Job initialized with following paramters\nJobid: ' + vjobid + '\nInputfile: ' +
+    f_write_log(vsavefolder, vjobid, 'Job initialized with following parameters\nJobid: ' + vjobid + '\nInputfile: ' +
                 vinputfile + '\nIgnoredb: ' + vignoredb + '\nSavefolder: ' + vsavefolder + '\nDbfolder: ' + vdbfolder +
                 '\nGroupfile: ' + vgroupfile + '\nColorfile: ' + vcolorfile + '\nIgnoredomainfile: ' +
-                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nCostomscaling: ' +
+                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nCustomscaling: ' +
                 vcustom_scaling_on + '\nScalingfigure: ' + vscalingfigure + '\nAbsolute: ' + vabsolute +
                 '\nWarnings: ' + vwarnings + '\nFrom_scratch: ' + vfrom_scratch + '\nNotolderthan: ' + vnotolderthan +
                 '\n\n', 'w')
@@ -345,6 +347,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
         # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            if vwarnings:
+                print('Searching header ' + str(vheader_id + 1) + ' of ' + str(len(vheaders)) + '.')
             f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False  # Defines if the header was found in the db
             vdbid = vsequences[vheader_id][0:vlen_dbid]  # Defines the db file that should be searched.
@@ -362,7 +366,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                                 vfound = True  # if it is, say that the sequence was found in the db.
                                 f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
                                 f_write_pfam_prosite_res(vprositefile, vheader, vsplitentry[1:], False, True,
-                                                         vsavefolder, vjobid)  # Write the record to the output file.
+                                                         vsavefolder, vjobid)  # Write the record to the
+                                # output file.
                     vfh_db_prosite.close()
                 except IOError:  # If the db can not be read, it likely does not exist.
                     f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
@@ -374,8 +379,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 ventry_found = f_run_sequences_through_prosite(vheader, vsequences[vheader_id], vsavefolder, vjobid,
                                                                vwarnings)
                 # Search for the sequence in prosite.
-                f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid, vcurrentdate)  # Write the
-                # results into the db.
+                f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid, vcurrentdate)  # Write
+                # the results into the db.
                 f_write_pfam_prosite_res(vprositefile, vheader, ventry_found, False, False, vsavefolder, vjobid)
                 # Write the results into the results file.
             # Update cookies
@@ -432,6 +437,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
         # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            if vwarnings:
+                print('Searching header ' + str(vheader_id + 1) + ' of ' + str(len(vheaders)) + '.')
             f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False
             vdbid = vsequences[vheader_id][0:vlen_dbid]
@@ -595,7 +602,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     f_write_cookie(60, vsavefolder, vjobid, 'Finished reading and processing additional data')
 
     # Per group of protein: get annotations of Prosite and PFAM domains and make one plot per protein group.
-    f_write_log(vsavefolder, vjobid, 'Collecting Prostie and PFAM domain information per protein group\n', 'a')
+    f_write_log(vsavefolder, vjobid, 'Collecting Prosite and PFAM domain information per protein group\n', 'a')
     vprositedomainsofgroup_all = []
     vprositedomainsingenes_all = []
     vpfamdomainsofgroup_all = []
@@ -1424,7 +1431,7 @@ def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_
 
     # Check for sequence length
     vout_all = []
-    if len(vseq) >= 16:
+    if 16 <= len(vseq):
         # Run sequence
         try:
             # If a 404 error occurs, then the reason might be that the mirror https://prosite.expasy.org changed to
@@ -1494,6 +1501,11 @@ def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_
 
 
 def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfam):
+    # Constants:
+    vmax_pfam_503_iterations = 6
+    vinitial_503_wait_time_multiplier = 5
+    vcurrent_503_try = 0
+
     # Write that sequences are run to PFAM to the stdout
     f_write_log(vsavefolder, vjobid, 'Submitted PFAM search for sequence "' + vseq[0:16] + '...".\n', 'a')
     if vwarnings_pfam:
@@ -1501,10 +1513,58 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
 
     # Check for sequence length
     vout_all = []
-    if len(vseq) >= 16:
+    if 16 <= len(vseq) <= 5000:
         # Run sequence
         try:
-            vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, 0, 0)  # Call PFAM with sequence
+            verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid)  # Call PFAM with sequence
+            if verrorcode == 503 or verrorcode == 500 or verrorcode == -2:
+                if vwarnings_pfam:
+                    verrorcode_2_display = str(verrorcode)
+                    if verrorcode_2_display == '-2':
+                        verrorcode_2_display = 'A seldom error that usually can be rescued was found. '
+                    else:
+                        verrorcode_2_display = 'HTTP ' + verrorcode_2_display + ' Error occurred. '
+                    print(verrorcode_2_display + 'Try to rescue.')
+                f_write_log(vsavefolder, vjobid, verrorcode_2_display + '\nTrying to rescue.\n', 'a')
+                vcurrent_503_try += 1
+                vpassed = False
+                while vcurrent_503_try <= vmax_pfam_503_iterations and vpassed is False:
+                    if vwarnings_pfam:
+                        print('HTTP 500, 503, or a seldom other Error occurred. Rescue attempt #' +
+                              str(vcurrent_503_try) + ' of ' + str(vmax_pfam_503_iterations))
+                    f_write_log(vsavefolder, vjobid,
+                                'Rescue attempt #' + str(vcurrent_503_try) + ' of ' + str(vmax_pfam_503_iterations) +
+                                '.\n', 'a')
+                    vwaittime = 4 ^ vcurrent_503_try * vinitial_503_wait_time_multiplier
+                    print('Waiting ' + str(vwaittime) + ' seconds.')
+                    time.sleep(vwaittime)
+                    verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid)  # Call PFAM with sequence
+                    if verrorcode == -1:
+                        vpassed = True
+                    elif verrorcode == 503:
+                        if vwarnings_pfam:
+                            print('HTTP 503 Error occurred again.')
+                    elif verrorcode == 500:
+                        if vwarnings_pfam:
+                            print('HTTP 500 Error occurred again.')
+                    elif verrorcode == -2:
+                        if vwarnings_pfam:
+                            print('Other error than HTTP occurred again. Experience says: just try another time.')
+                    else:
+                        f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam)
+                    vcurrent_503_try += 1
+                if vpassed is False:
+                    f_write_log(vsavefolder, vjobid, 'Was unable to rescue 500/503.\nAbort.\n', 'a')
+                    print('HTTPError 500 or 503, or other seldom errors occurred too many times when trying to access '
+                          'PFAM result.')
+                    f_write_log(vsavefolder, vjobid, 'HTTPError 500, 503 or seldom other errors occurred when trying '
+                                                     'to access PFAM result.\n', 'a')
+                    f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 500, 503 or seldom other errors occurred too '
+                                                            'many times when trying to access PFAM result.')
+                    sys.exit()
+            else:
+                f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam)
+
             if len(vresults) > 0:  # If at least one result was found
                 for vr, vresult in enumerate(vresults):  # For every result (id vr)
                     vout = [vseq]  # Attach sequence as identifier
@@ -1513,7 +1573,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
                         vout.append('')
                     # for vi_41, vitem in enumerate(vresult):  # Check for all attributes and fill them into the output
                     for vi_16, vitem in enumerate(
-                                vresult):  # Check for all attributes and fill them into the output
+                            vresult):  # Check for all attributes and fill them into the output
                         # vout = f_dissect_pfam_key(vout, vheader[vi_41], vitem)
                         vout = f_dissect_pfam_key(vout, vheader[vi_16], vitem)
                     vout_all.append(vout)  # Append the output of this result to the output of all other results
@@ -1535,7 +1595,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
             vout_all.append(vout)
             if vwarnings_pfam:
                 print(vhead + ' has no results in pfam.')
-    else:
+    elif 16 > len(vseq):
         f_write_log(vsavefolder, vjobid, 'Warning, sequence too short (<16 amino acids).\n', 'a')
         vout = [vseq]
         # for _ in range(42 - 1):
@@ -1544,7 +1604,68 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
         vout_all.append(vout)
         if vwarnings_pfam:
             print(vhead + ' is too short to be run through PFAM (<16 amino acids).')
+    elif len(vseq) > 5000:
+        f_write_log(vsavefolder, vjobid, 'Warning, sequence too long (>5000 amino acids).\n', 'a')
+        vout = [vseq]
+        # for _ in range(42 - 1):
+        for _ in range(17 - 1):
+            vout.append('')
+        vout_all.append(vout)
+        if vwarnings_pfam:
+            print(vhead + ' is too long to be run through PFAM (>5000 amino acids).')
     return vout_all  # Return all results
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_handle_pfam_error                                                                                                 #
+#  Handles errors given out by running sequences through PFAM                                                          #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - verrorcode [string]: Error code that needs handling.                                                            #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings_pfam [boolean]: If warnings should be given out or not.                                               #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
+#                       followed by all other information collected from pfam.                                         #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam):
+    if verrorcode == -1:
+        if vwarnings_pfam:
+            print('Results of search received.')
+    elif verrorcode == 400:
+        print('HTTPError 400 occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'HTTPError 400 occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 400 occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    elif verrorcode == 404:
+        print('HTTPError 404 occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 404 occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    elif verrorcode == -2:
+        print('Error other than HTTPError occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'Error other than HTTPError occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Error other than HTTPError occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    else:
+        print('Unknown error ' + str(verrorcode) + ' occurred: ')
+        f_write_log(vsavefolder, vjobid, 'Unknown error ' + str(verrorcode) + ' occurred while trying '
+                                                                              'to reach PFAM.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Unknown error ' + str(verrorcode) + ' occurred while trying '
+                                                                                     'to reach PFAM.')
+        sys.exit()
 
 
 ########################################################################################################################
@@ -1843,6 +1964,7 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
 #                                                                                                                      #
 #  Output:                                                                                                             #
+#    - verrorcode [list]: Error code to check what is going on.                                                        #
 #    - vheader [list]: The header of the records, indicating what is what.                                             #
 #    - vrecords [list]: List of lists with every list being a domain, and every sublist an attribute of the domain     #
 #                       record.                                                                                        #
@@ -1850,12 +1972,9 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 ########################################################################################################################
 
 
-def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
-    vmax_iterations = 6
-    if viteration >= vmax_iterations:
-        raise ValueError('PFAM currently down (503 error).')
-    time.sleep(vwaittime)
-
+# noinspection PyBroadException
+def f_query_pfam(vseq, vsavefolder, vjobid):
+    verrorcode = -1
     # Modify sequence
     vseq = ''.join(vseq.split())  # remove spaces within the sequence
     vseq = '>Seq\n' + vseq  # Format sequence for running through hmmer.
@@ -1865,57 +1984,46 @@ def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
     vparameters_encoded = urllib.parse.urlencode(vparameters).encode('utf-8')
     vurllib_request_run = urllib.request.Request('https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan',
                                                  vparameters_encoded)
-    vresult_url = urllib.request.urlopen(vurllib_request_run).geturl()
-    vresult_parameters = {'format': 'xml'}
-    vresult_parameters_encoded = urllib.parse.urlencode(vresult_parameters)
-    vresult_url_with_parameters = vresult_url.replace('results', 'download') + '?' + vresult_parameters_encoded
-    vurllib_request_result = urllib.request.Request(vresult_url_with_parameters)
-
-    # Get results
-    vperform_conversion = True
-    vxml_result = ''
-    try:
-        vxml_result = urllib.request.urlopen(vurllib_request_result).read()
-    except HTTPError as e:
-        vperform_conversion = False
-        if e.code == 500:
-            raise ValueError('No matching Pfam domains were found.')
-        elif e.code == 503:
-            # Currently unavailable
-            viteration += 1
-            if viteration == 1:
-                vwaittime = 5
-            else:
-                vwaittime *= 4
-            try:
-                f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime)
-            except ValueError:
-                f_write_log(vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.\n', 'a')
-                f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.')
-                raise ValueError('PFAM currently down (503 error).')
-                sys.exit()
-        elif e.code == 404:
-            f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred while trying to reach PFAM.\n', 'a')
-            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) +
-                                                    ' occurred while trying to reach PFAM.')
-            raise ValueError('PFAM currently down (404 error).')
-            sys.exit()
-        else:
-            f_write_log(vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach PFAM.\n',
-                        'a')
-            print('HTTPError ' + str(e.code) + ' occurred.')
-            print(e.reason)
-            # Write kill cookie
-            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach' 
-                                                    ' PFAM.')
-            sys.exit()
-
-    # Modify results such that it comes in form of a table
+    vperform_retrieval = True
+    vperform_conversion = False
     vheader = []
     vrecords = []
+    try:
+        vresult_url = urllib.request.urlopen(vurllib_request_run).geturl()
+    except HTTPError as e:
+        vperform_retrieval = False
+        verrorcode = e.code
+        f_write_log(vsavefolder, vjobid, e.reason + '\n', 'a')
+    except:
+        vperform_retrieval = False
+        verrorcode = -2
+
+    if vperform_retrieval:
+        vresult_parameters = {'format': 'xml'}
+        vresult_parameters_encoded = urllib.parse.urlencode(vresult_parameters)
+        vresult_url_with_parameters = vresult_url.replace('results', 'download') + '?' + vresult_parameters_encoded
+        vurllib_request_result = urllib.request.Request(vresult_url_with_parameters)
+
+        # Get results
+        vperform_conversion = True
+        vxml_result = ''
+        try:
+            vxml_result = urllib.request.urlopen(vurllib_request_result).read()
+        except HTTPError as e:
+            vperform_conversion = False
+            if e.code == 500:
+                verrorcode = -1  # Is ok, This means, that no domains were found.
+            else:
+                verrorcode = e.code
+                f_write_log(vsavefolder, vjobid, e.reason + '\n', 'a')
+        except:
+            vperform_conversion = False
+            verrorcode = -2
+
+    # Modify results such that it comes in form of a table
     if vperform_conversion:
         vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid)
-    return vheader, vrecords
+    return verrorcode, vheader, vrecords
 
 
 ########################################################################################################################
@@ -2205,13 +2313,15 @@ def f_dissect_pfam_key(vout, key, value):
 #    - vmaxcutoff_ri [string] gets converted into float: Same as vcutoff, however, before the domain could exist       #
 #                                                        anywhere in the protein. Here the domains need to be present  #
 #                                                        at the same location to make the cut.                         #
-#    - vcustom_scaling_on_ri [string] gets converted into boolean: Allows for custom scaling of the figure. The \      #
+#    - vcustom_scaling_on_ri [string] gets converted into boolean: Allows for custom scaling of the figure. The        #
 #                                                                  standard case is that this is not on, and thus the  #
 #                                                                  scaling is the same regardless of the size of the   #
-#                                                                  protein. If this is on, one can set sbp (default    #
-#                                                                  100 bp per inch) to scale the width of the figure.  #
-#    - vscalingfigure_ri [string] gets converted into float: Indicates the number of bp that are displayed per inch of #
-#                                                            x-axis.                                                   #
+#                                                                  protein. If this is on, one can set with option api #
+#                                                                  (default 100 amino acids per inch) the number of    #
+#                                                                  amino acids displayed per inch to scale the width   #
+#                                                                  of the figure.                                      #
+#    - vscalingfigure_ri [string] gets converted into float: Indicates the number of amino acids per inch that are     #
+#                                                         displayed per inch of x-axis.                                #
 #    - vabsolute_ri [string] gets converted into True/False: Indicates whether absolute numbers are displayed on the   #
 #                                                            y-axis.                                                   #
 #    - vwarnings_ri [string] gets converted into True/False: Indicates whether warnings are written out.               #
@@ -2327,7 +2437,8 @@ def f_print_help():
           '                                  is 0.5, 50% of the sequences have to have this domain at the same \n'
           '                                  relative position).\n'
           '  -cs [0 or 1]: Can set custom scaling of figure on (default is off = 0).\n'
-          '  -sbp [number larger than 0]: Indicates the scaling of bp per inch that is used for figures.\n'
+          '  -api [number larger than 0]: Indicates the scaling of amino acids per inch of x axis that is used for\n'
+          '                               figures.\n'
           '  -fs [0 or 1]: Indicates if previous results should be overwritten.'
           '\n'
           'Output:\n'
@@ -2597,12 +2708,12 @@ if __name__ == "__main__":
                 vi += 1
                 if vwarnings_main == 1:
                     print('Domain display threshold values at bp level: ' + vmaxcutoff_main)
-            elif sys.argv[vi] == '-sbp':  # Indicates the scaling of bp per inch.
+            elif sys.argv[vi] == '-api':  # Indicates the scaling of amino acids per inch.
                 vscalefigure_main = sys.argv[vi + 1]
                 vi += 1
                 if vwarnings_main == 1:
                     print('Figure scale is 100pb per ' + vmaxcutoff_main + 'inch.')
-            elif sys.argv[vi] == '-cs':  # Indicates the scaling of bp per inch.
+            elif sys.argv[vi] == '-cs':  # Indicates the scaling of amino acids per inch.
                 vcustom_scaling_on_main = sys.argv[vi + 1]
                 vi += 1
                 if vwarnings_main == 1:
@@ -2655,8 +2766,8 @@ if __name__ == "__main__":
         # Produce output about the scaling of the figure
         if vstandardscalefigure_main == vscalefigure_main:
             if vwarnings_main == '1':
-                print('Using figure scaling of 100 bp per ' + str(vscalefigure_main) + ' inches. Change setting with ' +
-                      'scalefigure or -s followed by a value greater than 0.')
+                print('Using standard figure scaling. Change setting with scalefigure or -api followed by a value '
+                      'greater than 0 in combination with -cs 1.')
 
         # Run the script and produce the plots
         print('Running script:')
