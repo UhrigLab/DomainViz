@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { Button, makeStyles } from '@material-ui/core';
 
@@ -14,7 +14,12 @@ const useStyles = makeStyles((theme) => ({
 
 function UploadFile({ value, handleFile, acceptedTypes=".tsv" }) {
   const classes = useStyles();
-
+  const [inputValue, setInputValue] = useState("")
+  const returnFile = (file) => {
+    //reset the input's value so we can load another file
+    setInputValue("")
+    handleFile(file)
+  }
   return (
     <>
       <input
@@ -23,7 +28,8 @@ function UploadFile({ value, handleFile, acceptedTypes=".tsv" }) {
         id={value}
         type="file"
         style={{ display: 'none' }}
-        onChange={e => handleFile(e.target.files[0])}
+        value={inputValue}
+        onChange={e => returnFile(e.target.files[0])}
       />
       <label htmlFor={value}>
         <Button

@@ -223,7 +223,6 @@ function ProtPlot() {
                 <Grid item xs={2}>
                     <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear File</Button>
-
                 </Grid>
                 <Grid item xs={1}>
                     <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />

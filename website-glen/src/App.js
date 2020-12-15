@@ -76,6 +76,12 @@ const theme = createMuiTheme({
       main: '#000000',
     },
   },
+  typography: {
+    body2: {
+      fontWeight: 1000,
+      fontSize: 20,
+    },
+  },
 });
 
 

@@ -20,6 +20,10 @@ async function checkFasta(file) {
         for (var i in lines) {
             let line = lines[i];
 
+            if (headers.length > 3000) {
+                return false, 'Fasta file contains too many headers. Please limit your file to 3000 headers.'
+            }
+
             if (line[0] =='>') {
                 headers.push(line);
             }
@@ -33,10 +37,11 @@ async function checkFasta(file) {
         }
         //make sure there are no repeated headers
         if ((new Set(headers)).size == headers.length) {
-            return true
+            return true;
         }
         else {
-            return  false, "Remove duplicate sequences.";
+            alert("Warning: You have duplicate headers. Proceeding regardless.");
+            return true;
         }
     });
     
