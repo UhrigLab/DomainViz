@@ -66,7 +66,8 @@ node_modules/
 
 # I am excluding the database because in my development, I often run the same files
 database.db
-tmp/
+tmp/*
+dbs/*
 
 
 # Flask stuff:
