@@ -386,7 +386,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             # Update cookies
             vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 1
             if vcid > 1:
-                f_write_cookie(vcid, vsavefolder, vjobid, '')
+                f_write_cookie(vcid, vsavefolder, vjobid, str((vcid - 1) * 5) + '% of sequences evaluated for ' +
+                                                                                'prosite domains.')
 
     vprositedata = f_read_tsv(vprositefile, vsavefolder, vjobid)  # Read the data of prosite from the result file.
     f_write_log(vsavefolder, vjobid, 'Successfully gathered Prosite domain results.\n', 'a')
@@ -481,7 +482,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             # Update cookies
             vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 22
             if vcid > 22:
-                f_write_cookie(vcid, vsavefolder, vjobid, '')
+                f_write_cookie(vcid, vsavefolder, vjobid, str((vcid - 22) * 5) + '% of sequences evaluated for pfam ' +
+                                                                                 'domains.')
                 
     vpfamdata = f_read_tsv(vpfamfile, vsavefolder, vjobid)
     f_write_log(vsavefolder, vjobid, 'Successfully gathered PFAM domain results.\n', 'a')
@@ -677,13 +679,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                             for vp, vpd in enumerate(vprositedomains_u):  # Go through all domains
                                 if vprositedata[vheader_id][3] == vpd:  # Check if the domain is the domain we currently
                                     # look at
-                                    vmedianstartbp = f_float2int((int(vprositedata[vheader_id][1]) - 1) /
+                                    vmedianstartaa = f_float2int((int(vprositedata[vheader_id][1]) - 1) /
                                                                  len(vsequences[vh]) * vmedlengroup[vug])  # Calculate
                                     # the start position relative to the median length of the protein group:
-                                    vmedianendbp = f_float2int((int(vprositedata[vheader_id][2]) - 1) /
+                                    vmedianendaa = f_float2int((int(vprositedata[vheader_id][2]) - 1) /
                                                                len(vsequences[vh]) * vmedlengroup[vug])  # Calculate the
                                     # end position relative to the median length of the protein group:
-                                    vprositedomainsofgroup[vp, vmedianstartbp:vmedianendbp] += 1  # Mark the placing of
+                                    vprositedomainsofgroup[vp, vmedianstartaa:vmedianendaa] += 1  # Mark the placing of
                                     # the domain
                                     vprositedomainsingenes[vp, vh] = 1  # Define that the domain has been found for that
                                     # gene
@@ -695,13 +697,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                             # currently look at
                             for vp, vpd in enumerate(vpfamdomains_u):  # Go through all domains
                                 if vpfamdata[vheader_id][1] == vpd:  # If the domain is the domain we currently look at
-                                    vmedianstartbp = f_float2int((int(vpfamdata[vheader_id][6]) - 1) /
+                                    vmedianstartaa = f_float2int((int(vpfamdata[vheader_id][6]) - 1) /
                                                                  len(vsequences[vh]) * vmedlengroup[vug])  # Calculate
                                     # the start position relative to the median length of the protein group:
-                                    vmedianendbp = f_float2int((int(vpfamdata[vheader_id][7]) - 1) /
+                                    vmedianendaa = f_float2int((int(vpfamdata[vheader_id][7]) - 1) /
                                                                len(vsequences[vh]) * vmedlengroup[vug])  # Calculate the
                                     # end position relative to the median length of the protein group:
-                                    vpfamdomainsofgroup[vp, vmedianstartbp:vmedianendbp] += 1  # Mark the placing of the
+                                    vpfamdomainsofgroup[vp, vmedianstartaa:vmedianendaa] += 1  # Mark the placing of the
                                     # domain
                                     vpfamdomainsingenes[vp, vh] = 1  # Define that the domain has been found for
                                     # that gene
@@ -843,10 +845,6 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vheader_id in vmaxids:
-                print('max cut off: ' + str((vmaxcutoff * 100)))
-                print('Max present: ' + str(max(vprositedomainsofgroup_rel[vheader_id])))
-                print('cut off: ' + str(vcutoff))
-                print('cut present: ' + str(float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group)))
                 if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group) > vcutoff and \
                         vprositedomains_u_ignore[vheader_id] == 0:
@@ -880,7 +878,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             else:
                 plt.ylim(0, 100)  # 100 %
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -946,7 +944,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -1044,7 +1042,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -1527,7 +1525,8 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
     if 16 <= len(vseq) <= 5000:
         # Run sequence
         try:
-            verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid)  # Call PFAM with sequence
+            verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, vwarnings_pfam)  # Call PFAM with
+            # sequence
             if verrorcode == 503 or verrorcode == 500 or verrorcode == -2:
                 if vwarnings_pfam:
                     verrorcode_2_display = str(verrorcode)
@@ -1549,7 +1548,8 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
                     vwaittime = 4 ^ vcurrent_503_try * vinitial_503_wait_time_multiplier
                     print('Waiting ' + str(vwaittime) + ' seconds.')
                     time.sleep(vwaittime)
-                    verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid)  # Call PFAM with sequence
+                    verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, vwarnings_pfam)  # Call PFAM
+                    # with sequence
                     if verrorcode == -1:
                         vpassed = True
                     elif verrorcode == 503:
@@ -1689,6 +1689,7 @@ def f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam):
 #    - vtype [string]: String indicating whether vfile indicates a byte string ('string') or a file ('file').          #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vrecords [list]: A list of lists, containing the results of a hmmer search as lists stored in a list.           #
@@ -1696,10 +1697,7 @@ def f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam):
 ########################################################################################################################
 
 
-def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
-    # Parameters
-    vsilent = 1
-
+def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid, vwarnings):
     # Open file for real if type is file
     if vtype == 'file':
         # Test if file can be opened, else abort.
@@ -1727,7 +1725,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
     for vl, vline in enumerate(vfh_xml):
         vline_stripped = vline.strip()
         if vline_stripped == '':
-            if vsilent == 0:
+            if vwarnings:
                 print('Warning: Empty line: ' + str(vl))
         else:
             vtypeline = f_check_type_line(vline)
@@ -1736,6 +1734,9 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
                 vrecords.append(vrecord)
             elif vtypeline == 2:
                 vcurr_parent = f_get_parent(vrecords, vline)
+            elif vtypeline == 3: # comments
+                if vwarnings:
+                    print('Comment on line ' + str(vl) + ': ' + vline)
             else:
                 print('Line is not a correct xml line.')
                 print(vline)
@@ -1806,6 +1807,8 @@ def f_check_type_line(vline):
         vreturn = 2
     elif vline.startswith('<') and vline.endswith('>'):
         vreturn = 1
+    elif vline.starswith('//'):
+        vreturn = 3  # comment
     else:
         vreturn = -1
     return vreturn
@@ -1890,6 +1893,7 @@ def f_read_single_record(vline, vcurr_parent, vtype):
 #    - vtype [string]: String indicating whether vfile indicates a byte string ('string') or a file ('file').          #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vheader [list]: Header indicators with the first few headers being the same as in the tsv output of hmmer.      #
@@ -1898,8 +1902,8 @@ def f_read_single_record(vline, vcurr_parent, vtype):
 ########################################################################################################################
 
 
-def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
-    vrecords = f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid)
+def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid, vwarnings):
+    vrecords = f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid, vwarnings)
 
     # Create tsv header and the ids that are listed in the xml
     vheader = []
@@ -1973,6 +1977,7 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 #    - vseq [string]: Protein sequence.                                                                                #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - verrorcode [list]: Error code to check what is going on.                                                        #
@@ -1984,7 +1989,7 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 
 
 # noinspection PyBroadException
-def f_query_pfam(vseq, vsavefolder, vjobid):
+def f_query_pfam(vseq, vsavefolder, vjobid, vwarnings):
     verrorcode = -1
     # Modify sequence
     vseq = ''.join(vseq.split())  # remove spaces within the sequence
@@ -2033,7 +2038,7 @@ def f_query_pfam(vseq, vsavefolder, vjobid):
 
     # Modify results such that it comes in form of a table
     if vperform_conversion:
-        vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid)
+        vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid, vwarnings)
     return verrorcode, vheader, vrecords
 
 
@@ -2574,7 +2579,7 @@ if __name__ == "__main__":
         except IOError:
             print('Path ' + vtemp_db_place_main + ' can not be created.')
             sys.exit()
-        if vwarnings_main == 1:  # Give output about where the db location is, if warnings are on.
+        if vwarnings_main == '1':  # Give output about where the db location is, if warnings are on.
             print('Folder to save dbs: ' + vdbfolder_main)
         f_reinitialize_dbs(vjobid_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
                            vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main,
@@ -2639,7 +2644,7 @@ if __name__ == "__main__":
                 except IOError:
                     print('Path ' + vsavefolder_main + ' can not be created.')
                     sys.exit()
-                if vwarnings_main == 1:  # Give output about where the storing location is, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the storing location is, if warnings are on.
                     print('Folder to save intermediate and output files: ' + vsavefolder_main)
             elif sys.argv[vi] == '-dbf':  # Indicates the location of db files.
                 if len(sys.argv) == vi + 1:  # make sure that there is an argument after -dbf.
@@ -2652,7 +2657,7 @@ if __name__ == "__main__":
                 except IOError:
                     print('Path ' + vdbfolder_main + ' can not be created.')
                     sys.exit()
-                if vwarnings_main == 1:  # Give output about where the db location is, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the db location is, if warnings are on.
                     print('Folder to save dbs: ' + vdbfolder_main)
             elif sys.argv[vi] == '-in':  # Fasta sequence file that contains the protein sequences that should be run.
                 vinputfile_main = sys.argv[vi + 1]
@@ -2663,7 +2668,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vinputfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:  # Give output about where the fasta sequences are, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the fasta sequences are, if warnings are on.
                     print('Input file stored in: ' + vinputfile_main)
             elif sys.argv[vi] == '-gf':  # A file that contains the groupings of proteins.
                 vgroupfile_main = sys.argv[vi + 1]
@@ -2674,7 +2679,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vgroupfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Group association information stored in: ' + vgroupfile_main)
             elif sys.argv[vi] == '-cf':  # A file that contains the coloring of domains.
                 vcolorfile_main = sys.argv[vi + 1]
@@ -2685,7 +2690,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vcolorfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Domain color information stored in: ' + vcolorfile_main)
             elif sys.argv[vi] == '-if':  # A file that contains domains that should not be printed out.
                 vignoredomainfile_main = sys.argv[vi + 1]
@@ -2696,13 +2701,13 @@ if __name__ == "__main__":
                     print('Can not read ' + vignoredomainfile_main)
                     sys.exit()
                 vfh_main.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Information which domains to ignore stored in: ' + vignoredomainfile_main)
             elif sys.argv[vi] == '-ar':  # Indicates whether absolute or relative results should be used.
                 vabsoluteresults_main = sys.argv[vi + 1]
                 vi += 1
                 if vabsoluteresults_main == '1':
-                    if vwarnings_main == 1:
+                    if vwarnings_main == '1':
                         print('Using absolute results.')
                 elif vabsoluteresults_main != '0':
                     print('Unknown option: ' + sys.argv[vi] + ' ' + sys.argv[vi + 1])
@@ -2710,24 +2715,24 @@ if __name__ == "__main__":
             elif sys.argv[vi] == '-cut':  # Indicates at what cutoff domains should be displayed.
                 vcutoff_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Domain display threshold values: ' + vcutoff_main)
             elif sys.argv[vi] == '-mcut':  # Only domains that have a maximum prevalence at a relative place in the
                 # protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have
                 # this domain at the same relative position).
                 vmaxcutoff_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
-                    print('Domain display threshold values at bp level: ' + vmaxcutoff_main)
+                if vwarnings_main == '1':
+                    print('Domain display threshold values at amino acid level: ' + vmaxcutoff_main)
             elif sys.argv[vi] == '-api':  # Indicates the scaling of amino acids per inch.
                 vscalefigure_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Figure scale is 100pb per ' + vmaxcutoff_main + 'inch.')
             elif sys.argv[vi] == '-cs':  # Indicates the scaling of amino acids per inch.
                 vcustom_scaling_on_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     if vcustom_scaling_on_main == '1':
                         print('Custom scaling is on.')
                     else:
@@ -2735,12 +2740,12 @@ if __name__ == "__main__":
             elif sys.argv[vi] == '-fs':
                 vfrom_scratch_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('All previous results ignored.')
             elif sys.argv[vi] == '-not':
                 vnotolderthan_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Results recovered from databases should not be older than ' + vnotolderthan_main + '.')
             vi += 1
 
