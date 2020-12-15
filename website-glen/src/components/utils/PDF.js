@@ -9,6 +9,9 @@ export const PDF = ({pdf}) => {
         console.log("Successfully displayed pdf")
         setNumPages(numPages);
     }
+    function onDocumentLoadError() {
+        alert("Results not loaded. Please reload the page.")
+    }
 
     let pdf_string = 'data:application/pdf;base64,' + pdf;
 
@@ -16,7 +19,7 @@ export const PDF = ({pdf}) => {
         <Document
             file={pdf_string}
             onLoadSuccess={onDocumentLoadSuccess}
-            
+            onLoadError={onDocumentLoadError}
         >
 
             {Array.from(new Array(numPages), (el, index) => (
