@@ -154,6 +154,8 @@ def download(username):
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
         print('added csv: ' + f)
+    for f in glob.glob(file_path+result_id+'*.txt'):
+        result_zip.write(f, basename(f))
     result_zip.close()
     
     return send_file(os.path.abspath(file_path + result_id + '.zip'), as_attachment=True)

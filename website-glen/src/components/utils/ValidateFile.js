@@ -19,18 +19,16 @@ async function checkFasta(file) {
         let lines = content.split('\n');
         for (var i in lines) {
             let line = lines[i];
-    
-            if (line === '') {
-                return false, 'Fasta file contains empty line on line ' + i.toString() + '.';
-            }
-            else if (line[0] =='>') {
+
+            if (line[0] =='>') {
                 headers.push(line);
             }
             else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx\*\n]*$') == null) {
                 // 1) Check if line only consists of the following characters
                 // GALMFWKQESPVICYHRNDTgalmfwkqespvicyhrndt* and space and new line character (\n)
                 // If the line contains any other character, or is completely empty, the regex will return null
-                return false, 'Fasta file contains forbidden characters on line ' + i.toString() + '. Only allowed characters: ' + 'GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*';
+                let line_num = parseInt(i) + 1
+                return false, 'Fasta file contains forbidden characters on line ' + line_num.toString() + '. The only characters that are allowed are: ' + 'GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n The line that caused problems was: ' + line;
             }
         }
         //make sure there are no repeated headers
@@ -38,7 +36,7 @@ async function checkFasta(file) {
             return true
         }
         else {
-            return  false, "You cannot have duplicate headers.";
+            return  false, "Remove duplicate sequences.";
         }
     });
     

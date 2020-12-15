@@ -33,9 +33,6 @@ export const PDFMap = ({ images, uid }) => {
             {images.map((image, index) => {
                 return (
                     <>
-                        {/* <Grid item xs={2}>
-                            <Typography variant='h5'>{"Group " + (index / groupsize)}</Typography>
-                        </Grid> */}
                         <Grid item xs={4}>
                             <PDF pdf={image.file}></PDF>
                         </Grid>
@@ -43,7 +40,7 @@ export const PDFMap = ({ images, uid }) => {
                 )
             })}
             <Grid item xs={12}>
-                <Button variant='contained' color='primary' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
             </Grid>
             <Grid item xs={12}/>
         </>

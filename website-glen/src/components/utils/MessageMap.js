@@ -9,7 +9,7 @@ export const MessageMap = ({ messages }) => {
             {messages.map((message, index) => {
                 return (
                     <>
-                        <Typography variant='h5'>{"Message " + (index) + ": " + message}</Typography>
+                        <Typography variant='h5'>{message}</Typography>
                     </>
                     
                 )

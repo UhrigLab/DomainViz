@@ -4,7 +4,7 @@ import { MessageMap } from './utils/MessageMap';
 import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
-import { ReactComponent as DomainVizIcon } from './svg/domainviz.svg';
+import DomainVizIcon from './img/domainviz.png';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -20,13 +20,10 @@ const useStyles = makeStyles((theme) => ({
         textAlign: 'center',
         color: theme.palette.text.secondary,
     },
-    icon: {
-        height: '300px', 
-        width: '300px', 
-        marginTop: '20px',
-        marginBottom: '-90px',
-        backgroundColor: 'white',
-    }
+    img: {
+        height: "122px",
+        width: "293px"
+    },
 }));
 let interval;
 
@@ -111,11 +108,9 @@ export const ViewPDF = () => {
     }, [images, failed, currentMessage]);
 
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} style={{marginTop: '90px'}}>
             <Grid item xs={12}>
-                <Container className={classes.icon}>
-                    <DomainVizIcon></DomainVizIcon>
-                </Container>
+                <img src={DomainVizIcon} className={classes.img}></img>
             </Grid>
 
             <Grid item xs={12}>
@@ -131,10 +126,10 @@ export const ViewPDF = () => {
                 <>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} variant='outlined'>
-                            {(messages.length) //If the message only contains whitespace, display the loading text
-                                ? <MessageMap messages={messages}></MessageMap>
-                                : <Typography variant='h5'>Loading, this may take a while, please wait...</Typography>
+                            {(messages.length) && //If the message only contains whitespace, display the loading text
+                                <MessageMap messages={messages}></MessageMap>
                             }
+                            <Typography variant='h5'>Task processing can take several minutes to several hours. Please wait or copy the Result ID, exit, and retrieve your results later using the homepage.</Typography>
                         </Paper>
                     </Grid>
                     <Grid item xs={12}>
@@ -161,7 +156,7 @@ export const ViewPDF = () => {
                 </Grid>
             }
             <Grid item xs={12}>
-                <Button variant='contained' color='primary' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
                 <Dialog
                     open={open}
                     onClose={handleClose}

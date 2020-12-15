@@ -10,9 +10,9 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import { Box, Button, Checkbox, Container, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import { Route, useHistory } from 'react-router';
+import { useHistory } from 'react-router';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
-import { ReactComponent as DomainVizIcon } from './svg/domainviz.svg';
+import DomainVizIcon from './img/domainviz.png';
 import { saveAs } from 'file-saver';
 
 
@@ -34,15 +34,11 @@ const useStyles = makeStyles((theme) => ({
     divider: {
         scale: 1.5,
         backgroundColor: 'black',
-
     },
-    icon: {
-        height: '300px', 
-        width: '300px', 
-        marginTop: '20px',
-        marginBottom: '-90px',
-        backgroundColor: 'white',
-    }
+    img: {
+        height: "122px",
+        width: "293px"
+    },
 }));
 
 //generates random id;
@@ -59,6 +55,25 @@ let guid = () => {
 function ProtPlot() {
     //temp for production
     function getImages() {
+        let id = textFields.uidTextField;
+        if (!id) {
+            alert("Please enter a result ID.");
+            return;
+        }
+        if (id.length != 36) {
+            alert("Please enter a valid result ID, this ID is the wrong length.");
+            return;
+        }
+        if (id.match('^[a-z0-9.]*$') == null) {
+            alert("Please enter a valid result ID, this ID has the wrong characters.")
+            return;
+        }
+        let idSplit = id.split('.')
+        if (idSplit.length != 5 || idSplit[0].length != 8 || idSplit[1].length != 4 || idSplit[2].length != 4 
+            || idSplit[3].length != 4 || idSplit[4].length != 12) {
+            alert("Please enter a valid result ID, this ID isn't formatted correctly.")
+            return
+        }
         history.push('/view-results/' + textFields.uidTextField);
     }
     //end of temp
@@ -111,17 +126,13 @@ function ProtPlot() {
         await isFasta(file).then((result) => {
             valid = result;
         });
-        // if (!isFasta(file)) {
-        //     console.log("File is not valid")
-        //     valid = false
-        // }
 
         if (valid) {
             setFastaFile(file);
             alert("Sucessfully uploaded file: " + file.name)
         }
         else {
-            alert("Your fasta file is not in a valid format, please try again with a different file.")
+            return;
         }
     }
 
@@ -166,7 +177,7 @@ function ProtPlot() {
             }
         }
         if (textFields.scaleFigureTextField !== '') {
-            if (parseFloat(textFields.scaleFigureTextField) < 0) {
+            if (parseFloat(textFields.scaleFigureTextField) < 0 || parseFloat(textFields.scaleFigureTextField) > 10) {
                 alert("Please enter a valid figure scaling value.");
                 return;
             }
@@ -194,32 +205,34 @@ function ProtPlot() {
 
     return (
         <div className='protplot'>
-            <Grid container spacing={3} alignItems='center' justify='center'>
+            <Grid container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
                 <Grid item xs={12}>
-                    <Container className={classes.icon}>
-                        <DomainVizIcon></DomainVizIcon>
-                    </Container>
+                    <img src={DomainVizIcon} className={classes.img}></img>
                 </Grid>
                 <Grid item xs={12}>
-                    <Paper className={classes.paper} variant='outlined' >Use DomainViz by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
+                    <Paper className={classes.paper} variant='outlined'>
+                        <Typography variant='h5'>Protein domain enrichment {'&'} visualization tool</Typography>
+                        <Typography variant='body1'>Use DomainViz by first uploading a protein Fasta file, changing any options as desired and clicking "Submit Task".</Typography>
+                    </Paper>
                 </Grid>
 
                 <Grid item xs={2} />
                 <Grid item xs={3}>
                     <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item xs={2}>
                     <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginTop: "10px" }}>Clear File</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear File</Button>
 
-                </Grid>
-                <Grid item xs={1}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginTop: "10px" }}>Download Example</Button>
                 </Grid>
                 <Grid item xs={1}>
                     <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
+                <Grid item xs={12}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginLeft: "10px" }}>Download Example</Button>
+                </Grid>
+                
                 <Grid item xs={2} />
 
                 <Grid item xs={12} />
@@ -241,7 +254,7 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={3}>
-                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number larger than 0. The default value is 1. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
+                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number between 0 and 10. The default value is 1, but this may not reflect well in your plots, and it is recommended that you leave it off. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={1}>
                     <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0, max: 10, step: '0.1' }} onChange={handleTextField} />
@@ -262,7 +275,7 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant='contained' color='primary' component='span' className={classes.button} onClick={sendPartOneFiles}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
                         Submit Task
                     </Button>
                 </Grid>
@@ -277,11 +290,11 @@ function ProtPlot() {
                 <Grid item xs={5}>
                     <Typography variant='body1'>Already have a code? Enter it here:</Typography>
                 </Grid>
-                <Grid item xs={1}>
-                    <TextField id='uid' name='uidTextField' value={textFields.uidTextField} label='Result ID' type="text" onChange={handleTextField} />
+                <Grid item xs={3}>
+                    <TextField fullWidth id='uid' name='uidTextField' value={textFields.uidTextField} label='Result ID' type="text" onChange={handleTextField} />
                 </Grid>
-                <Grid item xs={6}>
-                    <Button variant='contained' color='primary' component='span' className={classes.button} onClick={getImages}>Go to my Results</Button>
+                <Grid item xs={4}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={getImages}>Go to my Results</Button>
                 </Grid>
                 {/* end of temp */}
             </Grid>
