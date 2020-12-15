@@ -781,7 +781,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
         for vmaxi in vmaxids:
             if vmaxi < vsize_of_prosite_data[0]:
-                if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
+                if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
                         sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
                         vprositedomains_u_ignore[vmaxi] == 0 and vprositedomains_u_process[vmaxi]:
                     if vprositedomains_u_color[vmaxi] == '':
@@ -797,7 +797,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                     vprositedomains_u_process[vmaxi] = False
             else:
                 vimod = vmaxi - vsize_of_prosite_data[0]
-                if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
+                if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
                         sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
                         vpfamdomains_u_ignore[vimod] == 0 and vpfamdomains_u_process[vimod]:
                     if vpfamdomains_u_color[vimod] == '':
@@ -843,7 +843,11 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vheader_id in vmaxids:
-                if max(vprositedomainsofgroup[vheader_id]) > (vmaxcutoff * 100) and \
+                print('max cut off: ' + str((vmaxcutoff * 100)))
+                print('Max present: ' + str(max(vprositedomainsofgroup_rel[vheader_id])))
+                print('cut off: ' + str(vcutoff))
+                print('cut present: ' + str(float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group)))
+                if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group) > vcutoff and \
                         vprositedomains_u_ignore[vheader_id] == 0:
                     # Create function
@@ -871,8 +875,10 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                     # Plot Polygon
                     ax.add_patch(poly)
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
-                plt.ylim(0, 100)
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)  # maximum of proteins in group
+            else:
+                plt.ylim(0, 100)  # 100 %
             plt.grid(axis='y', alpha=0.75)
             plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
             if vabsolute:
@@ -906,7 +912,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_pfam_data[1] + 1)
             for vheader_id in vmaxids:
-                if max(vpfamdomainsofgroup[vheader_id]) > (vmaxcutoff * 100) and \
+                if max(vpfamdomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vpfamdomainsingenes[vheader_id])) / \
                         float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore[vheader_id] == 0:
                     # Create function
@@ -935,7 +941,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                     ax.add_patch(poly)
 
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
             plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
@@ -973,7 +981,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vmaxi in vmaxids:
                 if vmaxi < vsize_of_prosite_data[0]:
-                    if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
+                    if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
                             sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
                             vprositedomains_u_ignore[vmaxi] == 0:
                         # Create function
@@ -1002,7 +1010,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                         ax.add_patch(poly)
                 else:
                     vimod = vmaxi - vsize_of_prosite_data[0]
-                    if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
+                    if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
                             sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
                             vpfamdomains_u_ignore[vimod] == 0:
                         # Create function
@@ -1031,7 +1039,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                         ax.add_patch(poly)
 
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
             plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
@@ -1048,8 +1058,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_combined.pdf')
     # Write fifth cookie
-    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
     f_write_log(vsavefolder, vjobid, 'Job ' + vjobid + ' ran successfully.\n', 'a')
+    time.sleep(5)  # make sure pdfs are created
+    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
     print('done')
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import 'fontsource-roboto';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, IconButton, Toolbar, Typography, Button } from '@material-ui/core';
+import { AppBar, IconButton, Toolbar, Typography, Button, createMuiTheme, ThemeProvider, Divider, Box, Container } from '@material-ui/core';
 import {spacing} from '@material-ui/system';
 import {
   BrowserRouter,
@@ -21,11 +21,12 @@ import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
 import ProtPlotDEV from './components/ProtPlotDev';
 
-import { ReactComponent as DomainVizIcon } from './components/svg/domainviz.svg';
-
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
+  app: {
+    minHeight: '85.8vh',
+    minWidth: '100%',
+    overflow: "hidden",
+    display: 'box',
   },
   menuButton: {
     marginRight: theme.spacing(2),
@@ -33,15 +34,25 @@ const useStyles = makeStyles((theme) => ({
     height: 90,
     // backgroundColor: '#7F7F7F' 
   },
-  title: {
+  subtitle: {
     flexGrow: 1,
     fontFamily: `"Raleway"`,
-    fontSize: 40,
   },
   linkButton: {
     fontFamily: `"Raleway"`,
     fontSize: 20,
     fontStyle: "bold",
+    color: "black"
+  },
+  divider: {
+    scale: 1.0,
+    backgroundColor: 'black',
+  },
+  paper: {
+    padding: theme.spacing(2),
+    textAlign: 'center',
+    color: "black",
+    backgroundColor: "#e8e8e8"
   },
   appBar: {
     transition: theme.transitions.create(['margin', 'width'], {
@@ -53,6 +64,20 @@ const useStyles = makeStyles((theme) => ({
 
 }));
 
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#e8e8e8',
+    },
+    secondary: {
+      // This is green.A700 as hex.
+      main: '#000000',
+    },
+  },
+});
+
+
 function App() {
   const classes = useStyles();
   // const theme = {
@@ -60,16 +85,19 @@ function App() {
   // }
   return (
     <div className="App">
+      <Container className={classes.app}>
+      <ThemeProvider theme={theme}>
       <BrowserRouter>
         <AppBar postion='fixed' className={classes.appBar}>
           <Toolbar>
             {/* TODO: replace with svg icon from devang */}
-            <IconButton disabled edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-              <DomainVizIcon/>
-            </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Uhrig Lab
-            </Typography>
+            <Box className={classes.paper}>
+              <Typography variant='h5' fontWeight='bold' >UHRIG LAB</Typography>
+              <Divider className={classes.divider}></Divider>
+              <Typography variant='body1' className={classes.subtitle}>Protein tools</Typography>
+            </Box>
+            <Typography variant="h6" className={classes.subtitle}/> {/* Need this for spacing for now */}
+            
             {/* <Link to='/'>
               <Button color='inherit'>Home</Button>
             </Link> */}
@@ -105,6 +133,8 @@ function App() {
         </Switch>
       </BrowserRouter>
 
+      </ThemeProvider>
+      </Container>
       <Footer></Footer>
 
     </div>

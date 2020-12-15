@@ -3,13 +3,18 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import UploadFile from './UploadFile';
 import AccordionSetup from './AccordionSetup';
+import isFasta from './utils/ValidateFile';
+
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Checkbox, Container, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { Route, useHistory } from 'react-router';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import { ReactComponent as DomainVizIcon } from './svg/domainviz.svg';
+import { saveAs } from 'file-saver';
+
 
 
 //TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
@@ -30,6 +35,13 @@ const useStyles = makeStyles((theme) => ({
         scale: 1.5,
         backgroundColor: 'black',
 
+    },
+    icon: {
+        height: '300px', 
+        width: '300px', 
+        marginTop: '20px',
+        marginBottom: '-90px',
+        backgroundColor: 'white',
     }
 }));
 
@@ -55,7 +67,6 @@ function ProtPlot() {
     const history = useHistory()
 
     const [fastaFile, setFastaFile] = useState(null);
-    let fileReader;
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
@@ -75,8 +86,13 @@ function ProtPlot() {
         setTextFields({ ...textFields, [event.target.name]: event.target.value })
     }
 
+    function downloadTestFastaFile() {
+        fetch('/api/testFasta').then(response => {
+            saveAs(response.url);
+        });
+    }
     function uploadTestFastaFile() {
-        //TODO change this - set fastafile to "test" and fix in views.py
+        // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFile({
             file: "test",
             name: "test"
@@ -85,21 +101,20 @@ function ProtPlot() {
     function clearFastaFile() {
         setFastaFile(null);
     }
-    const handleFileRead = (e) => {
-        const content = fileReader.result;
-        //TODO Validate file content
-        console.log(content)
-    }
-    function handleFastaFile(file) {
+    async function handleFastaFile(file) {
         //Validate fastaFile:
         let valid = true;
         if (((file.size / 1024) / 1024).toFixed(4) > 10) {
             alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
             valid = false;
         }
-        fileReader = new FileReader();
-        fileReader.onloadend = handleFileRead;
-        fileReader.readAsText(file);
+        await isFasta(file).then((result) => {
+            valid = result;
+        });
+        // if (!isFasta(file)) {
+        //     console.log("File is not valid")
+        //     valid = false
+        // }
 
         if (valid) {
             setFastaFile(file);
@@ -173,6 +188,7 @@ function ProtPlot() {
             history.push("/view-results/" + resultID);
         }).catch(error => {
             console.log(error);
+            alert("Oh dear. Something has gone wrong.")
         });
     }
 
@@ -180,23 +196,31 @@ function ProtPlot() {
         <div className='protplot'>
             <Grid container spacing={3} alignItems='center' justify='center'>
                 <Grid item xs={12}>
-                    <Paper className={classes.paper} variant='outlined' style={{ marginTop: "90px" }}>Use DomainViz by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
+                    <Container className={classes.icon}>
+                        <DomainVizIcon></DomainVizIcon>
+                    </Container>
+                </Grid>
+                <Grid item xs={12}>
+                    <Paper className={classes.paper} variant='outlined' >Use DomainViz by first uploading your fasta file, and then adding options if desired, and finally press the Send Task button!</Paper>
                 </Grid>
 
+                <Grid item xs={2} />
                 <Grid item xs={3}>
                     <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                 </Grid>
-                <Grid item xs={1} />
                 <Grid item xs={1}>
                     <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile} style={{ marginTop: "10px" }}>Load Example</Button>
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginTop: "10px" }}>Clear File</Button>
 
                 </Grid>
                 <Grid item xs={1}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginTop: "10px" }}>Download Example</Button>
+                </Grid>
+                <Grid item xs={1}>
                     <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
-                <Grid item xs={4} />
+                <Grid item xs={2} />
 
                 <Grid item xs={12} />
                 <Grid item xs={12} />
@@ -206,21 +230,21 @@ function ProtPlot() {
                     <AccordionSetup id='cutofftxt' header='Minimum domain prevalence' body='Enter a number between 0 and 1. The default value is 0.05. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>
                 </Grid>
                 <Grid item xs={2}>
-                    <TextField id='cutoff' name='cutoffTextField' value={textFields.cutoffTextField} type='number' inputProps={{ step: '0.1', max: 1, min: 0 }} onChange={handleTextField} />
+                    <TextField id='cutoff' name='cutoffTextField' value={textFields.cutoffTextField} type='number' inputProps={{ step: '0.01', max: 1, min: 0 }} onChange={handleTextField} />
                 </Grid>
 
                 <Grid item xs={3}>
                     <AccordionSetup id='max-cutofftxt' header='Minimum domain position conservation' body='Enter a number between 0 and 1. The default value is 0.05. Only domains that have a maximum prevalence at a relative place in the protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have this domain at the same relative position).'></AccordionSetup>
                 </Grid>
                 <Grid item xs={2}>
-                    <TextField id='max-cutoff' name='maxCutoffTextField' value={textFields.maxCutoffTextField} type='number' inputProps={{ step: '0.1', max: 1, min: 0 }} onChange={handleTextField} />
+                    <TextField id='max-cutoff' name='maxCutoffTextField' value={textFields.maxCutoffTextField} type='number' inputProps={{ step: '0.01', max: 1, min: 0 }} onChange={handleTextField} />
                 </Grid>
 
                 <Grid item xs={3}>
                     <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number larger than 0. The default value is 1. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={1}>
-                    <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0 }} onChange={handleTextField} />
+                    <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0, max: 10, step: '0.1' }} onChange={handleTextField} />
                 </Grid>
                 <Grid item xs={1}>
                     <FormControlLabel

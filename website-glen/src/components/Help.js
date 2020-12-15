@@ -26,7 +26,6 @@ export const Help = () => {
             <Typography variant='h6'>File Upload:</Typography>
             <Typography variant='body1' paragraph>DomainViz accepts a single multiple sequence fasta file. The file extension should be .FA or .FASTA and the file size should be less than 10 Mb. Each sequence present within the fasta file should be formatted as follows:</Typography>
             
-            <Typography variant='h6'>File Upload:</Typography>
             <Typography variant='caption' paragraph>
               {'>'}AT3G19040.1|PACid:19663337_AtTAFIIb
               MICRVDYGSNDEEYDGPELQVVTEEDHLLPKREYLSAAFALSGLNSRASVFDDEDYDEQGGQEKEHVPVEKSFDSEEREPVVLKEEKPV

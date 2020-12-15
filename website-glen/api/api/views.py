@@ -39,6 +39,10 @@ def handle_404(e):
 def index():
     return main.send_static_file('index.html')
 
+@main.route('/api/testFasta')
+def test_fasta():
+    return send_file(os.path.abspath(file_path + 'TAFIIsample_NAR_MS.fa'), as_attachment=True)
+
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
