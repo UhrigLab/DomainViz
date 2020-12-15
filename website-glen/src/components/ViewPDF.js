@@ -62,8 +62,13 @@ export const ViewPDF = () => {
                     }
                     else {
                         if (data.failed === 'null') {
-                            alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
-                            setFailed(true);
+                            // alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
+                            //setFailed(true);
+                            //TODO remove temp
+                            //TEMP:
+                            alert("Results not loaded, please refresh the page.")
+                            setFailed("TEMP");
+                            //END OF TEMP
                         }
                         else if (data.failed === -1) {
                             alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
@@ -119,10 +124,10 @@ export const ViewPDF = () => {
                 </Paper>
             </Grid>
 
-            {(displayImages && !showProgressBar && !failed) &&
+            {(displayImages && !showProgressBar && failed == false) &&
                 <PDFMap images={images} uid={uid} />
             }
-            {(!displayImages && showProgressBar && !failed) &&
+            {(!displayImages && showProgressBar && failed == false) &&
                 <>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} variant='outlined'>
@@ -137,10 +142,13 @@ export const ViewPDF = () => {
                     </Grid>
                 </>
             }
-            {(!displayImages && !showProgressBar && failed) &&
+            {/* TODO remove TEMP */}
+            {(!displayImages && !showProgressBar && failed === "TEMP") &&
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
-                        <Typography variant='h5'>Something went wrong. Please try again.</Typography>
+                        {/* <Typography variant='h5'>Something went wrong. Please try again.</Typography> */}
+                        <Typography variant='h5'>Please try reloading the page.</Typography>
+
                         {(messages.length) //If the message has information, display the message
                             ? <MessageMap messages={messages}></MessageMap>
                             : <Typography variant='h5'>There was no information from this run.</Typography>

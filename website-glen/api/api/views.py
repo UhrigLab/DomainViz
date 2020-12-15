@@ -58,17 +58,29 @@ def images(username):
             print("added image: " + f)
             file.close()
     max_cookie = get_max_cookie(result_id)
-
-    if len(images) == 0 and max_cookie:
+    #TODO swap temp with correct
+    #temp
+    if len(images) < 3 and max_cookie:
         if get_cookie_info(result_id, max_cookie):
             return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
         else:
             return jsonify({'failed' : max_cookie})
-    elif len(images) == 0:
+    elif len(images) < 3:
         return jsonify({'failed' : 'null'})
     else:
         cleanup_cookies(result_id)
         return jsonify({'images' : images})
+    #correct
+    # if len(images) == 0 and max_cookie:
+    #     if get_cookie_info(result_id, max_cookie):
+    #         return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
+    #     else:
+    #         return jsonify({'failed' : max_cookie})
+    # elif len(images) == 0:
+    #     return jsonify({'failed' : 'null'})
+    # else:
+    #     cleanup_cookies(result_id)
+    #     return jsonify({'images' : images})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():

@@ -32,7 +32,7 @@ export const Help = () => {
               YREVIRSEREEEKRRKAKQKKKLQRGILENYPPRRNDGISSESGQNINSLCVSDFERNRTEYAPQPKRRKKGQVGLANILESIVDTLRVKEVNVSYLFLK
               PVTKKEAPNYLEIVKCPMDLSTIRDKVRRMEYRDRQQFRHDVWQIKFNAHLYNDGRNLSIPPLADELLVKCDRLLDEYRDELKEAEKGIVDSSDSLR*
             </Typography>
-            <Typography variant='body1' paragraph>The chevron denotes the header line containing unique identifying information, which is ended by a line return to denote this as a separate entity from the sequence. At the end of each sequence should be a (*) to ensure the end of the sequence is denoted. Sequences of 16 amino acids or less, and greater than 1000 amino acids are not compatible with DomainViz.</Typography>
+            <Typography variant='body1' paragraph>The chevron denotes the header line containing unique identifying information, which is ended by a line return to denote this as a separate entity from the sequence. At the end of each sequence should be a (*) to ensure the end of the sequence is denoted. Sequences of 16 amino acids or less, and greater than 5000 amino acids are not compatible with DomainViz.</Typography>
             <Typography variant='body2' display='inline'>NOTE: </Typography>
             <Typography variant='body1' display='inline'>Ensure that headers and sequences are not duplicated in the file and that standard amino acid code is used. Accepted characters are GALMFWKQESPVICYHRNDTX, in upper or lower case.</Typography>
             <Typography paragraph/>
