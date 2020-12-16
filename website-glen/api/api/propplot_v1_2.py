@@ -222,8 +222,8 @@ except ImportError:
 #                                              structure.                                                              #
 #    - proteingroup_pfam_colors.txt [file]: Same file as above, but for pfam plot.                                     #
 #    - proteingroup_combined_colors.txt [file]: Same file as above, but for combined plot.                             #
-#    - jobid_proteingroup_prosite.csv [file]: Results of Prosite for protein group.                                    #
-#    - jobid_proteingroup_pfam.csv [file]: Results of PFAM for protein group.                                          #
+#    - jobid_proteingroup_prosite_domain_results_per_aa.tsv [file]: Results of Prosite for protein group.              #
+#    - jobid_proteingroup_pfam_domain_results_per_aa.tsv [file]: Results of PFAM for protein group.                    #
 #    - jobid_prosite_res.tsv [file]: Results of Prosite for this job.                                                  #
 #    - jobid_pfam_res.tsv [file]: Results of PFAM for this job.                                                        #
 #    - Prosite_db_[first five amino acids of sequence] [file]: TSV database files for sequences run through Prosite.   #
@@ -732,13 +732,14 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             for vprd in range(vsize_of_prosite_data[0]):
                 for vj in range(vsize_of_prosite_data[1]):
                     if vprositedomainsofgroup[vprd][vj] != 0:
-                        vprositedomainsofgroup_rel[vprd][vj] = vprositedomainsofgroup[vprd][vj]/vn_prot_per_group * 100
+                        vprositedomainsofgroup_rel[vprd][vj] = vprositedomainsofgroup[vprd][vj] / vn_prot_per_group * \
+                                                               100
         if vpfamfile != '':
             vpfamdomainsofgroup_rel = np.zeros((len(vpfamdomains_u), vmedlengroup[vug]), dtype=float)
             for vpfd in range(vsize_of_pfam_data[0]):
                 for vj in range(vsize_of_pfam_data[1]):
                     if vpfamdomainsofgroup[vpfd][vj] != 0:
-                        vpfamdomainsofgroup_rel[vpfd][vj] = vpfamdomainsofgroup[vpfd][vj]/vn_prot_per_group * 100
+                        vpfamdomainsofgroup_rel[vpfd][vj] = vpfamdomainsofgroup[vpfd][vj] / vn_prot_per_group * 100
         vprositedomainsofgroup_rel_all.append(vprositedomainsofgroup_rel)
         vpfamdomainsofgroup_rel_all.append(vpfamdomainsofgroup_rel)
         vn_prot_per_group_all.append(vn_prot_per_group)
@@ -757,23 +758,52 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vpfamdomainsofgroup_all.append(vpfamdomainsofgroup)
 
         # Save of data
-        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .csvs: ', 'a')
+        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .tsvs: ', 'a')
         if vprositefile != '':
             if vsavefolder != '':
-                np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.csv'), vprositedomainsofgroup,
-                           delimiter="\t")
+                vfilename = join(vsavefolder, vjobid + '_' + vgitem + '_prosite_domain_results_per_aa.tsv')
             else:
-                np.savetxt(vjobid + '_' + vgitem + '_prosite.csv', vprositedomainsofgroup, delimiter="\t")
+                vfilename = vjobid + '_' + vgitem + '_prosite_domain_results_per_aa.tsv'
+            vfh_filename = open(vfilename, 'w')
+
+            # Write header:
+            vfh_filename.write('Median protein (' + vgitem + ') amino acid position')
+            for item in vprositedomains_u:
+                vfh_filename.write('\t' + item)
+            vfh_filename.write('\n')
+
+            # Write content
+            for vj in range(vsize_of_prosite_data[1]):
+                vfh_filename.write(str(vj + 1))
+                for vprd in range(vsize_of_prosite_data[0]):
+                    vfh_filename.write('\t' + str(vprositedomainsofgroup[vprd][vj]))
+                vfh_filename.write('\n')
+            vfh_filename.close()
         if vpfamfile != '':
             if vsavefolder != '':
-                np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.csv'), vpfamdomainsofgroup, delimiter="\t")
+                vfilename = join(vsavefolder, vjobid + '_' + vgitem + '_pfam_domain_results_per_aa.tsv')
             else:
-                np.savetxt(vjobid + '_' + vgitem + '_pfam.csv', vpfamdomainsofgroup, delimiter="\t")
+                vfilename = vjobid + '_' + vgitem + '_pfam_domain_results_per_aa.tsv'
+            vfh_filename = open(vfilename, 'w')
+
+            # Write header:
+            vfh_filename.write('Median protein (' + vgitem + ') amino acid position')
+            for item in vpfamdomains_u:
+                vfh_filename.write('\t' + item)
+            vfh_filename.write('\n')
+
+            # Write content
+            for vj in range(vsize_of_pfam_data[1]):
+                vfh_filename.write(str(vj + 1))
+                for vpfd in range(vsize_of_pfam_data[0]):
+                    vfh_filename.write('\t' + str(vpfamdomainsofgroup[vpfd][vj]))
+                vfh_filename.write('\n')
+            vfh_filename.close()
         f_success(vsavefolder, vjobid)
 
         # Plot domains into figure with all domains of all groups to get coloring identical
         f_write_log(vsavefolder, vjobid, 'Add domains into dummy figure to get consistent domain data of group as'
-                                         ' .csvs: ', 'a')
+                                         ' .tsvs: ', 'a')
         vmaxes = []
         for vprd in range(vsize_of_prosite_data[0]):
             vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
@@ -846,7 +876,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vheader_id in vmaxids:
                 if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
-                        float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group) > vcutoff and \
+                        float(sum(vprositedomainsingenes[vheader_id])) / float(vn_prot_per_group) > vcutoff and \
                         vprositedomains_u_ignore[vheader_id] == 0:
                     # Create function
                     a = min(bin_edges[:-1])  # integral lower limit
@@ -1734,7 +1764,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid, vwarnings):
                 vrecords.append(vrecord)
             elif vtypeline == 2:
                 vcurr_parent = f_get_parent(vrecords, vline)
-            elif vtypeline == 3: # comments
+            elif vtypeline == 3:  # comments
                 if vwarnings:
                     print('Comment on line ' + str(vl) + ': ' + vline)
             else:
@@ -2363,7 +2393,6 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
                        vcolorfile_ri, vignoredomainfile_ri, vcutoff_ri, vmaxcutoff_ri, vcustom_scaling_on_ri,
                        vscalefigure_ri, vabsoluteresults_ri, vwarnings_ri, vfrom_scratch_ri, vnotolderthan_ri,
                        vtemp_db_place_ri):
-
     # Create fasta input file from the databases
     vfastafile = join(vtemp_db_place_ri, vjobid_ri + '_reinitialize.fa')
     vfh_ri_out = open(vfastafile, 'w')
@@ -2466,8 +2495,8 @@ def f_print_help():
           '  - jobid_domain_color_file.txt [file]: Tsv of the domains and colors used in the plots. Can be modified\n'
           '                                        and funneled back into the script to modify colors. See vcolorfile\n'
           '                                        for structure.\n'
-          '  - jobid_proteingroup_prosite.csv [file]: Results of Prosite for protein group.\n'
-          '  - jobid_proteingroup_pfam.csv [file]: Results of PFAM for protein group.\n'
+          '  - jobid_proteingroup_prosite_domain_results_per_aa.tsv [file]: Results of Prosite for protein group.\n'
+          '  - jobid_proteingroup_pfam_domain_results_per_aa.tsv [file]: Results of PFAM for protein group.\n'
           '  - jobid_prosite_res.tsv [file]: Results of Prosite for this job.\n'
           '  - jobid_pfam_res.tsv [file]: Results of PFAM for this job.\n'
           '  - jobid_cookie[id] [file]: Cookie that shows that this part of code was processed. If cookie -1 shows\n'
@@ -2491,6 +2520,7 @@ def f_print_help():
           '\n'
           'Output:\n'
           'New db files at old locations given by parameter -dbf.\n')
+
 
 ########################################################################################################################
 #                                                                                                                      #
