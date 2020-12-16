@@ -78,16 +78,19 @@ export const Help = () => {
             <Typography variant='h5'>FAQ</Typography>
             <Typography variant='body1' display='inline'>1. </Typography>
             <Typography variant='body2' display='inline'>Q. How do I retrieve my results after navigating away from the processing results?</Typography>
-            <Typography variant='body1'>A. Ensure that you retain the 32-character unique identifier result ID. Place this code into the Result ID on the main page and hit “Go to My Results”.</Typography>
+            <Typography variant='body1'>A. Ensure that you retain the 32-character unique identifier result ID displayed on the Results page. EnterPlace this code into the Result ID field on the homemain page and hit “Go to My Results”. Alternatively, bookmark the Results page and revisit it after some time.</Typography>
             <Typography paragraph/>
-
             <Typography variant='body1' display='inline'>2. </Typography>
             <Typography variant='body2' display='inline'>Q. I have been warned that I have duplicate sequences in my FASTA file?</Typography>
-            <Typography variant='body1'>A. DomainViz will still run; however, it is recommended that these be removed before proceeding further.</Typography>
+            <Typography variant='body1'>A. DomainViz will still process your file under the assumption that duplicate sequences refer to independent proteins that share the same sequence. We advise checking that spurious duplicate sequences were not accidentally introduced during input file creation as they can lead to altered results.</Typography>
             <Typography paragraph/>
             <Typography variant='body1' display='inline'>3. </Typography>
             <Typography variant='body2' display='inline'>Q. What is the maximal number of protein sequences that can be analyzed at once?</Typography>
             <Typography variant='body1'>A. DomainViz can currently assess 1000 protein sequences at once. NOTE: The more sequences in a single query the longer the analysis will take.</Typography>
+            <Typography paragraph/>
+            <Typography variant='body1' display='inline'>4. </Typography>
+            <Typography variant='body2' display='inline'>Q. My fasta isn't uploading, it says there is a problem with one of my lines? How do I fix this?</Typography>
+            <Typography variant='body1'>A. Please remove the lines that are causing issues.</Typography>
             <Typography paragraph/>
 
           </Paper>

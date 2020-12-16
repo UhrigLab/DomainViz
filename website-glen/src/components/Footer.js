@@ -1,9 +1,16 @@
 import React from 'react';
 import { Typography, Grid, Button, Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { useHistory } from 'react-router';
+import {
+    BrowserRouter,
+    Switch,
+    Route,
+    Link,
+  } from 'react-router-dom';
 
 import UalbertaLogo from './img/UA-SCI-1C-SOLID-REVERSE.png'
+import { TermsOfUse } from './TermsOfUse';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -32,32 +39,31 @@ const useStyles = makeStyles((theme) => ({
 
 function Footer () {
         const classes = useStyles();
-        const history = useHistory();
-
-        function goToTermsOfUse() {
-            history.push('/terms-of-use');
-        }
         return (
-        <Container className={classes.container} maxWidth="xl" disableGutters style={{ marginTop: "20px" }}>
-            <Grid container spacing={0} alignItems='center' justify='center'>
-                <Grid item xs={2}>
-                    <img src={UalbertaLogo} className={classes.img}></img>
+            <Container className={classes.container} maxWidth="xl" disableGutters style={{ marginTop: "20px" }}>
+                <Grid container spacing={0} alignItems='center' justify='center'>
+                    <Grid item xs={2}>
+                        <img src={UalbertaLogo} className={classes.img}></img>
+                    </Grid>
+                    <Grid item xs={4}/>
+                    <Grid item xs={4}>
+                        <Link to='/terms-of-use'>
+                            <Button component='span' color="primary" className={classes.button}>Terms of Use</Button>
+                        </Link>
+                        <Link to='/privacy-statement'>
+                            <Button component='span' color="primary" className={classes.button}>Privacy Statement</Button>
+                        </Link>
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Typography className={classes.typography} variant='body1'>Contact:</Typography>
+                            <a href={`mailto:protools@ualberta.ca?subject=DomainViz Help`}>
+                                <Typography className={classes.typography} variant='body1'>protools@ualberta.ca</Typography>
+                            </a>
+                        <Typography className={classes.typography} variant='body1'>{'\u00A9'} 2020 The Uhrig Lab</Typography>
+                    </Grid>
+                    
                 </Grid>
-                <Grid item xs={4}/>
-                <Grid item xs={4}>
-                    {/* <Button component='span' color="primary" className={classes.button} onClick={goToTermsOfUse}>Terms of Use</Button> */}
-                </Grid>
-                <Grid item xs={2}>
-                    <Typography className={classes.typography} variant='body1'>Contact:</Typography>
-                        <a href={`mailto:protools@ualberta.ca?subject=DomainViz Help`}>
-                            <Typography className={classes.typography} variant='body1'>protools@ualberta.ca</Typography>
-                        </a>
-                    <Typography className={classes.typography} variant='body1'>{'\u00A9'} 2020 The Uhrig Lab</Typography>
-                </Grid>
-                
-            </Grid>
-        </Container>
-        
+            </Container>
     );
 }
 export default Footer;

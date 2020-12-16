@@ -1,16 +1,11 @@
 import os, glob
-#DEVELOPMENT
-file_path = 'api/api/tmp/' 
-#PRODUCTION
-#file_path = 'api/tmp/'
-
 
 # A function that returns the highest entry cookie for the result_id "id". 
 # NOTE: This function is only ever called AFTER cookie_exists, so we assume a cookie does exist.
 # INPUTS: id - the result id we want to find a cookie for
 # OUTPUTS: integer - the maximum cookie found. If it is -1, the process has failed, if it is > 1, the process is still working
 # OUTPUTS: boolean - if there are no cookies, the function will return false.
-def get_max_cookie(id):
+def get_max_cookie(file_path, id):
     cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
     if cookies: # True unless there are no cookies
         max_cookie = 0
@@ -24,7 +19,7 @@ def get_max_cookie(id):
     else:
         return False
 
-def get_cookie_info(id, current_cookie):
+def get_cookie_info(file_path, id, current_cookie):
     try:
         current_cookie = os.path.abspath(file_path + id + "_cookie_" + str(current_cookie))
         f = open(current_cookie, 'r')
@@ -37,7 +32,7 @@ def get_cookie_info(id, current_cookie):
     print(" ".join(cookie_info.split()))
     return cookie_info
 
-def cleanup_cookies(id):
+def cleanup_cookies(file_path, id):
     cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
     for cookie in cookies:
         try:

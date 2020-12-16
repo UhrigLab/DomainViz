@@ -119,10 +119,13 @@ function ProtPlot() {
     async function handleFastaFile(file) {
         //Validate fastaFile:
         let valid = true;
+
+        // Check the file's size
         if (((file.size / 1024) / 1024).toFixed(4) > 10) {
             alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
             valid = false;
         }
+        // Check that the file is a fasta file
         await isFasta(file).then((result) => {
             valid = result;
         });

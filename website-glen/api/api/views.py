@@ -11,11 +11,19 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-file_path = 'api/api/tmp/' 
+api_path = "api/api/"
 #PRODUCTION
-#file_path = 'api/tmp/'
+#api_path = "api/"
 
-test_fasta_file = "TAFIIsample_NAR_MS.fa"
+#DEVELOPMENT
+virtual_env = "api/api/propplotenvDEV/"
+#PRODUCTION
+#virtual_env = "api/propplotenv/"
+
+file_path = api_path + "tmp/"
+example_file_path = api_path + "examples/"
+example_fasta_file = "TAFIIsample_NAR_MS.fa"
+
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
 
@@ -30,7 +38,6 @@ def handle_500(e):
 
     # wrapped unhandled error
     return render_template("500.html", e=original), 500
-    
 @main.errorhandler(404)
 def handle_404(e):
     return render_template("404.html", e=e), 404
@@ -41,7 +48,27 @@ def index():
 
 @main.route('/api/testFasta')
 def test_fasta():
-    return send_file(os.path.abspath(file_path + 'TAFIIsample_NAR_MS.fa'), as_attachment=True)
+    return send_file(os.path.abspath(example_file_path + example_file_path), as_attachment=True)
+@main.route('/api/testResults')
+def test_results():
+    result_id = "example"
+    result_zip = ZipFile(example_file_path + result_id + '.zip', 'w')
+
+    for f in glob.glob(example_file_path+result_id+'*.pdf'):
+        result_zip.write(f, basename(f))
+        print("added pdf: " + f)
+    for f in glob.glob(example_file_path+result_id+'*.tsv'):
+        result_zip.write(f, basename(f))
+        print('added csv: ' + f)
+    for f in glob.glob(example_file_path+result_id+'*.txt'):
+        result_zip.write(f, basename(f))
+    for f in glob.glob(example_file_path+'README.md'):
+        result_zip.write(f, basename(f))
+    result_zip.close()
+
+    return send_file(os.path.abspath(file_path + result_id + '.zip'), as_attachment=True)
+
+
 
 @main.route('/api/images/<username>')
 def images(username):
@@ -57,18 +84,18 @@ def images(username):
             images.append({"resultID" : result_id, "file" : image_file})
             print("added image: " + f)
             file.close()
-    max_cookie = get_max_cookie(result_id)
+    max_cookie = get_max_cookie(file_path, result_id)
     #TODO swap temp with correct
     #temp
     if len(images) < 3 and max_cookie:
-        if get_cookie_info(result_id, max_cookie):
-            return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
+        if get_cookie_info(file_path, result_id, max_cookie):
+            return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
             return jsonify({'failed' : max_cookie})
     elif len(images) < 3:
         return jsonify({'failed' : 'null'})
     else:
-        cleanup_cookies(result_id)
+        cleanup_cookies(file_path, result_id)
         return jsonify({'images' : images})
     #correct
     # if len(images) == 0 and max_cookie:
@@ -88,23 +115,26 @@ def sendfiles():
     result_id = ""
     fasta_file = None
     fasta_filename = None
+    fp = file_path
     i=0 # the first key will always be the result id, and its value will always be the fasta file
     for key in request.files.keys():
         if i==0:
             #retrieve fasta file
             result_id=key
             fasta_file=request.files[key]
-            fasta_file.save(os.path.abspath(file_path + fasta_file.filename))
-            fasta_filename = fasta_file.filename
+            #Check for spaces in the filename before saving
+            fasta_filename = "".join(fasta_file.filename.split(" "))
+            fasta_file.save(os.path.abspath(file_path + fasta_filename))
             break
-
     if fasta_file == None:
         for key in request.form.keys():
             if i==0:
                 result_id=key
                 break
-        fasta_filename=test_fasta_file
+        fasta_filename=example_fasta_file
+        fp = example_file_path
         print("Test fasta file being used")
+
     # retrieve the 4 parameters
     absolute_results=request.form["absoluteResults"]
     ar = "0"
@@ -117,12 +147,9 @@ def sendfiles():
     if scale_figure == "1":
         custom_scaling = "0" 
 
-    # call Pascals script for fasta files here
-    #DEVELOPMENT
-    call = "api/api/propplotenvDEV/bin/python api/api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
-    #PRODUCTION
-    #call = "api/propplotenv/bin/python api/propplot_v1_2.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf api/dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
-
+    # Set up the call for Pascals script here
+    call = virtual_env +  "bin/python " + api_path + "propplot_v1_2.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
+    
     # try to retrieve the other 3 files, if they exist
     protein_groups_file = None
     color_file = None
@@ -145,8 +172,8 @@ def sendfiles():
         call = call + ' -if ' + ignore_domains_file.filename
     except:
         print("no ignore domains file")
-    # TODO validate files
 
+    #send the call
     subprocess.Popen(call, shell=True)
 
     return "Done", 201
@@ -160,13 +187,12 @@ def download(username):
     for f in glob.glob(file_path+result_id+'*.pdf'):
         result_zip.write(f, basename(f))
         print("added pdf: " + f)
-    for f in glob.glob(file_path+result_id+'*.csv'):
-        result_zip.write(f, basename(f))
-        print('added csv: ' + f)
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
         print('added csv: ' + f)
     for f in glob.glob(file_path+result_id+'*.txt'):
+        result_zip.write(f, basename(f))
+    for f in glob.glob(file_path+'README.md'):
         result_zip.write(f, basename(f))
     result_zip.close()
     
