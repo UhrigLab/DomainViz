@@ -48,7 +48,7 @@ def index():
 
 @main.route('/api/testFasta')
 def test_fasta():
-    return send_file(os.path.abspath(example_file_path + example_file_path), as_attachment=True)
+    return send_file(os.path.abspath(example_file_path + example_fasta_file), as_attachment=True)
 @main.route('/api/testResults')
 def test_results():
     result_id = "example"

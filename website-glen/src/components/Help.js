@@ -16,7 +16,7 @@ export const Help = () => {
   return (
     <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>
       <Grid item xs={11}>
-        <Typography variant='h5'>Help</Typography>
+        <Typography variant='h4'>Help</Typography>
 
         <Paper className={classes.paper} variant='outlined'>
           <Typography variant='h5'>Introduction</Typography>

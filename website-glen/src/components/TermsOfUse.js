@@ -16,7 +16,7 @@ export const TermsOfUse = () => {
   return (
       <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>
         <Grid item xs={11}>
-          <Typography variant='h5'>Terms of use</Typography>
+          <Typography variant='h4'>Terms of use</Typography>
           <Paper className={classes.paper} variant='outlined' >
             <Typography variant='h5'>General</Typography>
             <Typography variant='body1'>1. The Uhrig Lab promotes open science through making scientific data openly and freely accessible.</Typography>

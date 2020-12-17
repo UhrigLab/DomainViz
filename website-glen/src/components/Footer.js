@@ -34,6 +34,7 @@ const useStyles = makeStyles((theme) => ({
     button: {
         padding: theme.spacing(1),
         textAlign: 'center',
+        textDecorationColor: 'white'
     },
   }));
 
@@ -45,15 +46,16 @@ function Footer () {
                     <Grid item xs={2}>
                         <img src={UalbertaLogo} className={classes.img}></img>
                     </Grid>
-                    <Grid item xs={4}/>
-                    <Grid item xs={4}>
-                        <Link to='/terms-of-use'>
-                            <Button component='span' color="primary" className={classes.button}>Terms of Use</Button>
+                    <Grid item xs={3}/>
+                    <Grid item xs={2}>
+                        <Link to='/terms-of-use' >
+                            <Typography className={classes.typography} variant='body1'>Terms of Use</Typography>
                         </Link>
                         <Link to='/privacy-statement'>
-                            <Button component='span' color="primary" className={classes.button}>Privacy Statement</Button>
+                            <Typography className={classes.typography} variant='body1'>Privacy Statement</Typography>
                         </Link>
                     </Grid>
+                    <Grid item xs={3}/>
                     <Grid item xs={2}>
                         <Typography className={classes.typography} variant='body1'>Contact:</Typography>
                             <a href={`mailto:protools@ualberta.ca?subject=DomainViz Help`}>
