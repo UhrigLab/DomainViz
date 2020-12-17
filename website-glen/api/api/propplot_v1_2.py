@@ -1837,7 +1837,7 @@ def f_check_type_line(vline):
         vreturn = 2
     elif vline.startswith('<') and vline.endswith('>'):
         vreturn = 1
-    elif vline.starswith('//'):
+    elif vline.startswith('//'):
         vreturn = 3  # comment
     else:
         vreturn = -1
