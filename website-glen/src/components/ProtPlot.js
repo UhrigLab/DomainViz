@@ -208,7 +208,7 @@ function ProtPlot() {
 
     return (
         <div className='protplot'>
-            <Grid container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
+            <Grid className={classes.root} container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
                 <Grid item xs={12}>
                     <img src={DomainVizIcon} className={classes.img}></img>
                 </Grid>
