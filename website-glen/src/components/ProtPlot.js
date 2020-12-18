@@ -214,7 +214,7 @@ function ProtPlot() {
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
-                        <Typography variant='h5'>Protein domain enrichment {'&'} visualization tool</Typography>
+                        <Typography variant='h5'>Protein domain search {'&'} visualization tool</Typography>
                         <Typography variant='body1'>Use DomainViz by first uploading a protein Fasta file, changing any options as desired and clicking "Submit Task".</Typography>
                     </Paper>
                 </Grid>

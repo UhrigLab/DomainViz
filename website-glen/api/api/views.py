@@ -49,24 +49,24 @@ def index():
 @main.route('/api/testFasta')
 def test_fasta():
     return send_file(os.path.abspath(example_file_path + example_fasta_file), as_attachment=True)
-@main.route('/api/testResults')
-def test_results():
-    result_id = "example"
-    result_zip = ZipFile(example_file_path + result_id + '.zip', 'w')
+# @main.route('/api/testResults')
+# def test_results():
+#     result_id = "example"
+#     result_zip = ZipFile(example_file_path + result_id + '.zip', 'w')
 
-    for f in glob.glob(example_file_path+result_id+'*.pdf'):
-        result_zip.write(f, basename(f))
-        print("added pdf: " + f)
-    for f in glob.glob(example_file_path+result_id+'*.tsv'):
-        result_zip.write(f, basename(f))
-        print('added csv: ' + f)
-    for f in glob.glob(example_file_path+result_id+'*.txt'):
-        result_zip.write(f, basename(f))
-    for f in glob.glob(example_file_path+'README.md'):
-        result_zip.write(f, basename(f))
-    result_zip.close()
+#     for f in glob.glob(example_file_path+result_id+'*.pdf'):
+#         result_zip.write(f, basename(f))
+#         print("added pdf: " + f)
+#     for f in glob.glob(example_file_path+result_id+'*.tsv'):
+#         result_zip.write(f, basename(f))
+#         print('added tsv: ' + f)
+#     for f in glob.glob(example_file_path+result_id+'*.txt'):
+#         result_zip.write(f, basename(f))
+#     for f in glob.glob(example_file_path+'README.md'):
+#         result_zip.write(f, basename(f))
+#     result_zip.close()
 
-    return send_file(os.path.abspath(file_path + result_id + '.zip'), as_attachment=True)
+#     return send_file(os.path.abspath(example_file_path + result_id + '.zip'), as_attachment=True)
 
 
 
@@ -189,10 +189,10 @@ def download(username):
         print("added pdf: " + f)
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
-        print('added csv: ' + f)
+        print('added tsv: ' + f)
     for f in glob.glob(file_path+result_id+'*.txt'):
         result_zip.write(f, basename(f))
-    for f in glob.glob(file_path+'README.md'):
+    for f in glob.glob(example_file_path+'README.md'):
         result_zip.write(f, basename(f))
     result_zip.close()
     

@@ -29,7 +29,12 @@ export const Help = () => {
 
         <Paper className={classes.paper} variant='outlined'>
           <Typography variant='h5'>Introduction</Typography>
-          <Typography variant='body1' paragraph>DomainViz allows users to identify and visualize protein domains on multiple protein sequences using multiple domain prediction platforms (Pfam and Prosite) to understand the consensus positionality and abundance of different domains within protein groups and families. For example, DomainViz can be used to visualize the extent to which particular protein domains are evolutionarily conserved across homologous proteins, and also to visualize domain conservation between members of a single protein family. </Typography>
+          <Typography variant='body1' display='inline'>DomainViz allows users to identify and visualize protein domains on multiple protein sequences using multiple domain prediction platforms{' '}(</Typography>
+          <Link className={classes.link} to='http://pfam.xfam.org/'>Pfam</Link>
+          <Typography variant='body1' display='inline'>{' '}and{' '}</Typography>
+          <Link className={classes.link} to='https://prosite.expasy.org/'>Prosite</Link>
+          <Typography variant='body1' display='inline'>) to understand the consensus positionality and abundance of different domains within protein groups and families. For example, DomainViz can be used to visualize the extent to which particular protein domains are evolutionarily conserved across homologous proteins, and also to visualize domain conservation between members of a single protein family. </Typography>
+          <Typography variant='body1' paragraph/>
           <Typography variant='body1' paragraph>While Pfam and Prosite each individually provide domain information for a single sequence, searching and visualizing multiple proteins is not possible with these tools. DomainViz automates the simultaneous identification of domains from multiple proteins and provides both consolidated and consensus outputs for further analysis and publication. This is facilitated by the production of a ‘consensus’ histogram plot that depicts the frequency distribution and positionality of domains within a representative median protein sequence derived from the input protein sequences.</Typography>
           
           <Typography variant='h5'>General Operations</Typography>
@@ -49,7 +54,7 @@ export const Help = () => {
 
 
           <Typography variant='h6'>Submit Task and Analysis:</Typography>
-          <Typography variant='body1' paragraph>Once a file is successfully uploaded, use the "Submit Task" button to start the analysis. This will redirect to a new, results page with an unique identifying 32 digit Result ID. Please copy and save the Result ID. You can use this ID to retrieve results for a period of 7 days post analysis. Please note that some searches can take a long time, from several minutes to hours and you can check the status of your analysis using your Result ID.</Typography>
+          <Typography variant='body1' paragraph>Once a file is successfully uploaded, use the Submit Task button to start the analysis. This will redirect to  a new results page with an unique identifying 32 digit  Result ID. Please copy and save the Result ID. You can use this ID to retrieve results for a period of 7 days post analysis. Please note that some searches can take a long time, from several minutes to hours and you can check the status of your analysis using your Result ID. </Typography>
           <Typography className={classes.body2} variant='body1' display='inline'>Example Result ID: </Typography>
           <Typography variant='body1' display='inline' paragraph>5ff3eeda.5842.5879.d627.f4d1faea3c84</Typography>
           <Typography variant='body1' paragraph/>
@@ -62,21 +67,25 @@ export const Help = () => {
           
           <Typography variant='h5'>Settings</Typography>
           <Typography variant='h6'>Absolute Results</Typography>
-          <Typography variant='body1' paragraph>Absolute results means that we will plot absolute numbers on y axis of plots instead of relative ones. If the box is unchecked, we plot relative results, if it is checked, we plot absolute results. </Typography>
+          <Typography variant='body1' paragraph>Absolute results means that we will plot absolute numbers on y axis of plots instead of relative ones. If the box is unchecked, we plot relative results, if it is checked, we plot absolute results.</Typography>
 
           <Typography variant='h6'>Minimum domain prevalence</Typography>
-          <Typography variant='body1' paragraph>Only domains occuring in a ratio higher than the number are plotted will be present in the output (e.g. If the value is 0.5, the domain has to be present in at least 50% of the input sequences)</Typography>
+          <Typography variant='body1' paragraph>Only domains occuring in a ratio higher than the number are plotted will be present in the output (e.g. If the value is 0.5, the domain has to be present in  at least 50% of the input sequences).</Typography>
 
           <Typography variant='h6'>Minimum domain position conservation</Typography>
-          <Typography variant='body1' paragraph>Only domains occuring at a ratio higher than this number at a specific place in the protein group will be presented in the output (e.g. if value is 0.5, 50% of the sequences have to have this domain at the same relative position).</Typography>
+          <Typography variant='body1' display='inline'>Only domains occuring at a ratio higher than this number at a specific place in the protein group will be presented in the output (e.g. if value is 0.5, 50% of the sequences have to have this domain{' '}</Typography>
+          <Typography className={classes.body2} variant='body1' display='inline'>at the same relative position</Typography>
+          <Typography variant='body1' display='inline'>).</Typography>
+          <Typography variant='body1' paragraph/>
 
           <Typography variant='h6'>Figure Scaling</Typography>
           <Typography variant='body1' paragraph>The number input here represents the number of inches per 100 amino acids that the plot will use to display each visualization.</Typography>
 
           <Typography variant='h5'>Data Interpretation</Typography>
-          <Typography variant='body1' paragraph>The histograms depict both the position and prevalence of each protein domain within the group of proteins input by the user.</Typography>
+          <Typography variant='body1'>The histograms depict both the position and prevalence of each protein domain within the group of proteins input by the user.</Typography>
+          <Typography variant='body1' paragraph>Note: interactive example is accessible by submitting the “Load Example” dataset on the main DomainViz page. </Typography>
           <Typography variant='body1' paragraph>Generally, results with non-overlapping domains can be directly interpreted as showing the prevalence and position of each domain with different degrees of conservation within the protein group.</Typography>
-          <Typography variant='body1' paragraph>In rare cases, the visualization of a group of proteins may show two perfectly overlapping domains, for example, Domains A and B, each with 50% prevalence. There are three possible explainations:</Typography>
+          <Typography variant='body1' paragraph>In rare cases, the visualization of a group of proteins may show two perfectly overlapping domains, for example, Domains A and B, each with 50% prevalence. There are three possible explanations:</Typography>
           <Typography className={classes.body2} variant='body1' display='inline'>Case 1: </Typography>
           <Typography variant='body1' display='inline'>A subset of proteins have no domain predicted, while the remaining subset of proteins have both domains A and B predicted at the same spot. (In this case, the subsets are each half of the total set of proteins).</Typography>
           <Typography paragraph/>
@@ -89,7 +98,8 @@ export const Help = () => {
           <Typography variant='body1' paragraph>Only further investigation of the results files available upon Download can further discriminate the cases.</Typography>
 
           <Typography variant='h5'>Downloadable Outputs</Typography>
-          <Typography paragraph>The DomainViz output is available for download as a .zip file containing multiple files. This includes: Job.id.tsv files containing the raw output data from Pfam and Prosite. Job.id_ProteinGroup.csv allows users to replot the data used in creating each visualized histogram. Lastly, Job.id_ProteinGroup.pdf files that are high resolution vector files that can be used for further manipulation using any standard vector image editor (e.g. Adobe Illustrator or Affinity Designer) and/or publication.</Typography>
+          <Typography variant='body1'>The DomainViz output is available for download as a .zip file containing multiple files.</Typography>
+          <Typography variant='body1' paragraph>This includes: Job.id.tsv files containing the raw output data from Pfam and Prosite. Job.id_ProteinGroup.csv allows users to replot the data used in creating each visualized histogram. Lastly, Job.id_ProteinGroup.pdf files that are high resolution vector files that can be used for further manipulation using any standard vector image editor (e.g. Adobe Illustrator or Affinity Designer) and/or publication.</Typography>
           <Typography className={classes.body2} variant='body1'>Result output: Job.id_pfam_res.tsv</Typography>
           <Typography variant='body1' paragraph>All results of the PFAM search as a single tab separated file. This result file mimics the tabulated files that can be downloaded for results from PFAM directly, however is not produced by PFAM. Each row depicts one domain/sequence pair. The headers are as follows: </Typography>
           <Typography variant='body1'>Sequence id: The fasta sequence header that was submitted to DomainViz.</Typography>
