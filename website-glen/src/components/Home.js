@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
@@ -23,24 +23,28 @@ const useStyles = makeStyles((theme) => ({
 function Home() {
   const classes = useStyles();
   let history = useHistory();
+  //automatically reroute to domainviz
+  useEffect(() => {
+    history.push('/domainviz');
+  }, []);
 
-  const [textFields, setTextFields] = useState({
-    uidTextField: '',
-  });
-  const handleTextField = (event) => {
-    setTextFields({ ...textFields, [event.target.name]: event.target.value })
-  }
+  // const [textFields, setTextFields] = useState({
+  //   uidTextField: '',
+  // });
+  // const handleTextField = (event) => {
+  //   setTextFields({ ...textFields, [event.target.name]: event.target.value })
+  // }
 
-  function getImages() {
-    history.push('/view-results/' + textFields.uidTextField);
-  }
-  function gotoProtplot() {
-    history.push('/protplot');
-  }
+  // function getImages() {
+  //   history.push('/view-results/' + textFields.uidTextField);
+  // }
+  // function gotoProtplot() {
+  //   history.push('/protplot');
+  // }
   
   return (
     <>
-      <Grid container spacing={3} alignItems='center'>
+      {/* <Grid container spacing={3} alignItems='center'>
         <Grid item xs={12}>
           <Paper className={classes.paper} variant='outlined' style={{marginTop: "70px"}}>
             <Typography variant='h6'>Welcome to DomainVis, Hosted by the University of Alberta.</Typography>
@@ -64,7 +68,7 @@ function Home() {
         <Grid item xs={6}>
           <Button variant='contained' color='primary' component='span' className={classes.button} onClick={gotoProtplot}>Go to DomainVis!</Button>
         </Grid>
-      </Grid>
+      </Grid> */}
     </>
   );
 }

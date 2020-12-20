@@ -1,0 +1,9 @@
+DUF3591	#1f77b4
+Bromodomain	#ff7f0e
+PS50014	#2ca02c
+TBP-binding	#d62728
+PS00633	#9467bd
+ubiquitin	#8c564b
+PS50053	#e377c2
+zf-CCHC_6	#7f7f7f
+Rad60-SLD	#bcbd22

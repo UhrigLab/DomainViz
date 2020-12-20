@@ -2,8 +2,7 @@ import React from 'react';
 import './App.css';
 import 'fontsource-roboto';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, IconButton, Toolbar, Typography, Button, createMuiTheme, ThemeProvider, Divider, Box, Container } from '@material-ui/core';
-import {spacing} from '@material-ui/system';
+import { AppBar, Toolbar, Typography, Button, createMuiTheme, ThemeProvider, Divider, Box, Container } from '@material-ui/core';
 import {
   BrowserRouter,
   Switch,
@@ -17,10 +16,11 @@ import Footer from './components/Footer';
 import Home from './components/Home';
 import { About } from './components/About';
 import { Help } from './components/Help';
+import { TermsOfUse } from './components/TermsOfUse';
+import { PrivacyStatement } from './components/PrivacyStatement';
 import ProtPlot from './components/ProtPlot';
 import MotifX from './components/MotifX';
 import ProtPlotDEV from './components/ProtPlotDev';
-import { TermsOfUse } from './components/TermsOfUse';
 
 const useStyles = makeStyles((theme) => ({
   app: {
@@ -76,28 +76,18 @@ const theme = createMuiTheme({
       main: '#000000',
     },
   },
-  typography: {
-    body2: {
-      fontWeight: 1000,
-      fontSize: 20,
-    },
-  },
 });
 
 
 function App() {
   const classes = useStyles();
-  // const theme = {
-  //   spacing: 10,
-  // }
   return (
     <div className="App">
+      <BrowserRouter>
       <Container className={classes.app}>
       <ThemeProvider theme={theme}>
-      <BrowserRouter>
         <AppBar postion='fixed' className={classes.appBar}>
           <Toolbar>
-            {/* TODO: replace with svg icon from devang */}
             <Box className={classes.paper}>
               <Typography variant='h5' fontWeight='bold' >UHRIG LAB</Typography>
               <Divider className={classes.divider}></Divider>
@@ -108,8 +98,8 @@ function App() {
             {/* <Link to='/'>
               <Button color='inherit'>Home</Button>
             </Link> */}
-            {/* <Link to='/domainvis'> */}
-            <Link to='/'>
+            {/* <Link to='/domainviz'> */}
+            <Link to='/domainviz'>
               <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
             </Link>
             {/* <Link to='/motif-x'>
@@ -129,21 +119,23 @@ function App() {
         </AppBar>
 
         <Switch>
-          {/* <Route path="/" exact component={Home} /> TODO TEMP: this should be enabled, and the following line should be disabled in final product*/}
-          <Route path="/" exact component={ProtPlot} /> 
+          <Route path="/" exact component={Home} />
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          {/* <Route path="/domainviz" component={ProtPlot} /> */}
+          <Route path="/domainviz" component={ProtPlot} />
           <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
           <Route path="/help" component={Help} />
           <Route path='/terms-of-use' component={TermsOfUse}/>
+          <Route path='/privacy-statement' component={PrivacyStatement}/>
+
           {/* <Route path="/motif-x" component={MotifX} /> */}
         </Switch>
-      </BrowserRouter>
 
       </ThemeProvider>
       </Container>
       <Footer></Footer>
+      </BrowserRouter>
+
 
     </div>
 

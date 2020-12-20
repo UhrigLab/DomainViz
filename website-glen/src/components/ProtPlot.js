@@ -119,10 +119,13 @@ function ProtPlot() {
     async function handleFastaFile(file) {
         //Validate fastaFile:
         let valid = true;
+
+        // Check the file's size
         if (((file.size / 1024) / 1024).toFixed(4) > 10) {
             alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
             valid = false;
         }
+        // Check that the file is a fasta file
         await isFasta(file).then((result) => {
             valid = result;
         });
@@ -205,13 +208,13 @@ function ProtPlot() {
 
     return (
         <div className='protplot'>
-            <Grid container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
+            <Grid className={classes.root} container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
                 <Grid item xs={12}>
                     <img src={DomainVizIcon} className={classes.img}></img>
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
-                        <Typography variant='h5'>Protein domain enrichment {'&'} visualization tool</Typography>
+                        <Typography variant='h5'>Protein domain search {'&'} visualization tool</Typography>
                         <Typography variant='body1'>Use DomainViz by first uploading a protein Fasta file, changing any options as desired and clicking "Submit Task".</Typography>
                     </Paper>
                 </Grid>
