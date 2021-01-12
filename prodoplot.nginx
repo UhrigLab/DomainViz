@@ -1,6 +1,6 @@
 server {
 	listen 80;
-	server_name uhriglabdev.biology.ualberta.ca www.uhrigplabdev.biology.ualberta.ca;
+	server_name uhriglabdev.biology.ualberta.ca www.uhriglabdev.biology.ualberta.ca;
 	return 301 https://$host$request_uri;
 }
 server {
