@@ -95,13 +95,13 @@ function App() {
             </Box>
             <Typography variant="h6" className={classes.subtitle}/> {/* Need this for spacing for now */}
             
-            {/* <Link to='/'>
-              <Button color='inherit'>Home</Button>
-            </Link> */}
-            {/* <Link to='/domainviz'> */}
-            <Link to='/domainviz'>
-              <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
+            <Link to='/'>
+              <Button color='inherit' className={classes.linkButton}>Home</Button>
             </Link>
+            {/* <Link to='/domainviz'> */}
+            {/* <Link to='/domainviz'>
+              <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
+            </Link> */}
             {/* <Link to='/motif-x'>
               <Button color='inherit'>MotifX</Button>
             </Link> */}
