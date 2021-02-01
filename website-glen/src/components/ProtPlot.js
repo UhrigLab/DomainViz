@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import UploadFile from './UploadFile';
 import AccordionSetup from './AccordionSetup';
-import isFasta from './utils/ValidateFile';
+import isFileFasta from './utils/ValidateFile';
+import {isStringFasta} from './utils/ValidateFile';
+
 
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -96,6 +98,7 @@ function ProtPlot() {
         cutoffTextField: '0.05',
         maxCutoffTextField: '0.05',
         scaleFigureTextField: '1',
+        fastaTextField: '',
     });
     const handleTextField = (event) => {
         setTextFields({ ...textFields, [event.target.name]: event.target.value })
@@ -111,10 +114,26 @@ function ProtPlot() {
         setFastaFile({
             file: "test",
             name: "test"
-        })
+        });
     }
     function clearFastaFile() {
         setFastaFile(null);
+    }
+    async function validateFastaText() {
+        let valid = true;
+        await isStringFasta(textFields.fastaTextField).then((result) => {
+            valid = result;
+        });
+        if (valid) {
+            setFastaFile({
+                file: textFields.fastaTextField,
+                name: "manual"
+            });
+        }
+        else {
+            return;
+        }
+        alert("Text accepted as fasta file.")
     }
     async function handleFastaFile(file) {
         //Validate fastaFile:
@@ -126,7 +145,7 @@ function ProtPlot() {
             valid = false;
         }
         // Check that the file is a fasta file
-        await isFasta(file).then((result) => {
+        await isFileFasta(file).then((result) => {
             valid = result;
         });
 
@@ -144,11 +163,20 @@ function ProtPlot() {
         const data = new FormData();
 
         if (fastaFile == null) {
-            alert("Please upload a file before clicking go.");
-            return;
+            if (textFields.fastaTextField == '') {
+                alert("Please upload a file, or paste the fasta text into the text field before clicking \"Submit Task\".");
+                return;
+            }
+            else {
+                alert("Please Validate your text before clicking \"Submit Task\".")
+                return
+            }
         }
         if (fastaFile.name === "test") {
             data.append(resultID, fastaFile.name)
+        }
+        else if (fastaFile.name === "manual") {
+            data.append(resultID, fastaFile.file)
         }
         else {
             data.append(resultID, fastaFile, fastaFile.name);
@@ -188,7 +216,6 @@ function ProtPlot() {
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
-
         await axios.post('/api/sendfiles', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -225,20 +252,34 @@ function ProtPlot() {
                 </Grid>
                 <Grid item xs={2}>
                     <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear File</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile} style={{ marginLeft: "10px" }}>Load Example</Button>
+                </Grid>
+                <Grid item xs={1}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} >Clear File</Button>
                 </Grid>
                 <Grid item xs={1}>
                     <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
-                <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginLeft: "10px" }}>Download Example</Button>
+                <Grid item xs={3}/>
+
+                <Grid item xs={2}/>
+                <Grid item xs={6} >
+                    <TextField id="fasta-textfield"  name='fastaTextField' label="Fasta File" placeholder="Paste Text Here" multiline fullWidth rowsMax={5} variant='outlined' value={textFields.fastaTextField} onChange={handleTextField} />
                 </Grid>
-                
+                <Grid item xs={1}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={validateFastaText} >Validate Text</Button>
+                </Grid>
+                <Grid item xs={3}/>
+
                 <Grid item xs={2} />
+                <Grid item xs={6}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile}>Download Example</Button>
+                </Grid>
+                <Grid item xs={4}/>
 
                 <Grid item xs={12} />
                 <Grid item xs={12} />
+
 
 
                 <Grid item xs={3}>

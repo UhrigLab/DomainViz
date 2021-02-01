@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+# api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+# virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
@@ -130,10 +130,21 @@ def sendfiles():
         for key in request.form.keys():
             if i==0:
                 result_id=key
+                if request.form[key] == "test":
+                    fasta_filename = example_fasta_file
+                    fp = example_file_path
+                    print("Test fasta file being used")
+                else:
+                    # This section is for if the user pasted their fasta file rather than uploading a file.
+                    # file_path will be the regular one
+                    fasta_filename = key + ".fa"
+                    fa_text = request.form[key]
+                    fa_file = open(os.path.abspath(file_path + fasta_filename), 'w')
+                    fa_file.write(fa_text)
+                    fa_file.close()
+                    print("Fasta file: " + fasta_filename + " will be used.")
                 break
-        fasta_filename=example_fasta_file
-        fp = example_file_path
-        print("Test fasta file being used")
+        
 
     # retrieve the 4 parameters
     absolute_results=request.form["absoluteResults"]
@@ -172,7 +183,7 @@ def sendfiles():
         call = call + ' -if ' + ignore_domains_file.filename
     except:
         print("no ignore domains file")
-
+ 
     #send the call
     subprocess.Popen(call, shell=True)
 
