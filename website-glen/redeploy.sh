@@ -8,16 +8,16 @@ echo $COMMANDS
 else echo "No jobs are running."; 
 fi
 
-IFS=', ' read -r -a array <<< "$string"
-for index in "${!array[@]}"
-do
-    echo "$index ${array[index]}"
-done
-# cd ..
-# git pull
-# cd website-glen/
-# npm run build
-# systemctl reload nginx
-# systemctl daemon-reload
-# systemctl restart prodoplot
-# echo "Redeployment finished."
+#IFS=', ' read -r -a array <<< "$string"
+#for index in "${!array[@]}"
+#do
+#    echo "$index ${array[index]}"
+#done
+cd ..
+git pull
+cd website-glen/
+npm run build
+systemctl reload nginx
+systemctl daemon-reload
+systemctl restart prodoplot
+echo "Redeployment finished."
