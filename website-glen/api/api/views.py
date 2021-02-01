@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-api_path = "api/api/"
+# api_path = "api/api/"
 #PRODUCTION
-# api_path = "api/"
+api_path = "api/"
 
 #DEVELOPMENT
-virtual_env = "api/api/propplotenvDEV/"
+# virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-# virtual_env = "api/propplotenv/"
+virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
