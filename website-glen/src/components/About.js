@@ -2,8 +2,6 @@ import React from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import Flowchart from './img/flowchart.png'
-
 
 
 const useStyles = makeStyles((theme) => ({

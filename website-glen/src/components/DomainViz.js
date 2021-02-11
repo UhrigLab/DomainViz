@@ -1,25 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
 import UploadFile from './UploadFile';
 import AccordionSetup from './AccordionSetup';
-import isFileFasta from './utils/ValidateFile';
-import {isStringFasta} from './utils/ValidateFile';
-
+import { isFileFasta } from './utils/ValidateInputs';
+import { isStringFasta } from './utils/ValidateInputs';
+import { downloadTestFastaFile } from './utils/HTTPRequests';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Box, Button, Checkbox, Container, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { useHistory } from 'react-router';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import DomainVizIcon from './img/domainviz.png';
-import { saveAs } from 'file-saver';
+import { SketchPicker } from 'react-color';
 
 
-
-//TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -41,11 +38,17 @@ const useStyles = makeStyles((theme) => ({
         height: "122px",
         width: "293px"
     },
+    colorPicker: {
+        position: 'fixed',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        left: '0px',
+    }
 }));
-
-//generates random id;
-let guid = () => {
-    let s4 = () => {
+const guid = () => {
+    //generates random id;
+    const s4 = () => {
         return Math.floor((1 + Math.random()) * 0x10000)
             .toString(16)
             .substring(1);
@@ -85,6 +88,15 @@ function ProtPlot() {
 
     const [fastaFile, setFastaFile] = useState(null);
 
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    function handleColorPicker() {
+        setShowColorPicker(!showColorPicker);
+    }
+    const [cfColor, setCfColor] = useState('#fff'); // cfColor is one of the colors that will be used to generate a colorfile
+    const handleCfColorChange = (color) => {
+        setCfColor(color.hex)
+    }
+
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
         fastaFileLoadedCheckbox: false,
@@ -104,11 +116,6 @@ function ProtPlot() {
         setTextFields({ ...textFields, [event.target.name]: event.target.value })
     }
 
-    function downloadTestFastaFile() {
-        fetch('/api/testFasta').then(response => {
-            saveAs(response.url);
-        });
-    }
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFile({
@@ -117,7 +124,9 @@ function ProtPlot() {
         });
     }
     function clearFastaFile() {
+        // TODO Make clear button clear textfield as well
         setFastaFile(null);
+        setTextFields({...textFields, [textFields.fastaTextField]: ''})
     }
     async function validateFastaText() {
         let valid = true;
@@ -139,11 +148,6 @@ function ProtPlot() {
         //Validate fastaFile:
         let valid = true;
 
-        // Check the file's size
-        if (((file.size / 1024) / 1024).toFixed(4) > 10) {
-            alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
-            valid = false;
-        }
         // Check that the file is a fasta file
         await isFileFasta(file).then((result) => {
             valid = result;
@@ -158,7 +162,7 @@ function ProtPlot() {
         }
     }
 
-    async function sendPartOneFiles() {
+    async function sendDomainvizFiles() {
         //Save file to server so the backend can access it 
         const data = new FormData();
 
@@ -237,7 +241,7 @@ function ProtPlot() {
         <div className='protplot'>
             <Grid className={classes.root} container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
                 <Grid item xs={12}>
-                    <img src={DomainVizIcon} className={classes.img}></img>
+                    <img src={DomainVizIcon} className={classes.img} alt='Logo'></img>
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
@@ -277,7 +281,16 @@ function ProtPlot() {
                 </Grid>
                 <Grid item xs={4}/>
 
-                <Grid item xs={12} />
+                <Grid item xs={12}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleColorPicker}>Pick A Color</Button>
+                    
+                </Grid>
+                <Grid item xs={3}/>
+                <Grid item xs={4}>
+                    {(showColorPicker) &&
+                        <SketchPicker color={ cfColor } onChangeComplete={ handleCfColorChange }/>
+                    }
+                </Grid>
                 <Grid item xs={12} />
 
 
@@ -288,7 +301,6 @@ function ProtPlot() {
                 <Grid item xs={2}>
                     <TextField id='cutoff' name='cutoffTextField' value={textFields.cutoffTextField} type='number' inputProps={{ step: '0.01', max: 1, min: 0 }} onChange={handleTextField} />
                 </Grid>
-
                 <Grid item xs={3}>
                     <AccordionSetup id='max-cutofftxt' header='Minimum domain position conservation' body='Enter a number between 0 and 1. The default value is 0.05. Only domains that have a maximum prevalence at a relative place in the protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have this domain at the same relative position).'></AccordionSetup>
                 </Grid>
@@ -307,7 +319,6 @@ function ProtPlot() {
                         control={<Checkbox checked={checkboxes.scaleFigureCheckbox} onChange={handleCheckBox} name="scaleFigureCheckbox" />}
                         label="Yes" />
                 </Grid>
-
                 <Grid item xs={3}>
                     <AccordionSetup id='absoluteresultstxt' header='Absolute y-axis?' body='Click the checkbox if you want absolute results on the y-axis. The default is no. Absolute results means that we will plot absolute numbers on y axis of plots instead of relative ones. If the box is unchecked, we plot relative results, if it is checked, we plot absolute results.'></AccordionSetup>
                 </Grid>
@@ -318,7 +329,7 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendDomainvizFiles}>
                         Submit Task
                     </Button>
                 </Grid>

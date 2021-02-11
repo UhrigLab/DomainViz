@@ -1,5 +1,3 @@
-let fileReader;
-
 async function canReadFile(file) {
     // Check if file exists.
     try {
@@ -77,7 +75,13 @@ async function checkStringFasta(text) {
     }
     
 }
-async function isFileFasta(file) {
+export async function isFileFasta(file) {
+
+    // Check the file's size
+    if (((file.size / 1024) / 1024).toFixed(4) > 10) {
+        alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
+        return false;
+    }
 
     // Check if file can be read
     let valid = false;
@@ -89,7 +93,7 @@ async function isFileFasta(file) {
     });
 
     if (!valid) {
-        return false
+        return false;
     }
 
     // Check if file is fasta file:
@@ -119,8 +123,6 @@ export async function isStringFasta(text) {
 
     return valid;
 }
-
-export default isFileFasta
 
 // def is_groupfile(filename):
 //     # Default values

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Grid, Paper, Typography, Link } from '@material-ui/core';
+import { Grid, Paper, Typography, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import HelpImage from './img/help-file.png'
 
@@ -90,7 +90,7 @@ export const Help = () => {
           <Typography variant='body1'>The histograms depict both the position and prevalence of each protein domain within the group of proteins input by the user.</Typography>
           <Typography variant='body1' paragraph>Note: interactive example is accessible by submitting the “Load Example” dataset on the main DomainViz page. </Typography>
 
-          <img src={HelpImage} className={classes.img}/>
+          <img src={HelpImage} alt="Data Interpretations" className={classes.img}/>
 
           <Typography variant='body1' paragraph>Generally, results with non-overlapping domains can be directly interpreted as showing the prevalence and position of each domain with different degrees of conservation within the protein group.</Typography>
           <Typography variant='body1' paragraph>In rare cases, the visualization of a group of proteins may show two perfectly overlapping domains, for example, Domains A and B, each with 50% prevalence. There are three possible explanations:</Typography>

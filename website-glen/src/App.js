@@ -18,9 +18,8 @@ import { About } from './components/About';
 import { Help } from './components/Help';
 import { TermsOfUse } from './components/TermsOfUse';
 import { PrivacyStatement } from './components/PrivacyStatement';
-import ProtPlot from './components/ProtPlot';
+import DomainViz from './components/DomainViz';
 import MotifX from './components/MotifX';
-import ProtPlotDEV from './components/ProtPlotDev';
 
 const useStyles = makeStyles((theme) => ({
   app: {
@@ -102,18 +101,16 @@ function App() {
             {/* <Link to='/domainviz'>
               <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
             </Link> */}
-            {/* <Link to='/motif-x'>
-              <Button color='inherit'>MotifX</Button>
-            </Link> */}
+            <Link to='/u-motif'>
+              <Button color='inherit' className={classes.linkButton}>U-Motif</Button>
+            </Link>
             <Link to='/about'>
               <Button color='inherit' className={classes.linkButton}>About Us</Button>
             </Link>
             <Link to='/help'>
               <Button color='inherit' className={classes.linkButton}>Help</Button>
             </Link>
-            <a>
-              <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
-            </a>
+            <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
 
           </Toolbar>
         </AppBar>
@@ -122,13 +119,11 @@ function App() {
           <Route path="/" exact component={Home} />
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          <Route path="/domainviz" component={ProtPlot} />
-          <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
+          <Route path="/domainviz" component={DomainViz} />
           <Route path="/help" component={Help} />
           <Route path='/terms-of-use' component={TermsOfUse}/>
           <Route path='/privacy-statement' component={PrivacyStatement}/>
-
-          {/* <Route path="/motif-x" component={MotifX} /> */}
+          <Route path="/u-motif" component={MotifX} />
         </Switch>
 
       </ThemeProvider>
