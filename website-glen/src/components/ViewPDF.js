@@ -1,10 +1,12 @@
 import { React, useEffect, useState } from 'react';
 import { PDFMap } from './utils/PDFMap';
 import { MessageMap } from './utils/MessageMap';
-import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, Container } from '@material-ui/core';
+import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 import DomainVizIcon from './img/domainviz.png';
+import { saveAs } from 'file-saver';
+import { ColorGroupMap } from './utils/ColorGroupMap';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -34,9 +36,11 @@ export const ViewPDF = () => {
     const [currentMessage, setCurrentMessage] = useState("")
     const [messages, setMessages] = useState([]);
     const [progress, setProgress] = useState(0);
-    const [showProgressBar, setShowProgressBar] = useState(false)
+    const [showProgressBar, setShowProgressBar] = useState(false);
+    const [showColorDialog, setShowColorDialog] = useState(false);
+    const [colorGroups, setColorGroups] = useState([])
     const [failed, setFailed] = useState(false);
-    const [open, setOpen] = useState(false);
+    const [showExitDialog, setShowExitDialog] = useState(false);
     const classes = useStyles();
 
     let history = useHistory();
@@ -45,13 +49,38 @@ export const ViewPDF = () => {
     function goToHome() {
         history.push('/')
     }
-    const handleClickOpen = () => {
-        setOpen(true);
+    const handleClickOpenExitDialog = () => {
+        setShowExitDialog(true);
+    };
+    const handleCloseExitDialog = () => {
+        setShowExitDialog(false);
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    function gotoChangeColors() {
+        //Clear the colors
+        setColorGroups([])
+        fetch('/api/color-files/' + uid).then(response =>
+            response.json().then(data => {
+                //get the JSONified color group data from the backend, and put it into the colorGroups state
+                for (let i in data.colorGroups) { 
+                    let group = data.colorGroups[i].split('\t')[0];
+                    let hexcode = data.colorGroups[i].split('\t')[1];
+                    let colorDict = {"group": group, "color": hexcode}
+                    setColorGroups(current => [...current, colorDict])
+                }
+                setShowColorDialog(true);
+            })
+        );
+    }
+    const handleCloseColorDialog = () => {
+        setShowColorDialog(false);
     };
+
+    function gotoDownload() {
+        fetch('/api/download/' + uid).then(response => {
+            saveAs(response.url, 'DomainViz_results.zip')
+        });
+    }
 
     useEffect(() => {
         interval = setInterval(() => {
@@ -125,7 +154,14 @@ export const ViewPDF = () => {
             </Grid>
 
             {(displayImages && !showProgressBar && failed == false) &&
-                <PDFMap images={images} uid={uid} />
+                <>
+                    <PDFMap images={images} uid={uid} />
+                    <Grid item xs={12}>
+                        <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
+                        <Button variant='contained' color='default' component='span' className={classes.button} style={{ marginLeft: "10px" }} onClick={gotoChangeColors}>Change Colors</Button>
+                    </Grid>
+            <Grid item xs={12}/>
+                </>
             }
             {(!displayImages && showProgressBar && failed == false) &&
                 <>
@@ -163,28 +199,36 @@ export const ViewPDF = () => {
                     </Paper>
                 </Grid>
             }
+            {(showColorDialog) &&
+                <Dialog open={showColorDialog} onClose={handleCloseColorDialog} aria-labelledby="color-form-dialog-title">
+                    <DialogTitle id="color-form-dialog-title">Change Group Coloring</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            To subscribe to this website, please enter your email address here. We will send updates
+                            occasionally.
+                        </DialogContentText>
+                        <ColorGroupMap colorGroups={colorGroups}/>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseColorDialog}>Cancel</Button>
+                        <Button onClick={handleCloseColorDialog}>Save</Button>
+                    </DialogActions>
+                </Dialog>
+            }
+
             <Grid item xs={12}>
-                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
-                <Dialog
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle id="alert-dialog-title">{"Have you saved your result id?"}</DialogTitle>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpenExitDialog}>Exit</Button>
+                <Dialog open={showExitDialog} onClose={handleCloseExitDialog} aria-labelledby="exit-dialog-title" aria-describedby="exit-dialog-description">
+                    <DialogTitle id="exit-dialog-title">Have you saved your result id?</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
                             If you want to return to view your results again, you must save your result id.
                             If you do not save your result id, YOU WILL NOT BE ABLE TO VIEW THIS PAGE AGAIN
-                            </DialogContentText>
+                        </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleClose}>
-                            No
-                            </Button>
-                        <Button onClick={goToHome} autoFocus>
-                            Yes
-                            </Button>
+                        <Button onClick={handleCloseExitDialog}>No</Button>
+                        <Button onClick={goToHome} autoFocus>Yes</Button>
                     </DialogActions>
                 </Dialog>
             </Grid>

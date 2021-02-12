@@ -281,7 +281,7 @@ function ProtPlot() {
                 </Grid>
                 <Grid item xs={4}/>
 
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleColorPicker}>Pick A Color</Button>
                     
                 </Grid>
@@ -290,7 +290,7 @@ function ProtPlot() {
                     {(showColorPicker) &&
                         <SketchPicker color={ cfColor } onChangeComplete={ handleCfColorChange }/>
                     }
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} />
 
 
