@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
@@ -111,21 +111,33 @@ def images(username):
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
-    # retrieve the fasta file from the POST
+    # retrieve the fasta file(s) from the POST
+    print(request.files)
+    # Each file in request.files has the layout:
+    # (file_name<str>, file<FileStorage>, result_id<str>)
     result_id = ""
     fasta_file = None
     fasta_filename = None
     fp = file_path
-    i=0 # the first key will always be the result id, and its value will always be the fasta file
+    
+    i=0 
     for key in request.files.keys():
+        fasta_file=request.files[key]
+         # A failsafe in case the wrong type of files have been uploaded. In this case, we ignore it, and move on to the next file
+        if ".fa" not in key and ".fasta" not in key:
+            print("File " + key + " is not a fastafile, and is being skipped.")
+            continue
         if i==0:
-            #retrieve fasta file
-            result_id=key
-            fasta_file=request.files[key]
-            #Check for spaces in the filename before saving
-            fasta_filename = "".join(fasta_file.filename.split(" "))
-            fasta_file.save(os.path.abspath(file_path + fasta_filename))
-            break
+            #retrieve result id
+            result_id=fasta_file.filename # this is called filename because normally the request.files has a different layout than the one i am using
+        
+        # Save each fasta file as "result_id_i", where i is the index in the loop. 
+        # Eg. e23f6b67.163d.2103.1984.b6937bf3518a_0.fa
+        fasta_filename = result_id + "_" + str(i) + ".fa"
+        fasta_file.save(os.path.abspath(file_path + fasta_filename))
+        print("Fasta file: " + key + " has been saved as " + fasta_filename)
+        i+=1
+
     if fasta_file == None:
         for key in request.form.keys():
             if i==0:

@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
-import UploadFile from './UploadFile';
+import UploadFile from './utils/UploadFile';
 import AccordionSetup from './AccordionSetup';
 import isFasta from './utils/ValidateFile';
+import { FastaFileMap } from './utils/FastaFileMap';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Box, Button, Checkbox, Container, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import DomainVizIcon from './img/domainviz.png';
 import { saveAs } from 'file-saver';
 
-
-
-//TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -81,7 +77,7 @@ function ProtPlot() {
     const resultID = guid();
     const history = useHistory()
 
-    const [fastaFile, setFastaFile] = useState(null);
+    const [fastaFiles, setFastaFiles] = useState([]);
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
@@ -108,50 +104,72 @@ function ProtPlot() {
     }
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
-        setFastaFile({
-            file: "test",
-            name: "test"
-        })
+        setFastaFiles(
+            [ {file: "test", name: "test"} ]
+        )
     }
     function clearFastaFile() {
-        setFastaFile(null);
+        setFastaFiles([]);
     }
-    async function handleFastaFile(file) {
-        //Validate fastaFile:
-        let valid = true;
+    function changeFAFileName(index, newName) {
+        let newFAFile = new File([fastaFiles[index]], newName + ".fa");
+        setFastaFiles([
+            ...fastaFiles.slice(0, index),
+            newFAFile,
+            ...fastaFiles.slice(index+1)
+        ]);
+    }
+    async function handleFastaFiles(fileList) {
+        
+        let files = []
+        for (let i=0; i<fileList.length; i++) {
+            files.push(fileList[i])
+        }
+        const promises = files.map(async file => {
+            //Validate fastaFiles
+            let valid = true;
+            
+            // Check the file's size
+            if (((file.size / 1024) / 1024).toFixed(4) > 10) {
+                alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
+                valid = false;
+            }
+            // // Check that the file is a fasta file
+            await isFasta(file).then((result) => {
+                valid = result;
+            });
 
-        // Check the file's size
-        if (((file.size / 1024) / 1024).toFixed(4) > 10) {
-            alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
-            valid = false;
-        }
-        // Check that the file is a fasta file
-        await isFasta(file).then((result) => {
-            valid = result;
-        });
+            return valid;
+        })
+        const validList = await Promise.all(promises);
 
-        if (valid) {
-            setFastaFile(file);
-            alert("Sucessfully uploaded file: " + file.name)
+        let filenames = ""
+        for (let i=0; i<files.length; i++) {
+            if(validList[i] === false) {
+                alert("File " + files[i].name + " is invalid")
+                return;
+            }
+            filenames = filenames + files[i].name + " "
         }
-        else {
-            return;
-        }
+        alert("Successfully uploaded file(s): " + filenames)
+        setFastaFiles(oldFaFiles => [...oldFaFiles, ...files])
     }
 
     async function sendPartOneFiles() {
         //Save file to server so the backend can access it 
         const data = new FormData();
 
-        if (fastaFile == null) {
-            alert("Please upload a file before clicking go.");
+        if (fastaFiles.length === 0) {
+            alert("Please upload a fasta file before clicking \"Submit Task\".");
             return;
         }
-        if (fastaFile.name === "test") {
-            data.append(resultID, fastaFile.name)
+        if (fastaFiles[0].name === "test") {
+            data.append(resultID, "test")
         }
         else {
-            data.append(resultID, fastaFile, fastaFile.name);
+            for (let i=0; i<fastaFiles.length; i++) {
+                data.append(fastaFiles[i].name, fastaFiles[i], resultID);
+            }
         }
 
 
@@ -224,22 +242,20 @@ function ProtPlot() {
                     <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={2}>
-                    <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear File</Button>
+                    <UploadFile value='fasta' handleFile={handleFastaFiles} acceptedTypes='.fa,.fasta' multiple={true} />
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear</Button>
                 </Grid>
                 <Grid item xs={1}>
-                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />
+                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
                 <Grid item xs={12}>
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginLeft: "10px" }}>Download Example</Button>
                 </Grid>
                 
-                <Grid item xs={2} />
+                <FastaFileMap fastaFiles={fastaFiles} changeName={changeFAFileName}></FastaFileMap>
 
                 <Grid item xs={12} />
-                <Grid item xs={12} />
-
 
                 <Grid item xs={3}>
                     <AccordionSetup id='cutofftxt' header='Minimum domain prevalence' body='Enter a number between 0 and 1. The default value is 0.05. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>

@@ -18,9 +18,8 @@ import { About } from './components/About';
 import { Help } from './components/Help';
 import { TermsOfUse } from './components/TermsOfUse';
 import { PrivacyStatement } from './components/PrivacyStatement';
-import ProtPlot from './components/ProtPlot';
-import MotifX from './components/MotifX';
-import ProtPlotDEV from './components/ProtPlotDev';
+import DomainViz from './components/DomainViz';
+// import MotifX from './components/MotifX';
 
 const useStyles = makeStyles((theme) => ({
   app: {
@@ -111,9 +110,7 @@ function App() {
             <Link to='/help'>
               <Button color='inherit' className={classes.linkButton}>Help</Button>
             </Link>
-            <a>
-              <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
-            </a>
+            <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
 
           </Toolbar>
         </AppBar>
@@ -122,8 +119,7 @@ function App() {
           <Route path="/" exact component={Home} />
           <Route path="/about" component={About} />
           <Route path="/view-results/" component={ViewPDF} />
-          <Route path="/domainviz" component={ProtPlot} />
-          <Route path="/protplotDEVcc8ff46b-6306-0197-20b8-53961a20dd76" component={ProtPlotDEV} />
+          <Route path="/domainviz" component={DomainViz} />
           <Route path="/help" component={Help} />
           <Route path='/terms-of-use' component={TermsOfUse}/>
           <Route path='/privacy-statement' component={PrivacyStatement}/>
