@@ -39,3 +39,21 @@ def cleanup_cookies(file_path, id):
             os.remove(cookie)
         except:
             print("Error while removing cookie: " + cookie)
+
+# This function adds the groupfile name to the end of each header of a fasta file
+# It is intended to be used to combine multiple fasta files into one large one, separated by their groups
+def save_fasta_file(file_path, file, group_name):
+    file.save(os.path.abspath(file_path + "tmp"))
+
+    read_file = open(file_path + "tmp", 'r')
+    write_file = open(file_path, 'a+')
+    for line in read_file.readlines():
+        if ">" in line:
+            write_file.write(">" + group_name + line[1:])
+        else:
+            write_file.write(line)
+    read_file.close()
+    write_file.close()
+
+    #delete the temporary read-only file
+    os.remove(file_path + "tmp")

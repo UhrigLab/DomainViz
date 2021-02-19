@@ -6,7 +6,7 @@ from os.path import basename
 
 from werkzeug.exceptions import InternalServerError
 #import py-fasta-validator # for validating fasta files
-from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies
+from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fasta_file
 
 import os, subprocess, base64, glob
 
@@ -119,23 +119,28 @@ def sendfiles():
     fasta_file = None
     fasta_filename = None
     fp = file_path
-    
+
     i=0 
     for key in request.files.keys():
         fasta_file=request.files[key]
+        group_name=key
+        print(fasta_file)
          # A failsafe in case the wrong type of files have been uploaded. In this case, we ignore it, and move on to the next file
-        if ".fa" not in key and ".fasta" not in key:
-            print("File " + key + " is not a fastafile, and is being skipped.")
+        if ".fa" not in group_name and ".fasta" not in group_name:
+            print("File " + group_name + " is not a fastafile, and is being skipped.")
             continue
         if i==0:
             #retrieve result id
             result_id=fasta_file.filename # this is called filename because normally the request.files has a different layout than the one i am using
         
-        # Save each fasta file as "result_id_i", where i is the index in the loop. 
-        # Eg. e23f6b67.163d.2103.1984.b6937bf3518a_0.fa
-        fasta_filename = result_id + "_" + str(i) + ".fa"
-        fasta_file.save(os.path.abspath(file_path + fasta_filename))
-        print("Fasta file: " + key + " has been saved as " + fasta_filename)
+        # Save each fasta file in an increasingly large single fasta file called result_id.fa
+        # Each header will have its group name 
+        # Eg. e23f6b67.163d.2103.1984.b6937bf3518a.fa
+        fasta_filename = result_id + ".fa"
+        group_name = group_name.split(".")[0] # remove the .fa from group_name
+        save_fasta_file(os.path.abspath(file_path + fasta_filename), fasta_file, group_name)
+
+        print("Fasta file: " + group_name + " has been saved as " + fasta_filename)
         i+=1
 
     if fasta_file == None:
