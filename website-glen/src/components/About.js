@@ -39,6 +39,7 @@ export const About = () => {
             <Typography variant='body1' paragraph>Despite the Uhrig Lab’s focus on plant proteins and proteomics, tools such as these are interdisciplinary and can assist a wide range of user groups interested in protein domain analysis. </Typography>
 
             <Typography variant='h6'>DomainViz</Typography>
+            <Typography variant='body1'>The Uhrig Lab, working in conjunction with ETH collaborator Dr. Pascal Schläpfer; have developed DomainViz.</Typography>
             <Typography variant='body1' display='inline'>Our first tool,  </Typography>
             <Link className={classes.link} to='/domainviz' underline='always' color='textSecondary'>DomainViz</Link>
             <Typography variant='body1' display='inline'>  was created to assist molecular biological and biochemical researchers to easily inspect and visualize domain elements within single proteins or protein groups. DomainViz has the ability to be used as a discovery tool as well as a purely visualization tool for known, related protein sequences. For example, users can upload protein sequences of homologs from multiple species and visualize the extent to which particular protein domains are evolutionarily conserved. Alternatively, users can use DomainViz to visualize the degree of conservation of protein domains between members of a protein family in a single species. </Typography>

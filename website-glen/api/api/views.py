@@ -73,41 +73,49 @@ def test_fasta():
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
-    images = []
+    pdf_names = []
+    # sort the list of pdfs associated with the result_id
     for f in glob.glob(os.path.abspath(file_path+result_id+'*.pdf')):
+        #get the result_id from the filename to ensure we have to correct files
         file_id = f.split("tmp/")[1]
         file_id = file_id.split("_")[0]
         if result_id == file_id:
-            file = open(f, 'rb')
-            b64_bytes = base64.b64encode(file.read())
-            image_file = b64_bytes.decode("utf-8")
-            images.append({"resultID" : result_id, "file" : image_file})
-            print("added image: " + f)
-            file.close()
+            pdf_names.append(f)
+    pdf_names=sorted(pdf_names)
+    
+    # open the files in order of their name (for consistency of display) and add them to the list of pdfs
+    pdfs = []
+    for f in pdf_names:
+        file = open(f, 'rb')
+        b64_bytes = base64.b64encode(file.read())
+        image_file = b64_bytes.decode("utf-8")
+        pdfs.append({"resultID" : result_id, "file" : image_file})
+        print("added image: " + f)
+        file.close()
     max_cookie = get_max_cookie(file_path, result_id)
     #TODO swap temp with correct
     #temp
-    if len(images) < 3 and max_cookie:
+    if len(pdfs) < 3 and max_cookie:
         if get_cookie_info(file_path, result_id, max_cookie):
             return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
             return jsonify({'failed' : max_cookie})
-    elif len(images) < 3:
+    elif len(pdfs) < 3:
         return jsonify({'failed' : 'null'})
     else:
         cleanup_cookies(file_path, result_id)
-        return jsonify({'images' : images})
+        return jsonify({'images' : pdfs})
     #correct
-    # if len(images) == 0 and max_cookie:
+    # if len(pdfs) == 0 and max_cookie:
     #     if get_cookie_info(result_id, max_cookie):
     #         return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
     #     else:
     #         return jsonify({'failed' : max_cookie})
-    # elif len(images) == 0:
+    # elif len(pdfs) == 0:
     #     return jsonify({'failed' : 'null'})
     # else:
     #     cleanup_cookies(result_id)
-    #     return jsonify({'images' : images})
+    #     return jsonify({'images' : pdfs})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
@@ -138,7 +146,7 @@ def sendfiles():
         # Eg. e23f6b67.163d.2103.1984.b6937bf3518a.fa
         fasta_filename = result_id + ".fa"
         group_name = group_name.split(".")[0] # remove the .fa from group_name
-        save_fasta_file(os.path.abspath(file_path + fasta_filename), fasta_file, group_name)
+        save_fasta_file(fp, fasta_file, result_id, group_name)
 
         print("Fasta file: " + group_name + " has been saved as " + fasta_filename)
         i+=1
@@ -167,28 +175,27 @@ def sendfiles():
     # Set up the call for Pascals script here
     call = virtual_env +  "bin/python " + api_path + "propplot_v1_2.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     
-    # try to retrieve the other 3 files, if they exist
-    protein_groups_file = None
-    color_file = None
-    ignore_domains_file = None
-    try:
-        protein_groups_file = request.files["proteinGroups"]
-        protein_groups_file.save(os.path.abspath(file_path + protein_groups_file.filename))
-        call = call + ' -gf ' + file_path + protein_groups_file.filename
-    except:
-        print("no protein groups file")
-    try:
-        color_file = request.files["colorFile"]
-        color_file.save(os.path.abspath(file_path + color_file.filename))
-        call = call + ' -cf ' + file_path + color_file.filename
-    except:
-        print("no color file")
-    try:
-        ignore_domains_file = request.files["ignoreDomains"]
-        ignore_domains_file.save(os.path.abspath(file_path + ignore_domains_file.filename))
-        call = call + ' -if ' + ignore_domains_file.filename
-    except:
-        print("no ignore domains file")
+    #add the protein groups file, the creation of which can be found in utils.py
+    protein_groups_filename = result_id + "_groupfile.tsv"
+    call = call + ' -gf ' + file_path + protein_groups_filename
+
+    print(call)
+
+    # try to retrieve the other 2 files, if they exist
+    # color_file = None
+    # ignore_domains_file = None
+    # try:
+    #     color_file = request.files["colorFile"]
+    #     color_file.save(os.path.abspath(file_path + color_file.filename))
+    #     call = call + ' -cf ' + file_path + color_file.filename
+    # except:
+    #     print("no color file")
+    # try:
+    #     ignore_domains_file = request.files["ignoreDomains"]
+    #     ignore_domains_file.save(os.path.abspath(file_path + ignore_domains_file.filename))
+    #     call = call + ' -if ' + ignore_domains_file.filename
+    # except:
+    #     print("no ignore domains file")
 
     #send the call
     subprocess.Popen(call, shell=True)

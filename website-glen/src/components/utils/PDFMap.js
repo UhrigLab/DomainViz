@@ -1,6 +1,6 @@
 import { React } from 'react';
 import { PDF } from './PDF';
-import { Typography, Grid, Button } from '@material-ui/core';
+import { Typography, Grid, Button, Paper, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { saveAs } from 'file-saver';
 
@@ -33,7 +33,14 @@ export const PDFMap = ({ images, uid }) => {
             {images.map((image, index) => {
                 return (
                     <>
-                        <Grid item xs={4}>
+                        {(index % 3 === 0) &&
+                            <Grid item xs={3} alignItems='center'>
+                                    <Paper className={classes.paper} variant='outlined'>
+                                        <Typography variant="h5">Group {index/3}</Typography>
+                                    </Paper>
+                            </Grid>
+                        }
+                        <Grid item xs={3}>
                             <PDF pdf={image.file}></PDF>
                         </Grid>
                     </>
@@ -42,7 +49,6 @@ export const PDFMap = ({ images, uid }) => {
             <Grid item xs={12}>
                 <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
             </Grid>
-            <Grid item xs={12}/>
         </>
     );
 }

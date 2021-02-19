@@ -28,12 +28,6 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     display: 'box',
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
-    width: 90,
-    height: 90,
-    // backgroundColor: '#7F7F7F' 
-  },
   subtitle: {
     flexGrow: 1,
     fontFamily: `"Raleway"`,
@@ -42,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: `"Raleway"`,
     fontSize: 20,
     fontStyle: "bold",
-    color: "black"
+    color: "black",
   },
   divider: {
     scale: 1.0,

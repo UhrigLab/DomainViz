@@ -113,7 +113,7 @@ export const ViewPDF = () => {
     }, [images, failed, currentMessage]);
 
     return (
-        <Grid container spacing={3} style={{marginTop: '90px'}}>
+        <Grid container spacing={3} alignItems='center' style={{marginTop: '90px'}}>
             <Grid item xs={12}>
                 <img src={DomainVizIcon} className={classes.img}></img>
             </Grid>
@@ -164,7 +164,7 @@ export const ViewPDF = () => {
                 </Grid>
             }
             <Grid item xs={12}>
-                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen} style={{marginBottom:"10px"}}>Exit</Button>
                 <Dialog
                     open={open}
                     onClose={handleClose}

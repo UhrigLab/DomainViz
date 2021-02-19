@@ -42,18 +42,36 @@ def cleanup_cookies(file_path, id):
 
 # This function adds the groupfile name to the end of each header of a fasta file
 # It is intended to be used to combine multiple fasta files into one large one, separated by their groups
-def save_fasta_file(file_path, file, group_name):
-    file.save(os.path.abspath(file_path + "tmp"))
+# It also creates the groupfile.txt file.
+def save_fasta_file(file_path, file, id, group_name):
+    #save the file using the built in Flask method, so we can read it using python methods
+    print(file_path)
+    file.save(file_path + id + "tmp" + ".fa")
 
-    read_file = open(file_path + "tmp", 'r')
-    write_file = open(file_path, 'a+')
+    read_file = open(file_path + id + "tmp" + ".fa" , 'r')
+    write_file = open(file_path + id + '.fa', 'a+')
+    group_file = open(file_path + id + '_groupfile.tsv', 'a+')
+    
+    # if the last line we wrote was a protein sequence, then we need to write a newline character before writing the next
+    # header
+    newline = False 
     for line in read_file.readlines():
         if ">" in line:
-            write_file.write(">" + group_name + line[1:])
+            write_file.write(">" + group_name + "_" + line[1:])
+            #for the groupfile we want to replace the \n with a tab
+            if newline:
+                group_file.write('\n')
+                newline=False
+            group_file.write(">" + group_name + "_" + line.rstrip('\n')[1:] + "\t")
+
         else:
             write_file.write(line)
+            #for the groupfile we want the entire protein sequence to be on one line
+            group_file.write(line.rstrip('\n'))
+            newline = True
     read_file.close()
     write_file.close()
+    group_file.close()
 
     #delete the temporary read-only file
-    os.remove(file_path + "tmp")
+    os.remove(file_path + id + "tmp" + ".fa")
