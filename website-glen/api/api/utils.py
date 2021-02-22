@@ -62,12 +62,11 @@ def save_fasta_file(file_path, file, id, group_name):
             if newline:
                 group_file.write('\n')
                 newline=False
-            group_file.write(">" + group_name + "_" + line.rstrip('\n')[1:] + "\t")
+            group_file.write(">" + group_name + "_" + line.rstrip('\n')[1:] + "\t" + group_name)
 
         else:
             write_file.write(line)
             #for the groupfile we want the entire protein sequence to be on one line
-            group_file.write(line.rstrip('\n'))
             newline = True
     read_file.close()
     write_file.close()
