@@ -2,6 +2,7 @@ import React from 'react';
 import { Grid, Paper, Typography, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Flowchart from './img/flowchart.png'
+import {  Link as RouterLink } from 'react-router-dom';
 
 
 
@@ -40,7 +41,7 @@ export const About = () => {
             <Typography variant='h6'>DomainViz</Typography>
             <Typography variant='body1'>The Uhrig Lab, working in conjunction with ETH collaborator Dr. Pascal Schläpfer; have developed DomainViz.</Typography>
             <Typography variant='body1' display='inline'>Our first tool,  </Typography>
-            <Link className={classes.link} to='/domainviz' underline='always' color='textSecondary'>DomainViz</Link>
+            <RouterLink className={classes.link} to='/domainviz' underline='always' color='textSecondary'>DomainViz</RouterLink>
             <Typography variant='body1' display='inline'>  was created to assist molecular biological and biochemical researchers to easily inspect and visualize domain elements within single proteins or protein groups. DomainViz has the ability to be used as a discovery tool as well as a purely visualization tool for known, related protein sequences. For example, users can upload protein sequences of homologs from multiple species and visualize the extent to which particular protein domains are evolutionarily conserved. Alternatively, users can use DomainViz to visualize the degree of conservation of protein domains between members of a protein family in a single species. </Typography>
             <Typography paragraph/> 
 
