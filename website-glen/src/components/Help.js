@@ -35,9 +35,9 @@ export const Help = () => {
         <Paper className={classes.paper} variant='outlined'>
           <Typography variant='h5'>Introduction</Typography>
           <Typography variant='body1' display='inline'>DomainViz allows users to identify and visualize protein domains on multiple protein sequences using multiple domain prediction platforms{' '}(</Typography>
-          <Link className={classes.link} to='http://pfam.xfam.org/'>Pfam</Link>
+          <Link className={classes.link} target='_blank' href='http://pfam.xfam.org/'>Pfam</Link>
           <Typography variant='body1' display='inline'>{' '}and{' '}</Typography>
-          <Link className={classes.link} to='https://prosite.expasy.org/'>Prosite</Link>
+          <Link className={classes.link} target='_blank' href='https://prosite.expasy.org/'>Prosite</Link>
           <Typography variant='body1' display='inline'>) to understand the consensus positionality and abundance of different domains within protein groups and families. For example, DomainViz can be used to visualize the extent to which particular protein domains are evolutionarily conserved across homologous proteins, and also to visualize domain conservation between members of a single protein family. </Typography>
           <Typography variant='body1' paragraph/>
           <Typography variant='body1' paragraph>While Pfam and Prosite each individually provide domain information for a single sequence, searching and visualizing multiple proteins is not possible with these tools. DomainViz automates the simultaneous identification of domains from multiple proteins and provides both consolidated and consensus outputs for further analysis and publication. This is facilitated by the production of a ‘consensus’ histogram plot that depicts the frequency distribution and positionality of domains within a representative median protein sequence derived from the input protein sequences.</Typography>
@@ -115,43 +115,43 @@ export const Help = () => {
           <Typography variant='body1'>Family Accession: PFAM family grouping: A family is a collection of related protein regions.</Typography>
           <Typography variant='body1'>Clan: PFAM clan grouping: A clan is a collection of related Pfam entries. The relationship may be defined by similarity of sequence, structure or profile-HMM.
             Env. Start: Pfam hit start. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Env. End: Pfam hit end. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Env. End: Pfam hit end. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#envelope-coordinates</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Ali. Start: Pfam hit start. See{' '} 
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Ali. End: Pfam hit end. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#alignment-coordinates</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Model Start: Start for the hidden markov model hit. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Model End: End for the hidden markov model hit. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer'>https://pfam-docs.readthedocs.io/en/latest/glossary.html?highlight=envelope#hmmer</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Bit Score: PFAM Scoring. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Ind. E-value: PFAM Scoring. See{' '} 
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Cond. E-value: PFAM Scoring. See{' '}
-            <Link className={classes.link} to='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
+            <Link className={classes.link} target='_blank' href='https://pfam-docs.readthedocs.io/en/latest/scores.html'>https://pfam-docs.readthedocs.io/en/latest/scores.html</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Description: Description of the domain that is saved by PFAM.</Typography>
@@ -167,11 +167,11 @@ export const Help = () => {
           <Typography variant='body1'>Column 4: Domain identifier from ProSite.</Typography>
           <Typography variant='body1'>Column 5: ProSite score</Typography>
           <Typography variant='body1'>Column 6: Prosite level. See{' '}
-            <Link className={classes.link} to='https://prosite.expasy.org/prosuser.html'>https://prosite.expasy.org/prosuser.html</Link>
+            <Link className={classes.link} target='_blank' href='https://prosite.expasy.org/prosuser.html'>https://prosite.expasy.org/prosuser.html</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1'>Column 7: Prosite level tag. See{' '}
-            <Link className={classes.link} to='https://prosite.expasy.org/prosuser.html'>https://prosite.expasy.org/prosuser.html</Link>
+            <Link className={classes.link} target='_blank' href='https://prosite.expasy.org/prosuser.html'>https://prosite.expasy.org/prosuser.html</Link>
             {' '}for reference.
           </Typography>
           <Typography variant='body1' paragraph>Column 8: Unused</Typography>

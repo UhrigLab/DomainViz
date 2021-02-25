@@ -176,8 +176,9 @@ def sendfiles():
     call = virtual_env +  "bin/python " + api_path + "propplot_v1_2.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     
     #add the protein groups file, the creation of which can be found in utils.py
-    protein_groups_filename = result_id + "_groupfile.tsv"
-    call = call + ' -gf ' + file_path + protein_groups_filename
+    if fasta_filename != example_fasta_file:
+        protein_groups_filename = result_id + "_groupfile.tsv"
+        call = call + ' -gf ' + file_path + protein_groups_filename
 
     print(call)
 

@@ -1,7 +1,6 @@
 import React from 'react';
-import { Grid, Paper, Typography } from '@material-ui/core';
+import { Grid, Paper, Typography, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
 import Flowchart from './img/flowchart.png'
 
 
@@ -32,7 +31,7 @@ export const About = () => {
 
           <Paper className={classes.paper} variant='outlined' >
             <Typography variant='body1' display='inline'>The  </Typography>
-            <Link className={classes.link} to='https://www.uhriglab.com/'>Uhrig Lab</Link> 
+            <Link className={classes.link} target='_blank' href='https://www.uhriglab.com/'>Uhrig Lab</Link> 
             <Typography variant='body1' display='inline'>  at the University of Alberta is a protein biochemistry and proteomics research group interested in protein function discovery. We are also currently developing multiple open-source, accessible, and easy to use protein sequence analysis tools to enable biological discovery.</Typography>
             <Typography paragraph/>
 
