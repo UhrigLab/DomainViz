@@ -173,7 +173,7 @@ def sendfiles():
         custom_scaling = "0" 
 
     # Set up the call for Pascals script here
-    call = virtual_env +  "bin/python " + api_path + "propplot_v1_2.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
+    call = virtual_env +  "bin/python " + api_path + "domainviz.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     
     #add the protein groups file, the creation of which can be found in utils.py
     if fasta_filename != example_fasta_file:
