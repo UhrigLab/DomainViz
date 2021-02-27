@@ -30,16 +30,18 @@ let interval;
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
-    const [displayImages, setDisplayImages] = useState(false)
-    const [currentMessage, setCurrentMessage] = useState("")
+    const [groupNames, setGroupNames] = useState([]);
+    const [displayImages, setDisplayImages] = useState(false);
+    const [currentMessage, setCurrentMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [progress, setProgress] = useState(0);
-    const [showProgressBar, setShowProgressBar] = useState(false)
+    const [showProgressBar, setShowProgressBar] = useState(false);
     const [failed, setFailed] = useState(false);
     const [open, setOpen] = useState(false);
-    const classes = useStyles();
 
+    const classes = useStyles();
     let history = useHistory();
+
     let uid = url.split("/view-results/")[1];
 
     function goToHome() {
@@ -59,6 +61,7 @@ export const ViewPDF = () => {
                 response.json().then(data => {
                     if (data.hasOwnProperty('images')) {
                         setImages(data.images);
+                        setGroupNames(data.groups)
                     }
                     else {
                         if (data.failed === 'null') {
@@ -125,7 +128,7 @@ export const ViewPDF = () => {
             </Grid>
 
             {(displayImages && !showProgressBar && failed == false) &&
-                <PDFMap images={images} uid={uid} />
+                <PDFMap images={images} uid={uid} groupNames={groupNames} />
             }
             {(!displayImages && showProgressBar && failed == false) &&
                 <>

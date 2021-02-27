@@ -1,5 +1,5 @@
 import { React, useState, Fragment } from 'react';
-import { Button, Grid, makeStyles, TextField, Typography} from '@material-ui/core';
+import { Button, Grid, makeStyles, TextField, Typography, Paper } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -9,9 +9,14 @@ const useStyles = makeStyles((theme) => ({
         padding: theme.spacing(1),
         textAlign: 'center',
     },
+    paper: {
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        color: theme.palette.text.primary,
+    },
 }));
 
-export const FastaFileMap = ({ fastaFiles, changeName }) => {
+export const FastaFileMap = ({ fastaFiles, changeName, removeFile }) => {
         const classes = useStyles();
         const [faFileNames, setFAFileNames] = useState([]);
 
@@ -44,6 +49,9 @@ export const FastaFileMap = ({ fastaFiles, changeName }) => {
                 alert("Please change a name before clicking the \"Confirm\" button.")
             }
         }
+        const deleteFile = (event, index) => {
+            removeFile(index)
+        }
 
         return (
         <>
@@ -51,19 +59,22 @@ export const FastaFileMap = ({ fastaFiles, changeName }) => {
                 return (
                     
                     <Fragment key={i}>
-                        {(file.name !== "test" && file.file !== "test") &&
-                            <>
-                                <Grid item xs={4}>
-                                    <Typography>{"Rename: " + file.name}</Typography>
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <TextField name="fasta-filename-${i}" onChange={(e) => handleFAFilesChange(e, e.target.value, i)}/>
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={(e) => returnName(e, i)}>Confirm</Button>
-                                </Grid>
-                            </>
-                        }
+                        <Grid item xs={3}/>
+                        <Grid item xs={2}>
+                            <Paper className={classes.paper} variant='outlined'>
+                                <Typography>{"Rename: " + file.name}</Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={2}>
+                            <TextField fullWidth name="fasta-filename-${i}" label='New Name' onChange={(e) => handleFAFilesChange(e, e.target.value, i)}/>
+                        </Grid>
+                        <Grid item xs={1}>
+                            <Button name='rename-button-${i}' variant='contained' color='default' component='span' className={classes.button} onClick={(e) => returnName(e, i)}>Confirm</Button>
+                        </Grid>
+                        <Grid item xs={1}>
+                            <Button name='delete-button-${i}' variant='contained' color='default' component='span' className={classes.button} onClick={(e) => deleteFile(e, i)}>Clear Entry</Button>
+                        </Grid>
+                        <Grid item xs={3}/>
                     </Fragment>
                 )
             })}

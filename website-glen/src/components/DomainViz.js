@@ -105,25 +105,54 @@ function ProtPlot() {
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
-            [ {file: "test", name: "test"} ]
+            [ {file: "test1", name: "test1.fa"} ]
         )
     }
-    function clearFastaFile() {
-        setFastaFiles([]);
+    function uploadMultipleTestFastaFiles() {
+        setFastaFiles(
+            [
+                {file: "test1", name: "test1.fa"},
+                {file: "test2", name: "test2.fa"}
+            ]
+        )
     }
-    function changeFAFileName(index, newName) {
-        let newFAFile = new File([fastaFiles[index]], newName + ".fa");
+    function clearFastaFile(index) {
+        // Remove the fasta file at a certain index
         setFastaFiles([
             ...fastaFiles.slice(0, index),
-            newFAFile,
             ...fastaFiles.slice(index+1)
         ]);
+    }
+    function changeFAFileName(index, newName) {
+        // If the fastafile is one of the example files, we only replace its name, otherwise, we replace the whole file
+        // since that is the only way to change a File's name in Javascript. 
+        if (fastaFiles[index].file.includes("test")) {
+            setFastaFiles(
+                [
+                    ...fastaFiles.slice(0, index),
+                    {file: "test" + index, name: newName + '.fa'},
+                    ...fastaFiles.slice(index+1)
+                ]
+            )
+        }
+        else {
+            let newFAFile = new File([fastaFiles[index]], newName + ".fa");
+            setFastaFiles([
+                ...fastaFiles.slice(0, index),
+                newFAFile,
+                ...fastaFiles.slice(index+1)
+            ]);
+        }
     }
     async function handleFastaFiles(fileList) {
         
         let files = []
         for (let i=0; i<fileList.length; i++) {
             files.push(fileList[i])
+        }
+        if ((files.length + fastaFiles.length) >= 20) {
+            alert("Please restrict your number of files to a maximum of 20 total.");
+            return;
         }
         const promises = files.map(async file => {
             //Validate fastaFiles
@@ -163,8 +192,18 @@ function ProtPlot() {
             alert("Please upload a fasta file before clicking \"Submit Task\".");
             return;
         }
-        if (fastaFiles[0].name === "test") {
-            data.append(resultID, "test")
+        if (fastaFiles[0].file) {
+            if (fastaFiles[0].file.includes("test")) {
+                // This means we are using the example file, or the example file list. 
+                // There may be one or more files, and we append the name and the "file" object for each one, which here is just
+                // test1 or test2.
+                // Otherwise the entries become unaccessible in the backend, since the data is stored in a dictionary with the
+                // first value being the key.
+                data.append("result_id", resultID)
+                for (let i=0; i<fastaFiles.length; i++) { 
+                    data.append(fastaFiles[i].file, fastaFiles[i].name);
+                }
+            }
         }
         else {
             for (let i=0; i<fastaFiles.length; i++) {
@@ -206,7 +245,7 @@ function ProtPlot() {
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
-
+        console.log(data)
         await axios.post('/api/sendfiles', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -243,19 +282,24 @@ function ProtPlot() {
                 </Grid>
                 <Grid item xs={2}>
                     <UploadFile value='fasta' handleFile={handleFastaFiles} acceptedTypes='.fa,.fasta' multiple={true} />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear</Button>
+                    {/* <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear</Button> */}
                 </Grid>
                 <Grid item xs={1}>
-                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" />
+                    {/* <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" /> */}
                 </Grid>
-                <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginLeft: "10px" }}>Download Example</Button>
-                </Grid>
-                
-                <FastaFileMap fastaFiles={fastaFiles} changeName={changeFAFileName}></FastaFileMap>
 
-                <Grid item xs={12} />
+                <Grid item xs={12}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Single Example</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadMultipleTestFastaFiles} style={{ marginLeft: "10px" }}>Load Multiple Examples</Button>
+                </Grid>
+
+                <Grid item xs={12} >
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile}>Download Examples</Button>
+                </Grid>
+
+                <FastaFileMap fastaFiles={fastaFiles} changeName={changeFAFileName} removeFile={clearFastaFile}></FastaFileMap>
+
+                <Grid item xs={12}/>
 
                 <Grid item xs={3}>
                     <AccordionSetup id='cutofftxt' header='Minimum domain prevalence' body='Enter a number between 0 and 1. The default value is 0.05. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>

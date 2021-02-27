@@ -6,23 +6,23 @@ from os.path import basename
 
 from werkzeug.exceptions import InternalServerError
 #import py-fasta-validator # for validating fasta files
-from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fasta_file
+from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fasta_file, get_pdf_names, get_group_names
 
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
-example_fasta_file = "TAFIIsample_NAR_MS.fa"
+example_multiple_files = {"test1": "TAFIIsample_NAR_MS.fa", "test2": "test.fasta"}
 
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
@@ -46,42 +46,23 @@ def handle_404(e):
 def index():
     return main.send_static_file('index.html')
 
+#Send the hand-made 'example.zip' file to the user
 @main.route('/api/testFasta')
 def test_fasta():
-    return send_file(os.path.abspath(example_file_path + example_fasta_file), as_attachment=True)
-# @main.route('/api/testResults')
-# def test_results():
-#     result_id = "example"
-#     result_zip = ZipFile(example_file_path + result_id + '.zip', 'w')
-
-#     for f in glob.glob(example_file_path+result_id+'*.pdf'):
-#         result_zip.write(f, basename(f))
-#         print("added pdf: " + f)
-#     for f in glob.glob(example_file_path+result_id+'*.tsv'):
-#         result_zip.write(f, basename(f))
-#         print('added tsv: ' + f)
-#     for f in glob.glob(example_file_path+result_id+'*.txt'):
-#         result_zip.write(f, basename(f))
-#     for f in glob.glob(example_file_path+'README.md'):
-#         result_zip.write(f, basename(f))
-#     result_zip.close()
-
-#     return send_file(os.path.abspath(example_file_path + result_id + '.zip'), as_attachment=True)
-
-
+    return send_file(os.path.abspath(example_file_path + "example.zip"), as_attachment=True)
 
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
-    pdf_names = []
-    # sort the list of pdfs associated with the result_id
-    for f in glob.glob(os.path.abspath(file_path+result_id+'*.pdf')):
-        #get the result_id from the filename to ensure we have to correct files
-        file_id = f.split("tmp/")[1]
-        file_id = file_id.split("_")[0]
-        if result_id == file_id:
-            pdf_names.append(f)
-    pdf_names=sorted(pdf_names)
+
+    # get and sort the list of pdfs, and the list of groups associated with the result_id
+    pdf_names = get_pdf_names(file_path, result_id)
+    pdf_names = sorted(pdf_names)
+    group_names = get_group_names(file_path, result_id)
+    group_names = sorted(group_names)
+    
+
+
     
     # open the files in order of their name (for consistency of display) and add them to the list of pdfs
     pdfs = []
@@ -93,40 +74,35 @@ def images(username):
         print("added image: " + f)
         file.close()
     max_cookie = get_max_cookie(file_path, result_id)
-    #TODO swap temp with correct
-    #temp
-    if len(pdfs) < 3 and max_cookie:
+    
+    # First we check if there are any groups, if there aren't, then something went wrong, and we return 'failed'
+    if len(group_names) < 1:
         if get_cookie_info(file_path, result_id, max_cookie):
-            return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
+            return jsonify({'failed': max_cookie, 'info': " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
-            return jsonify({'failed' : max_cookie})
-    elif len(pdfs) < 3:
-        return jsonify({'failed' : 'null'})
+            return jsonify({'failed': max_cookie})
+ 
+    # If there are groups, we need to wait until there are 3 pdfs per group in order to display them. 
+    # Otherwise, we will display a bunch of broken or half-made data.
+    if len(pdfs) < (3*len(group_names)) and max_cookie:
+        if get_cookie_info(file_path, result_id, max_cookie):
+            return jsonify({'failed': max_cookie, 'info': " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
+        else:
+            return jsonify({'failed': max_cookie})
+    elif len(pdfs) < (3*len(group_names)):
+        return jsonify({'failed': 'null'})
     else:
         cleanup_cookies(file_path, result_id)
-        return jsonify({'images' : pdfs})
-    #correct
-    # if len(pdfs) == 0 and max_cookie:
-    #     if get_cookie_info(result_id, max_cookie):
-    #         return jsonify({'failed' : max_cookie, 'info' : " ".join(get_cookie_info(result_id, max_cookie).split())})
-    #     else:
-    #         return jsonify({'failed' : max_cookie})
-    # elif len(pdfs) == 0:
-    #     return jsonify({'failed' : 'null'})
-    # else:
-    #     cleanup_cookies(result_id)
-    #     return jsonify({'images' : pdfs})
+        return jsonify({'images': pdfs, 'groups': group_names})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
     # retrieve the fasta file(s) from the POST
-    print(request.files)
     # Each file in request.files has the layout:
     # (file_name<str>, file<FileStorage>, result_id<str>)
     result_id = ""
     fasta_file = None
     fasta_filename = None
-    fp = file_path
 
     i=0 
     for key in request.files.keys():
@@ -144,21 +120,29 @@ def sendfiles():
         # Save each fasta file in an increasingly large single fasta file called result_id.fa
         # Each header will have its group name 
         # Eg. e23f6b67.163d.2103.1984.b6937bf3518a.fa
-        fasta_filename = result_id + ".fa"
         group_name = group_name.split(".")[0] # remove the .fa from group_name
-        save_fasta_file(fp, fasta_file, result_id, group_name)
-
-        print("Fasta file: " + group_name + " has been saved as " + fasta_filename)
+        save_fasta_file(file_path, fasta_file, result_id, group_name)
         i+=1
 
+    # This block runs if there are no files being sent to the backend, in which case, there is a form sent instead
+    # that just has the name of the group that the test file should be saved under.
     if fasta_file == None:
+        # Start i at -1 because the first key-value pair will always be "result_id": the_result_id_for_this_job
+        i=-1
+        result_id=request.form['result_id']
         for key in request.form.keys():
-            if i==0:
-                result_id=key
-                break
-        fasta_filename=example_fasta_file
-        fp = example_file_path
-        print("Test fasta file being used")
+            # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
+            if '.fa' in request.form[key]:
+                # set the variables for the call to the example variables, and "save" the fasta file.
+                group_name = request.form[key].split('.fa')[0]  # remove the .fa from group_name    
+                #key will be "testX" where X is the number. This key is passed to the example_multiple_files dictionary, which is then
+                #used to grab the correct test file.
+                save_fasta_file(example_file_path, example_multiple_files[key], result_id, group_name) 
+            i=i+1
+        print("Test fasta file(s) being used")
+
+    # fasta_filename will always be:
+    fasta_filename = result_id + ".fa"
 
     # retrieve the 4 parameters
     absolute_results=request.form["absoluteResults"]
@@ -173,16 +157,14 @@ def sendfiles():
         custom_scaling = "0" 
 
     # Set up the call for Pascals script here
-    call = virtual_env +  "bin/python " + api_path + "domainviz.py " + "-id " + result_id + " -in " + fp + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
+    call = virtual_env +  "bin/python " + api_path + "domainviz.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     
     #add the protein groups file, the creation of which can be found in utils.py
-    if fasta_filename != example_fasta_file:
-        protein_groups_filename = result_id + "_groupfile.tsv"
-        call = call + ' -gf ' + file_path + protein_groups_filename
-
-    print(call)
+    protein_groups_filename = result_id + "_groupfile.tsv"
+    call = call + ' -gf ' + file_path + protein_groups_filename
 
     # try to retrieve the other 2 files, if they exist
+    # This functionality is currently disabled.
     # color_file = None
     # ignore_domains_file = None
     # try:

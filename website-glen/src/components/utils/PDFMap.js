@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
         color: theme.palette.text.secondary,
     },
   }));
-export const PDFMap = ({ images, uid }) => {
+export const PDFMap = ({ images, uid, groupNames }) => {
         const classes = useStyles()
         const groupsize = 3;
 
@@ -34,13 +34,13 @@ export const PDFMap = ({ images, uid }) => {
                 return (
                     <>
                         {(index % 3 === 0) &&
-                            <Grid item xs={3} alignItems='center'>
+                            <Grid item xs={12} alignItems='center'>
                                     <Paper className={classes.paper} variant='outlined'>
-                                        <Typography variant="h5">Group {index/3}</Typography>
+                                        <Typography variant="h5">Group: {groupNames[index/3]}</Typography>
                                     </Paper>
                             </Grid>
                         }
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                             <PDF pdf={image.file}></PDF>
                         </Grid>
                     </>
