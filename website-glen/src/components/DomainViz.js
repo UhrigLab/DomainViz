@@ -105,14 +105,14 @@ function ProtPlot() {
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
-            [ {file: "test1", name: "test1.fa"} ]
+            [ {file: "test0", name: "test0.fa"} ]
         )
     }
     function uploadMultipleTestFastaFiles() {
         setFastaFiles(
             [
-                {file: "test1", name: "test1.fa"},
-                {file: "test2", name: "test2.fa"}
+                {file: "test0", name: "test0.fa"},
+                {file: "test1", name: "test1.fa"}
             ]
         )
     }
