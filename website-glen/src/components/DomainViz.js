@@ -272,7 +272,7 @@ function ProtPlot() {
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
                         <Typography variant='h5'>Protein domain search {'&'} visualization tool</Typography>
-                        <Typography variant='body1'>Use DomainViz by first uploading a protein Fasta file, changing any options as desired and clicking "Submit Task".</Typography>
+                        <Typography variant='body1'>Use DomainViz by first uploading one or more protein Fasta file(s), changing any options as desired and clicking "Submit Task".</Typography>
                     </Paper>
                 </Grid>
 
@@ -285,7 +285,7 @@ function ProtPlot() {
                     {/* <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear</Button> */}
                 </Grid>
                 <Grid item xs={1}>
-                    {/* <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" /> */}
+                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
 
                 <Grid item xs={12}>
@@ -316,7 +316,7 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={3}>
-                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number between 0 and 10. The default value is 1, but this may not reflect well in your plots, and it is recommended that you leave it off. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
+                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number between 0 and 10. The default value is 1, but this may not reflect well in your plots, and it is recommended that you leave it off. The number you input represents the number of inches per 100pb that the plot is used to display. Please note that visualizations on the server will not reflect figure scaling, but in the downloaded package, they will be.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={1}>
                     <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0, max: 10, step: '0.1' }} onChange={handleTextField} />
