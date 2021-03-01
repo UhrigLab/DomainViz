@@ -74,7 +74,7 @@ export const ViewPDF = () => {
                             //END OF TEMP
                         }
                         else if (data.failed === -1) {
-                            alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
+                            alert("Oh dear, this attempt failed. Please double-check your data and try running DomainViz again.");
                             setFailed(true);
                             try {
                                 if (data.info.length > 0) {

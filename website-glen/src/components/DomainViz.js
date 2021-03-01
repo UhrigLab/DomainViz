@@ -278,7 +278,7 @@ function ProtPlot() {
 
                 <Grid item xs={2} />
                 <Grid item xs={3}>
-                    <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
+                    <AccordionSetup id='fastatxt' header='Fasta File(s)' body='The file(s) need to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={2}>
                     <UploadFile value='fasta' handleFile={handleFastaFiles} acceptedTypes='.fa,.fasta' multiple={true} />
