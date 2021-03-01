@@ -196,7 +196,7 @@ function ProtPlot() {
             if (fastaFiles[0].file.includes("test")) {
                 // This means we are using the example file, or the example file list. 
                 // There may be one or more files, and we append the name and the "file" object for each one, which here is just
-                // test1 or test2.
+                // test0 or test1.
                 // Otherwise the entries become unaccessible in the backend, since the data is stored in a dictionary with the
                 // first value being the key.
                 data.append("result_id", resultID)

@@ -22,7 +22,7 @@ virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
-example_multiple_files = {"test1": "TAFIIsample_NAR_MS.fa", "test2": "test.fasta"}
+example_multiple_files = {"test0": "TAFIIsample_NAR_MS.fa", "test1": "test.fasta"}
 
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
