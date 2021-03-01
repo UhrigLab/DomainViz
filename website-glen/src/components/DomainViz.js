@@ -124,16 +124,20 @@ function ProtPlot() {
         ]);
     }
     function changeFAFileName(index, newName) {
+        console.log(fastaFiles)
+        console.log(index)
         // If the fastafile is one of the example files, we only replace its name, otherwise, we replace the whole file
         // since that is the only way to change a File's name in Javascript. 
-        if (fastaFiles[index].file.includes("test")) {
-            setFastaFiles(
-                [
-                    ...fastaFiles.slice(0, index),
-                    {file: "test" + index, name: newName + '.fa'},
-                    ...fastaFiles.slice(index+1)
-                ]
-            )
+        if (fastaFiles[index].file) {
+            if (fastaFiles[index].file.includes("test")) {
+                setFastaFiles(
+                    [
+                        ...fastaFiles.slice(0, index),
+                        {file: "test" + index, name: newName + '.fa'},
+                        ...fastaFiles.slice(index+1)
+                    ]
+                );
+            }
         }
         else {
             let newFAFile = new File([fastaFiles[index]], newName + ".fa");
