@@ -21,6 +21,13 @@ except ImportError:
     exit()
 import sys
 
+# test if random is installed in python
+try:
+    import random
+except ImportError:
+    print('Error, module random is required.')
+    sys.exit()
+
 # test if shutil is installed in python
 try:
     import shutil
@@ -594,6 +601,29 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             if vfound == 0:
                 vpfamdomains_u_ignore.append(0)
     f_success(vsavefolder, vjobid)
+
+    # Generate unique colors for every domain (unless it should be ignored)
+    vcollected_colors = []
+    for vc, color_hex in enumerate(vprositedomains_u_color):
+        if vprositedomains_u_ignore[vc] == 0:
+            if not color_hex == '':
+                color_rgb = f_get_rgb(color_hex)
+                vcollected_colors.append(color_rgb)
+    for vc, color_hex in enumerate(vpfamdomains_u_color):
+        if vpfamdomains_u_ignore[vc] == 0:
+            if not color_hex == '':
+                color_rgb = f_get_rgb(color_hex)
+                vcollected_colors.append(color_rgb)
+    for vc, color_hex in enumerate(vprositedomains_u_color):
+        if vprositedomains_u_ignore[vc] == 0:
+            if color_hex == '':
+                vcollected_colors.append(generate_new_color(vcollected_colors, pastel_factor=0.9))
+                vprositedomains_u_color[vc] = f_get_hex(vcollected_colors[-1])
+    for vc, color_hex in enumerate(vpfamdomains_u_color):
+        if vpfamdomains_u_ignore[vc] == 0:
+            if color_hex == '':
+                vcollected_colors.append(generate_new_color(vcollected_colors, pastel_factor=0.9))
+                vpfamdomains_u_color[vc] = f_get_hex(vcollected_colors[-1])
 
     # Remove beginning ('>') from fasta
     f_write_log(vsavefolder, vjobid, 'Processing fasta headers\n', 'a')
@@ -1211,6 +1241,56 @@ def f_get_hex(vtuple):
     vg = '%02x' % int(round(vtuple[1] * 255))
     vb = '%02x' % int(round(vtuple[2] * 255))
     return '#' + vr + vg + vb
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_get_rgb                                                                                                           #
+#  Converts a hex code tuple into rgb values (tuple is assumed to be between 0 and 1).                                 #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vcode [string]: hex color code e.g. #af0010.                                                                    #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - [list]: a list of numbers e.g. (0,0.5,0.912).                                                                   #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def f_get_rgb(vcode):
+    vr = int(vcode[1:3], 16)
+    vg = int(vcode[3:5], 16)
+    vb = int(vcode[5:7], 16)
+    return [vr, vg, vb]
+
+
+########################################################################################################################
+#                                                                                                                      #
+# The following three function were derived from https://gist.github.com/adewes/5884820                                #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def get_random_color(pastel_factor=0.5):
+    return [(x + pastel_factor) / (1.0 + pastel_factor) for x in [random.uniform(0, 1.0) for i in [1, 2, 3]]]
+
+
+def color_distance(c1, c2):
+    return sum([abs(x[0] - x[1]) for x in zip(c1, c2)])
+
+
+def generate_new_color(existing_colors, pastel_factor=0.5):
+    max_distance = None
+    best_color = None
+    for i in range(0, 100):
+        color = get_random_color(pastel_factor=pastel_factor)
+        if not existing_colors:
+            return color
+        best_distance = min([color_distance(color, c) for c in existing_colors])
+        if not max_distance or best_distance > max_distance:
+            max_distance = best_distance
+            best_color = color
+    return best_color
 
 
 ########################################################################################################################
