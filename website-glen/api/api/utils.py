@@ -74,6 +74,8 @@ def save_fasta_file(file_path, file, id, group_name):
             #for the groupfile we want the entire protein sequence to be on one line
             newline = True
     group_file.write("\n")
+    write_file.write("\n")
+    
     read_file.close()
     write_file.close()
     group_file.close()
