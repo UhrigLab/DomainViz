@@ -105,14 +105,14 @@ function ProtPlot() {
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
-            [ {file: "test0", name: "test0.fa"} ]
+            [ {file: "test0", name: "singletestfile.fa"} ]
         )
     }
     function uploadMultipleTestFastaFiles() {
         setFastaFiles(
             [
-                {file: "test0", name: "test0.fa"},
-                {file: "test1", name: "test1.fa"}
+                {file: "test0", name: "multitestfile1.fa"},
+                {file: "test1", name: "multittestfile2.fa"}
             ]
         )
     }
@@ -305,6 +305,18 @@ function ProtPlot() {
 
                 <Grid item xs={12}/>
 
+                <Grid item xs={12}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
+                        Submit Task
+                    </Button>
+                </Grid>
+
+                <Grid item xs={3}/>
+                <Grid item xs={6}>
+                    <Divider className={classes.divider}></Divider>
+                </Grid>
+                <Grid item xs={3}/>
+
                 <Grid item xs={3}>
                     <AccordionSetup id='cutofftxt' header='Minimum domain prevalence' body='Enter a number between 0 and 1. The default value is 0.05. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>
                 </Grid>
@@ -338,12 +350,6 @@ function ProtPlot() {
                     <FormControlLabel
                         control={<Checkbox checked={checkboxes.absoluteResultsCheckbox} onChange={handleCheckBox} name="absoluteResultsCheckbox" />}
                         label="Yes" />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
-                        Submit Task
-                    </Button>
                 </Grid>
 
                 <Grid item xs={6}>

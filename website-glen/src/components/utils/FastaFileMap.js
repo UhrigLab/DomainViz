@@ -59,10 +59,10 @@ export const FastaFileMap = ({ fastaFiles, changeName, removeFile }) => {
                 return (
                     
                     <Fragment key={i}>
-                        <Grid item xs={3}/>
-                        <Grid item xs={2}>
+                        <Grid item xs={2}/>
+                        <Grid item xs={3}>
                             <Paper className={classes.paper} variant='outlined'>
-                                <Typography>{"Rename: " + file.name}</Typography>
+                                <Typography>{file.name}</Typography>
                             </Paper>
                         </Grid>
                         <Grid item xs={2}>
