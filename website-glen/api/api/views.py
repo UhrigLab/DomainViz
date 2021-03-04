@@ -11,18 +11,18 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
-example_multiple_files = {"test0": "TAFIIsample_NAR_MS.fa", "test1": "test.fasta"}
+example_multiple_files = {"single_test": "GNATs_ALL.fa", "mult_test_1": "GNATs_class1.fa", "mult_test_2": "GNATs_class2.fa", "mult_test_3": "GNATs_class3.fa"}
 
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
@@ -130,6 +130,7 @@ def sendfiles():
         # Start i at -1 because the first key-value pair will always be "result_id": the_result_id_for_this_job
         i=-1
         result_id=request.form['result_id']
+        print(request.form)
         for key in request.form.keys():
             # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
             if '.fa' in request.form[key]:

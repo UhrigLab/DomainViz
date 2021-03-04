@@ -105,14 +105,15 @@ function ProtPlot() {
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
-            [ {file: "test0", name: "singletestfile.fa"} ]
+            [ {file: "single_test", name: "single_test_file.fa"} ]
         )
     }
     function uploadMultipleTestFastaFiles() {
         setFastaFiles(
             [
-                {file: "test0", name: "multitestfile1.fa"},
-                {file: "test1", name: "multittestfile2.fa"}
+                {file: "mult_test_1", name: "multi_test_file_1.fa"},
+                {file: "mult_test_2", name: "multi_test_file_2.fa"},
+                {file: "mult_test_3", name: "multi_test_file_3.fa"},
             ]
         )
     }
@@ -199,8 +200,8 @@ function ProtPlot() {
         if (fastaFiles[0].file) {
             if (fastaFiles[0].file.includes("test")) {
                 // This means we are using the example file, or the example file list. 
-                // There may be one or more files, and we append the name and the "file" object for each one, which here is just
-                // test0 or test1.
+                // There may be one or more files, and we append the name and the "file" object for each one, which here is either
+                // single_test or mult_test_X.
                 // Otherwise the entries become unaccessible in the backend, since the data is stored in a dictionary with the
                 // first value being the key.
                 data.append("result_id", resultID)
@@ -263,7 +264,7 @@ function ProtPlot() {
             history.push("/view-results/" + resultID);
         }).catch(error => {
             console.log(error);
-            alert("Oh dear. Something has gone wrong.")
+            alert("Oh dear. Something has gone wrong. The following error has occured: " + error);
         });
     }
 
