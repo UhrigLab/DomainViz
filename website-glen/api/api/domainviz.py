@@ -1,10 +1,10 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Author: Pascal Schläpfer, ETH Zürich, December 19th 2020                                                           #
+#   Author: Pascal Schläpfer, ETH Zürich, March 7th 2020                                                               #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
 #   Acknowledgements:                                                                                                  #
-#     Dr. R. Glen Uhrig                                                                                                #
+#     Prof. Dr. R. Glen Uhrig                                                                                          #
 #     Dr. Devang Mehta                                                                                                 #
 #     Cameron Ridderikhoff                                                                                             #
 #                                                                                                                      #
@@ -520,7 +520,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
     else:
         f_write_log(vsavefolder, vjobid, 'Reading in protein group file:\n', 'a')
         vgroup, vgroup_u = f_read_in_groupfile(vgroupfile, vheaders, vsavefolder, vjobid)
-    vgroup_u = list(set(vgroup_u))
+    vgroup_u = sorted(list(set(vgroup_u)))
     f_write_log(vsavefolder, vjobid, 'Read protein group file successfully\n', 'a')
 
     # Per group of protein: get median sequence length
@@ -908,6 +908,8 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
         vpfamdomainsingenes = vpfamdomainsingenes_all[vug]
         vsize_of_prosite_data = vsize_of_prosite_data_all[vug]
         vsize_of_pfam_data = vsize_of_pfam_data_all[vug]
+        vprositedomains_u_ignore_for_plot = vprositedomains_u_ignore[:]
+        vpfamdomains_u_ignore_for_plot = vpfamdomains_u_ignore[:]
 
         # Plot data of Prosite
         f_write_log(vsavefolder, vjobid, 'Plot Prosite domains of protein group ' + vgitem + '.\n', 'a')
@@ -928,7 +930,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             for vheader_id in vmaxids:
                 if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vprositedomainsingenes[vheader_id])) / float(vn_prot_per_group) > vcutoff and \
-                        vprositedomains_u_ignore[vheader_id] == 0:
+                        vprositedomains_u_ignore_for_plot[vheader_id] == 0:
                     # Create function
                     a = min(bin_edges[:-1])  # integral lower limit
                     b = max(bin_edges[:-1])  # integral upper limit
@@ -954,7 +956,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                     # Plot Polygon
                     ax.add_patch(poly)
                 else:
-                    vprositedomains_u_ignore[vheader_id] = 1
+                    vprositedomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
             if vabsolute:
                 plt.ylim(0, vn_prot_per_group)  # maximum of proteins in group
@@ -981,7 +983,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             else:
                 fstick_name = vjobid + '_' + vgitem + '_prosite_stickfigure.pdf'
             f_get_stick(vmedlengroup[vug], vprositedomains_u, vprositedomainsofgroup_abs, vprositedomains_u_color,
-                        vmaxcutoff * vn_prot_per_group, fstick_name, vprositedomains_u_ignore, max(vmedlengroup))
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vprositedomains_u_ignore_for_plot, max(vmedlengroup))
 
         # Plot data of PFAM
         f_write_log(vsavefolder, vjobid, 'Plot PFAM domains of protein group ' + vgitem + '.\n', 'a')
@@ -1003,7 +1005,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             for vheader_id in vmaxids:
                 if max(vpfamdomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vpfamdomainsingenes[vheader_id])) / \
-                        float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore[vheader_id] == 0:
+                        float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore_for_plot[vheader_id] == 0:
                     # Create function
                     a = min(bin_edges[:-1])  # integral lower limit
                     b = max(bin_edges[:-1])  # integral upper limit
@@ -1029,7 +1031,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                     # Plot Polygon
                     ax.add_patch(poly)
                 else:
-                    vpfamdomains_u_ignore[vheader_id] = 1
+                    vpfamdomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
             if vabsolute:
                 plt.ylim(0, vn_prot_per_group)
@@ -1056,7 +1058,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             else:
                 fstick_name = vjobid + '_' + vgitem + '_pfam_stickfigure.pdf'
             f_get_stick(vmedlengroup[vug], vpfamdomains_u, vpfamdomainsofgroup_abs, vpfamdomains_u_color,
-                        vmaxcutoff * vn_prot_per_group, fstick_name, vpfamdomains_u_ignore, max(vmedlengroup))
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vpfamdomains_u_ignore_for_plot, max(vmedlengroup))
 
         # Combined plot
         f_write_log(vsavefolder, vjobid, 'Plot all domains of protein group ' + vgitem + '.\n', 'a')
@@ -1081,7 +1083,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 if vmaxi < vsize_of_prosite_data[0]:
                     if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
                             sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
-                            vprositedomains_u_ignore[vmaxi] == 0:
+                            vprositedomains_u_ignore_for_plot[vmaxi] == 0:
                         # Create function
                         a = min(bin_edges[:-1])  # integral lower limit
                         b = max(bin_edges[:-1])  # integral upper limit
@@ -1107,12 +1109,12 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                         # Plot Polygon
                         ax.add_patch(poly)
                     else:
-                        vprositedomains_u_ignore[vmaxi] = 1
+                        vprositedomains_u_ignore_for_plot[vmaxi] = 1
                 else:
                     vimod = vmaxi - vsize_of_prosite_data[0]
                     if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
                             sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
-                            vpfamdomains_u_ignore[vimod] == 0:
+                            vpfamdomains_u_ignore_for_plot[vimod] == 0:
                         # Create function
                         a = min(bin_edges[:-1])  # integral lower limit
                         b = max(bin_edges[:-1])  # integral upper limit
@@ -1138,7 +1140,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                         # Plot Polygon
                         ax.add_patch(poly)
                     else:
-                        vpfamdomains_u_ignore[vimod] = 1
+                        vpfamdomains_u_ignore_for_plot[vimod] = 1
 
             plt.xlim(min(bin_edges), max(bin_edges))
             if vabsolute:
@@ -1173,12 +1175,12 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 vcombineddomains_u.append(vprositedomains_u[vdid])
                 vcombinedomainsofgroup_abs.append(vprositedomainsofgroup_abs[vdid])
                 vcombineddomains_u_color.append(vprositedomains_u_color[vdid])
-                vcombineddomains_u_ignore.append(vprositedomains_u_ignore[vdid])
+                vcombineddomains_u_ignore.append(vprositedomains_u_ignore_for_plot[vdid])
             for vdid in range(len(vpfamdomains_u)):
                 vcombineddomains_u.append(vpfamdomains_u[vdid])
                 vcombinedomainsofgroup_abs.append(vpfamdomainsofgroup_abs[vdid])
                 vcombineddomains_u_color.append(vpfamdomains_u_color[vdid])
-                vcombineddomains_u_ignore.append(vpfamdomains_u_ignore[vdid])
+                vcombineddomains_u_ignore.append(vpfamdomains_u_ignore_for_plot[vdid])
             f_get_stick(vmedlengroup[vug], vcombineddomains_u, vcombinedomainsofgroup_abs, vcombineddomains_u_color,
                         vmaxcutoff * vn_prot_per_group, fstick_name, vcombineddomains_u_ignore, max(vmedlengroup))
     # Write fifth cookie
@@ -2695,7 +2697,7 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
                 vsequences.append(vsplit[0])  # Get the sequence entry
             vfh_in.close()  # Close file
 
-    vsequences = list(set(vsequences))  # Make unique list of sequences
+    vsequences = sorted(list(set(vsequences)))  # Make unique list of sequences
     for vs, vsequence in enumerate(vsequences):  # Go through all sequences and numerate them
         vfh_ri_out.write('>Seq_' + str(vs + 1) + '\n')  # Write header
         vfh_ri_out.write(vsequence)  # Write sequence
