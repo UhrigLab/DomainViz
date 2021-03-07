@@ -65,8 +65,10 @@ export const ViewPDF = () => {
                     }
                     else {
                         if (data.failed === 'null') {
-                            // alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
-                            //setFailed(true);
+                            alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
+                            setFailed(true);
+                        }
+                        else if (data.failed === 'notready') {
                             //TODO remove temp
                             //TEMP:
                             alert("Results not loaded, please refresh the page.")
@@ -156,6 +158,13 @@ export const ViewPDF = () => {
                             ? <MessageMap messages={messages}></MessageMap>
                             : <Typography variant='h5'>There was no information from this run.</Typography>
                         }
+                    </Paper>
+                </Grid>
+            }
+            {(!displayImages && !showProgressBar && failed) &&
+                <Grid item xs={12}>
+                    <Paper className={classes.paper} variant='outlined'>
+                        <Typography variant='h5'>There is no information under that result id. Please choose a valid result id and try again.</Typography>
                     </Paper>
                 </Grid>
             }

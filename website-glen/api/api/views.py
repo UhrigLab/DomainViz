@@ -58,8 +58,14 @@ def images(username):
     # get and sort the list of pdfs, and the list of groups associated with the result_id
     pdf_names = get_pdf_names(file_path, result_id)
     pdf_names = sorted(pdf_names)
-    group_names = get_group_names(file_path, result_id)
-    group_names = sorted(group_names)
+
+    # if there are no pdfs, then there cant be any groups (or rather, even if there are groups, we have to return a failed status
+    # since domainviz.py isnt finished yet)
+    if len(pdf_names) > 0:
+        group_names = get_group_names(file_path, result_id)
+        group_names = sorted(group_names)
+    else:
+        group_names = []
     
 
 
@@ -76,12 +82,13 @@ def images(username):
     max_cookie = get_max_cookie(file_path, result_id)
     
     # First we check if there are any groups, if there aren't, then something went wrong, and we return 'failed'
-    if len(group_names) < 1:
+    if len(group_names) < 1 and max_cookie:
         if get_cookie_info(file_path, result_id, max_cookie):
             return jsonify({'failed': max_cookie, 'info': " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
             return jsonify({'failed': max_cookie})
- 
+    elif len(group_names) < 1: 
+        return jsonify({'failed': 'null'})
     # If there are groups, we need to wait until there are 3 pdfs per group in order to display them. 
     # Otherwise, we will display a bunch of broken or half-made data.
     if len(pdfs) < (3*len(group_names)) and max_cookie:
@@ -90,7 +97,7 @@ def images(username):
         else:
             return jsonify({'failed': max_cookie})
     elif len(pdfs) < (3*len(group_names)):
-        return jsonify({'failed': 'null'})
+        return jsonify({'failed': 'notready'})
     else:
         cleanup_cookies(file_path, result_id)
         return jsonify({'images': pdfs, 'groups': group_names})

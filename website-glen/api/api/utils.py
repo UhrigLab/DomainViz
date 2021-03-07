@@ -9,6 +9,7 @@ from shutil import copyfile
 # OUTPUTS: boolean - if there are no cookies, the function will return false.
 def get_max_cookie(file_path, id):
     cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
+    print(cookies)
     if cookies: # True unless there are no cookies
         max_cookie = 0
         for cookie in cookies:
