@@ -118,11 +118,16 @@ function ProtPlot() {
         )
     }
     function clearFastaFile(index) {
-        // Remove the fasta file at a certain index
-        setFastaFiles([
-            ...fastaFiles.slice(0, index),
-            ...fastaFiles.slice(index+1)
-        ]);
+        // Remove the fasta file at a certain index, or if there is no index given, clear all files
+        if (typeof(index)=='number') {
+            setFastaFiles([
+                ...fastaFiles.slice(0, index),
+                ...fastaFiles.slice(index+1)
+            ]);
+        }
+        else {
+            setFastaFiles([])
+        }
     }
     function changeFAFileName(index, newName) {
         console.log(fastaFiles)
