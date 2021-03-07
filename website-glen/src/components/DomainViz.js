@@ -139,7 +139,7 @@ function ProtPlot() {
                 setFastaFiles(
                     [
                         ...fastaFiles.slice(0, index),
-                        {file: "test" + index, name: newName + '.fa'},
+                        {file: fastaFiles[index].file, name: newName + '.fa'},
                         ...fastaFiles.slice(index+1)
                     ]
                 );
