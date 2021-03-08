@@ -30,16 +30,18 @@ let interval;
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
-    const [displayImages, setDisplayImages] = useState(false)
-    const [currentMessage, setCurrentMessage] = useState("")
+    const [groupNames, setGroupNames] = useState([]);
+    const [displayImages, setDisplayImages] = useState(false);
+    const [currentMessage, setCurrentMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [progress, setProgress] = useState(0);
-    const [showProgressBar, setShowProgressBar] = useState(false)
+    const [showProgressBar, setShowProgressBar] = useState(false);
     const [failed, setFailed] = useState(false);
     const [open, setOpen] = useState(false);
-    const classes = useStyles();
 
+    const classes = useStyles();
     let history = useHistory();
+
     let uid = url.split("/view-results/")[1];
 
     function goToHome() {
@@ -59,11 +61,14 @@ export const ViewPDF = () => {
                 response.json().then(data => {
                     if (data.hasOwnProperty('images')) {
                         setImages(data.images);
+                        setGroupNames(data.groups)
                     }
                     else {
                         if (data.failed === 'null') {
-                            // alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
-                            //setFailed(true);
+                            alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
+                            setFailed(true);
+                        }
+                        else if (data.failed === 'notready') {
                             //TODO remove temp
                             //TEMP:
                             alert("Results not loaded, please refresh the page.")
@@ -71,7 +76,7 @@ export const ViewPDF = () => {
                             //END OF TEMP
                         }
                         else if (data.failed === -1) {
-                            alert("Oh dear, this attempt failed. Please double-check your data and try running ProDoPlot again.");
+                            alert("Oh dear, this attempt failed. Please double-check your data and try running DomainViz again.");
                             setFailed(true);
                             try {
                                 if (data.info.length > 0) {
@@ -113,7 +118,7 @@ export const ViewPDF = () => {
     }, [images, failed, currentMessage]);
 
     return (
-        <Grid container spacing={3} style={{marginTop: '90px'}}>
+        <Grid container spacing={3} alignItems='center' style={{marginTop: '90px'}}>
             <Grid item xs={12}>
                 <img src={DomainVizIcon} className={classes.img}></img>
             </Grid>
@@ -125,7 +130,7 @@ export const ViewPDF = () => {
             </Grid>
 
             {(displayImages && !showProgressBar && failed == false) &&
-                <PDFMap images={images} uid={uid} />
+                <PDFMap images={images} uid={uid} groupNames={groupNames} />
             }
             {(!displayImages && showProgressBar && failed == false) &&
                 <>
@@ -156,6 +161,13 @@ export const ViewPDF = () => {
                     </Paper>
                 </Grid>
             }
+            {(!displayImages && !showProgressBar && failed) &&
+                <Grid item xs={12}>
+                    <Paper className={classes.paper} variant='outlined'>
+                        <Typography variant='h5'>There is no information under that result id. Please choose a valid result id and try again.</Typography>
+                    </Paper>
+                </Grid>
+            }
             {(!displayImages && !showProgressBar && !failed) &&
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
@@ -164,7 +176,7 @@ export const ViewPDF = () => {
                 </Grid>
             }
             <Grid item xs={12}>
-                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen}>Exit</Button>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen} style={{marginBottom:"10px"}}>Exit</Button>
                 <Dialog
                     open={open}
                     onClose={handleClose}

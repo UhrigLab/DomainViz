@@ -1,10 +1,10 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Author: Pascal Schläpfer, ETH Zürich, December 7th 2020                                                            #
+#   Author: Pascal Schläpfer, ETH Zürich, March 7th 2020                                                               #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
 #   Acknowledgements:                                                                                                  #
-#     Dr. R. Glen Uhrig                                                                                                #
+#     Prof. Dr. R. Glen Uhrig                                                                                          #
 #     Dr. Devang Mehta                                                                                                 #
 #     Cameron Ridderikhoff                                                                                             #
 #                                                                                                                      #
@@ -20,6 +20,13 @@ except ImportError:
     print('Error, module sys is required.')
     exit()
 import sys
+
+# test if random is installed in python
+try:
+    import random
+except ImportError:
+    print('Error, module random is required.')
+    sys.exit()
 
 # test if shutil is installed in python
 try:
@@ -68,13 +75,6 @@ except ImportError:
     print('Error, module statistics is required.')
     sys.exit()
 
-# test if json is installed in python
-try:
-    import json
-except ImportError:
-    print('Error, module json is required.')
-    sys.exit()
-
 # test if numpy is installed in python
 try:
     import numpy as np
@@ -103,6 +103,16 @@ try:
 except ImportError:
     print('Error, module matplotlib is required.')
     sys.exit()
+try:
+    import matplotlib.patches as mpatches
+except ImportError:
+    print('Error, module matplotlib is required.')
+    sys.exit()
+try:
+    from matplotlib.collections import PatchCollection
+except ImportError:
+    print('Error, module matplotlib is required.')
+    sys.exit()
 
 # test if mpl_toolkits is installed in python
 try:
@@ -126,6 +136,20 @@ except ImportError:
 # test if Bio is installed in python
 try:
     import Bio.ExPASy.ScanProsite
+except ImportError:
+    print('Error, module Bio is required.')
+    sys.exit()
+
+# test if Bio is installed in python
+try:
+    from Bio import ExPASy
+except ImportError:
+    print('Error, module Bio is required.')
+    sys.exit()
+
+# test if Bio is installed in python
+try:
+    from Bio.ExPASy import Prosite
 except ImportError:
     print('Error, module Bio is required.')
     sys.exit()
@@ -158,7 +182,6 @@ except ImportError:
     print('Error, module time is required.')
     sys.exit()
 
-
 # test if datetime is installed in python
 try:
     from datetime import date
@@ -170,7 +193,7 @@ except ImportError:
 ########################################################################################################################
 #                                                                                                                      #
 #  f_process_results                                                                                                   #
-#  Main function of propplot.py. See help for further information                                                      #
+#  Main function of domainviz.py. See help for further information                                                     #
 #                                                                                                                      #
 #  Mandatory arguments:                                                                                                #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
@@ -196,10 +219,11 @@ except ImportError:
 #    - vcustom_scaling_on [string] gets converted into boolean: Allows for custom scaling of the figure. The standard  #
 #                                                               case is that this is not on, and thus the scaling is   #
 #                                                               the same regardless of the size of the protein. If     #
-#                                                               this is on, one can set sbp (default 100 bp per inch)  #
-#                                                               to scale the width of the figure.                      #
-#    - vscalingfigure [string] gets converted into float: Indicates the number of bp that are displayed per inch of    #
-#                                                         x-axis.                                                      #
+#                                                               this is on, one can set with option api (default 100   #
+#                                                               amino acids per inch) the number of amino acids        #
+#                                                               displayed per inch to scale the width of the figure.   #
+#    - vscalingfigure [string] gets converted into float: Indicates the number of amino acids per inch that are        #
+#                                                         displayed per inch of x-axis.                                #
 #    - vabsolute [string] gets converted into True/False: Indicates whether absolute numbers are displayed on the      #
 #                                                         y-axis.                                                      #
 #    - vwarnings [string] gets converted into True/False: Indicates whether warnings are written out.                  #
@@ -221,8 +245,8 @@ except ImportError:
 #                                              structure.                                                              #
 #    - proteingroup_pfam_colors.txt [file]: Same file as above, but for pfam plot.                                     #
 #    - proteingroup_combined_colors.txt [file]: Same file as above, but for combined plot.                             #
-#    - jobid_proteingroup_prosite.csv [file]: Results of Prosite for protein group.                                    #
-#    - jobid_proteingroup_pfam.csv [file]: Results of PFAM for protein group.                                          #
+#    - jobid_proteingroup_prosite_domain_results_per_aa.tsv [file]: Results of Prosite for protein group.              #
+#    - jobid_proteingroup_pfam_domain_results_per_aa.tsv [file]: Results of PFAM for protein group.                    #
 #    - jobid_prosite_res.tsv [file]: Results of Prosite for this job.                                                  #
 #    - jobid_pfam_res.tsv [file]: Results of PFAM for this job.                                                        #
 #    - Prosite_db_[first five amino acids of sequence] [file]: TSV database files for sequences run through Prosite.   #
@@ -231,9 +255,10 @@ except ImportError:
 ########################################################################################################################
 
 
-def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroupfile, vcolorfile, vignoredomainfile,
-                   vcutoff, vmaxcutoff, vcustom_scaling_on, vscalingfigure, vabsolute, vwarnings, vfrom_scratch,
-                   vnotolderthan):
+# noinspection PyTypeChecker
+def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroupfile, vcolorfile, vignoredomainfile,
+                    vcutoff, vmaxcutoff, vcustom_scaling_on, vscalingfigure, vabsolute, vwarnings, vfrom_scratch,
+                    vnotolderthan):
     # Write initial cookie
     f_write_cookie(0, vsavefolder, vjobid, 'Job initialized')
 
@@ -245,12 +270,12 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     vpaddingheight = 0.7
     vfontsize = 10
     vcurrentdate = int(re.sub('-', '', str(date.fromtimestamp(time.time()))))
-    
+
     # Write initial job:
-    f_write_log(vsavefolder, vjobid, 'Job initialized with following paramters\nJobid: ' + vjobid + '\nInputfile: ' +
+    f_write_log(vsavefolder, vjobid, 'Job initialized with following parameters\nJobid: ' + vjobid + '\nInputfile: ' +
                 vinputfile + '\nIgnoredb: ' + vignoredb + '\nSavefolder: ' + vsavefolder + '\nDbfolder: ' + vdbfolder +
                 '\nGroupfile: ' + vgroupfile + '\nColorfile: ' + vcolorfile + '\nIgnoredomainfile: ' +
-                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nCostomscaling: ' +
+                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nCustomscaling: ' +
                 vcustom_scaling_on + '\nScalingfigure: ' + vscalingfigure + '\nAbsolute: ' + vabsolute +
                 '\nWarnings: ' + vwarnings + '\nFrom_scratch: ' + vfrom_scratch + '\nNotolderthan: ' + vnotolderthan +
                 '\n\n', 'w')
@@ -298,7 +323,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     vlen_dbid = 5  # Length of db names (defines how many different db files are made.)
     f_success(vsavefolder, vjobid)
 
-    # Read in headers and sequences that were used to produce the prosite and or pfam results
+    # Read in headers and sequences that were used to produce the Prosite and or PFAM results
     f_write_log(vsavefolder, vjobid, 'Reading in fasta file:\n', 'a')
     vheaders, vsequences = f_read_in_file(vinputfile, vsavefolder, vjobid)
     if vwarnings:
@@ -345,6 +370,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
         # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            if vwarnings:
+                print('Searching header ' + str(vheader_id + 1) + ' of ' + str(len(vheaders)) + '.')
             f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False  # Defines if the header was found in the db
             vdbid = vsequences[vheader_id][0:vlen_dbid]  # Defines the db file that should be searched.
@@ -362,7 +389,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                                 vfound = True  # if it is, say that the sequence was found in the db.
                                 f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
                                 f_write_pfam_prosite_res(vprositefile, vheader, vsplitentry[1:], False, True,
-                                                         vsavefolder, vjobid)  # Write the record to the output file.
+                                                         vsavefolder, vjobid)  # Write the record to the
+                                # output file.
                     vfh_db_prosite.close()
                 except IOError:  # If the db can not be read, it likely does not exist.
                     f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
@@ -371,17 +399,18 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
             if not vfound:  # If the sequence has not been found in a db.
                 f_write_log(vsavefolder, vjobid, 'Sending sequence to Prosite\n', 'a')
-                ventry_found = f_run_sequences_through_prosite(vheader, vsequences[vheader_id], vsavefolder, vjobid,
-                                                               vwarnings)
-                # Search for the sequence in prosite.
-                f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid, vcurrentdate)  # Write the
-                # results into the db.
+                ventry_found = f_run_sequences_through_prosite(vdbfolder, vheader, vsequences[vheader_id], vsavefolder,
+                                                               vjobid, vwarnings, vcurrentdate)  # Search for the
+                # sequence in Prosite.
+                f_write_pfam_prosite_db(vdbfiles, vdbid, ventry_found, vsavefolder, vjobid, vcurrentdate)  # Write
+                # the results into the db.
                 f_write_pfam_prosite_res(vprositefile, vheader, ventry_found, False, False, vsavefolder, vjobid)
                 # Write the results into the results file.
             # Update cookies
             vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 1
             if vcid > 1:
-                f_write_cookie(vcid, vsavefolder, vjobid, '')
+                f_write_cookie(vcid, vsavefolder, vjobid, str((vcid - 1) * 5) + '% of sequences evaluated for ' +
+                               'prosite domains.')
 
     vprositedata = f_read_tsv(vprositefile, vsavefolder, vjobid)  # Read the data of prosite from the result file.
     f_write_log(vsavefolder, vjobid, 'Successfully gathered Prosite domain results.\n', 'a')
@@ -412,12 +441,6 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     if not vpfam_already_done:
         f_write_log(vsavefolder, vjobid, 'Create new PFAM output file: ', 'a')
         vfh_pfam_output = open(vpfamfile, 'w')  # writing the header of the pfam result file.
-        # vfh_pfam_output.write('Sequence id\tFamily id\tFamily Accession\tClan\tEnv. Start\tEnv. End\tAli. Start\t'
-        #                      'Ali. End\tModel Start\tModel End\tBit Score\tInd. E-value\tCond. E-value\tDescription\t'
-        #                      'aliIdCount\taliL\taliM\taliN\taliSim\taliSimCount\taliaseq\talicsline\talihindex\t'
-        #                      'alimline\talimmline\talimodel\talintseq\talippline\talirfline\talisqacc\talisqdesc\t'
-        #                      'alisqfrom\talisqname\talisqto\tbias\tdisplay\tis_included\tis_reported\toasc\t'
-        #                      'outcompeted\tsignificant\tuniq\n')
         vfh_pfam_output.write('Sequence id\tFamily id\tFamily Accession\tClan\tEnv. Start\tEnv. End\tAli. Start\t'
                               'Ali. End\tModel Start\tModel End\tBit Score\tInd. E-value\tCond. E-value\tDescription\t'
                               'outcompeted\tsignificant\tuniq\n')
@@ -432,6 +455,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
         # Process every header
         for vheader_id, vheader in enumerate(vheaders):
+            if vwarnings:
+                print('Searching header ' + str(vheader_id + 1) + ' of ' + str(len(vheaders)) + '.')
             f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
             vfound = False
             vdbid = vsequences[vheader_id][0:vlen_dbid]
@@ -474,8 +499,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             # Update cookies
             vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 22
             if vcid > 22:
-                f_write_cookie(vcid, vsavefolder, vjobid, '')
-                
+                f_write_cookie(vcid, vsavefolder, vjobid, str((vcid - 22) * 5) + '% of sequences evaluated for pfam ' +
+                               'domains.')
+
     vpfamdata = f_read_tsv(vpfamfile, vsavefolder, vjobid)
     f_write_log(vsavefolder, vjobid, 'Successfully gathered PFAM domain results.\n', 'a')
     f_write_cookie(43, vsavefolder, vjobid, 'Finished searching PFAM')
@@ -494,7 +520,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     else:
         f_write_log(vsavefolder, vjobid, 'Reading in protein group file:\n', 'a')
         vgroup, vgroup_u = f_read_in_groupfile(vgroupfile, vheaders, vsavefolder, vjobid)
-    vgroup_u = list(set(vgroup_u))
+    vgroup_u = sorted(list(set(vgroup_u)))
     f_write_log(vsavefolder, vjobid, 'Read protein group file successfully\n', 'a')
 
     # Per group of protein: get median sequence length
@@ -535,7 +561,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     if vprositefile != '':
         for vprdc in range(len(vprositedata.columns)):
             vprositedomains_u.append(vprositedata[vprdc][3])
-        vprositedomains_u = list(set(vprositedomains_u))
+        vprositedomains_u = sorted(list(set(vprositedomains_u)))
         for vitem in vprositedomains_u:
             vfound = 0
             for vc, vcitem in enumerate(vcolor_domain):
@@ -564,7 +590,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     if vpfamfile != '':
         for vpdc in range(1, len(vpfamdata.columns)):
             vpfamdomains_u.append(vpfamdata[vpdc][1])
-        vpfamdomains_u = list(set(vpfamdomains_u))
+        vpfamdomains_u = sorted(list(set(vpfamdomains_u)))
 
         for vitem in vpfamdomains_u:
             vfound = 0
@@ -586,6 +612,34 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 vpfamdomains_u_ignore.append(0)
     f_success(vsavefolder, vjobid)
 
+    # Generate unique colors for every domain (unless it should be ignored)
+    vcollected_colors = []
+    for vc, color_hex in enumerate(vprositedomains_u_color):
+        if vprositedomains_u_ignore[vc] == 0:
+            if not color_hex == '':
+                #color_rgb = f_get_rgb(color_hex)
+                #vcollected_colors.append(color_hex)
+                vcollected_colors.append(color_hex)
+    for vc, color_hex in enumerate(vpfamdomains_u_color):
+        if vpfamdomains_u_ignore[vc] == 0:
+            if not color_hex == '':
+                #_rgb = f_get_rgb(color_hex)
+                #vcollected_colors.append(color_rgb)
+                vcollected_colors.append(color_hex)
+
+    all_colors = get_all_colors(vcollected_colors)
+    vcurrcol = 0
+    for vc, color_hex in enumerate(vprositedomains_u_color):
+        if vprositedomains_u_ignore[vc] == 0:
+            if color_hex == '':
+                vcurrcol, vhexcolorcode = generate_new_color(vcurrcol, all_colors)
+                vprositedomains_u_color[vc] = vhexcolorcode
+    for vc, color_hex in enumerate(vpfamdomains_u_color):
+        if vpfamdomains_u_ignore[vc] == 0:
+            if color_hex == '':
+                vcurrcol, vhexcolorcode = generate_new_color(vcurrcol, all_colors)
+                vpfamdomains_u_color[vc] = vhexcolorcode
+
     # Remove beginning ('>') from fasta
     f_write_log(vsavefolder, vjobid, 'Processing fasta headers\n', 'a')
     vheaders_no_fastastart = []
@@ -595,10 +649,12 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     f_write_cookie(60, vsavefolder, vjobid, 'Finished reading and processing additional data')
 
     # Per group of protein: get annotations of Prosite and PFAM domains and make one plot per protein group.
-    f_write_log(vsavefolder, vjobid, 'Collecting Prostie and PFAM domain information per protein group\n', 'a')
+    f_write_log(vsavefolder, vjobid, 'Collecting Prosite and PFAM domain information per protein group\n', 'a')
     vprositedomainsofgroup_all = []
+    vprositedomainsofgroup_abs_all = []
     vprositedomainsingenes_all = []
     vpfamdomainsofgroup_all = []
+    vpfamdomainsofgroup_abs_all = []
     vpfamdomainsingenes_all = []
     vsize_of_prosite_data_all = []
     vsize_of_pfam_data_all = []
@@ -670,13 +726,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                             for vp, vpd in enumerate(vprositedomains_u):  # Go through all domains
                                 if vprositedata[vheader_id][3] == vpd:  # Check if the domain is the domain we currently
                                     # look at
-                                    vmedianstartbp = f_float2int((int(vprositedata[vheader_id][1]) - 1) /
+                                    vmedianstartaa = f_float2int((int(vprositedata[vheader_id][1]) - 1) /
                                                                  len(vsequences[vh]) * vmedlengroup[vug])  # Calculate
                                     # the start position relative to the median length of the protein group:
-                                    vmedianendbp = f_float2int((int(vprositedata[vheader_id][2]) - 1) /
+                                    vmedianendaa = f_float2int((int(vprositedata[vheader_id][2]) - 1) /
                                                                len(vsequences[vh]) * vmedlengroup[vug])  # Calculate the
                                     # end position relative to the median length of the protein group:
-                                    vprositedomainsofgroup[vp, vmedianstartbp:vmedianendbp] += 1  # Mark the placing of
+                                    vprositedomainsofgroup[vp, vmedianstartaa:vmedianendaa] += 1  # Mark the placing of
                                     # the domain
                                     vprositedomainsingenes[vp, vh] = 1  # Define that the domain has been found for that
                                     # gene
@@ -688,13 +744,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                             # currently look at
                             for vp, vpd in enumerate(vpfamdomains_u):  # Go through all domains
                                 if vpfamdata[vheader_id][1] == vpd:  # If the domain is the domain we currently look at
-                                    vmedianstartbp = f_float2int((int(vpfamdata[vheader_id][6]) - 1) /
+                                    vmedianstartaa = f_float2int((int(vpfamdata[vheader_id][6]) - 1) /
                                                                  len(vsequences[vh]) * vmedlengroup[vug])  # Calculate
                                     # the start position relative to the median length of the protein group:
-                                    vmedianendbp = f_float2int((int(vpfamdata[vheader_id][7]) - 1) /
+                                    vmedianendaa = f_float2int((int(vpfamdata[vheader_id][7]) - 1) /
                                                                len(vsequences[vh]) * vmedlengroup[vug])  # Calculate the
                                     # end position relative to the median length of the protein group:
-                                    vpfamdomainsofgroup[vp, vmedianstartbp:vmedianendbp] += 1  # Mark the placing of the
+                                    vpfamdomainsofgroup[vp, vmedianstartaa:vmedianendaa] += 1  # Mark the placing of the
                                     # domain
                                     vpfamdomainsingenes[vp, vh] = 1  # Define that the domain has been found for
                                     # that gene
@@ -723,19 +779,22 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             for vprd in range(vsize_of_prosite_data[0]):
                 for vj in range(vsize_of_prosite_data[1]):
                     if vprositedomainsofgroup[vprd][vj] != 0:
-                        vprositedomainsofgroup_rel[vprd][vj] = vprositedomainsofgroup[vprd][vj]/vn_prot_per_group * 100
+                        vprositedomainsofgroup_rel[vprd][vj] = vprositedomainsofgroup[vprd][vj] / vn_prot_per_group * \
+                                                               100
         if vpfamfile != '':
             vpfamdomainsofgroup_rel = np.zeros((len(vpfamdomains_u), vmedlengroup[vug]), dtype=float)
             for vpfd in range(vsize_of_pfam_data[0]):
                 for vj in range(vsize_of_pfam_data[1]):
                     if vpfamdomainsofgroup[vpfd][vj] != 0:
-                        vpfamdomainsofgroup_rel[vpfd][vj] = vpfamdomainsofgroup[vpfd][vj]/vn_prot_per_group * 100
+                        vpfamdomainsofgroup_rel[vpfd][vj] = vpfamdomainsofgroup[vpfd][vj] / vn_prot_per_group * 100
         vprositedomainsofgroup_rel_all.append(vprositedomainsofgroup_rel)
         vpfamdomainsofgroup_rel_all.append(vpfamdomainsofgroup_rel)
         vn_prot_per_group_all.append(vn_prot_per_group)
         f_success(vsavefolder, vjobid)
 
         # If not using absolute values
+        vprositedomainsofgroup_abs_all.append(vprositedomainsofgroup)
+        vpfamdomainsofgroup_abs_all.append(vpfamdomainsofgroup)
         if not vabsolute:
             f_write_log(vsavefolder, vjobid, 'Use relative prevalence of domains per group.\n', 'a')
             if vprositefile != '':
@@ -748,23 +807,52 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vpfamdomainsofgroup_all.append(vpfamdomainsofgroup)
 
         # Save of data
-        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .csvs: ', 'a')
+        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .tsvs: ', 'a')
         if vprositefile != '':
             if vsavefolder != '':
-                np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.csv'), vprositedomainsofgroup,
-                           delimiter="\t")
+                vfilename = join(vsavefolder, vjobid + '_' + vgitem + '_prosite_domain_results_per_aa.tsv')
             else:
-                np.savetxt(vjobid + '_' + vgitem + '_prosite.csv', vprositedomainsofgroup, delimiter="\t")
+                vfilename = vjobid + '_' + vgitem + '_prosite_domain_results_per_aa.tsv'
+            vfh_filename = open(vfilename, 'w')
+
+            # Write header:
+            vfh_filename.write('Median protein (' + vgitem + ') amino acid position')
+            for item in vprositedomains_u:
+                vfh_filename.write('\t' + item)
+            vfh_filename.write('\n')
+
+            # Write content
+            for vj in range(vsize_of_prosite_data[1]):
+                vfh_filename.write(str(vj + 1))
+                for vprd in range(vsize_of_prosite_data[0]):
+                    vfh_filename.write('\t' + str(vprositedomainsofgroup[vprd][vj]))
+                vfh_filename.write('\n')
+            vfh_filename.close()
         if vpfamfile != '':
             if vsavefolder != '':
-                np.savetxt(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.csv'), vpfamdomainsofgroup, delimiter="\t")
+                vfilename = join(vsavefolder, vjobid + '_' + vgitem + '_pfam_domain_results_per_aa.tsv')
             else:
-                np.savetxt(vjobid + '_' + vgitem + '_pfam.csv', vpfamdomainsofgroup, delimiter="\t")
+                vfilename = vjobid + '_' + vgitem + '_pfam_domain_results_per_aa.tsv'
+            vfh_filename = open(vfilename, 'w')
+
+            # Write header:
+            vfh_filename.write('Median protein (' + vgitem + ') amino acid position')
+            for item in vpfamdomains_u:
+                vfh_filename.write('\t' + item)
+            vfh_filename.write('\n')
+
+            # Write content
+            for vj in range(vsize_of_pfam_data[1]):
+                vfh_filename.write(str(vj + 1))
+                for vpfd in range(vsize_of_pfam_data[0]):
+                    vfh_filename.write('\t' + str(vpfamdomainsofgroup[vpfd][vj]))
+                vfh_filename.write('\n')
+            vfh_filename.close()
         f_success(vsavefolder, vjobid)
 
         # Plot domains into figure with all domains of all groups to get coloring identical
         f_write_log(vsavefolder, vjobid, 'Add domains into dummy figure to get consistent domain data of group as'
-                                         ' .csvs: ', 'a')
+                                         ' .tsvs: ', 'a')
         vmaxes = []
         for vprd in range(vsize_of_prosite_data[0]):
             vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
@@ -774,7 +862,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
         for vmaxi in vmaxids:
             if vmaxi < vsize_of_prosite_data[0]:
-                if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
+                if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
                         sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
                         vprositedomains_u_ignore[vmaxi] == 0 and vprositedomains_u_process[vmaxi]:
                     if vprositedomains_u_color[vmaxi] == '':
@@ -790,7 +878,7 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                     vprositedomains_u_process[vmaxi] = False
             else:
                 vimod = vmaxi - vsize_of_prosite_data[0]
-                if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
+                if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
                         sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
                         vpfamdomains_u_ignore[vimod] == 0 and vpfamdomains_u_process[vimod]:
                     if vpfamdomains_u_color[vimod] == '':
@@ -811,6 +899,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
     for vug, vgitem in enumerate(vgroup_u):  # Go through all groups of proteins
         vprositedomainsofgroup = vprositedomainsofgroup_all[vug]
         vpfamdomainsofgroup = vpfamdomainsofgroup_all[vug]
+        vprositedomainsofgroup_abs = vprositedomainsofgroup_abs_all[vug]
+        vpfamdomainsofgroup_abs = vpfamdomainsofgroup_abs_all[vug]
         vn_prot_per_group = vn_prot_per_group_all[vug]
         vprositedomainsofgroup_rel = vprositedomainsofgroup_rel_all[vug]
         vpfamdomainsofgroup_rel = vpfamdomainsofgroup_rel_all[vug]
@@ -818,6 +908,8 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
         vpfamdomainsingenes = vpfamdomainsingenes_all[vug]
         vsize_of_prosite_data = vsize_of_prosite_data_all[vug]
         vsize_of_pfam_data = vsize_of_pfam_data_all[vug]
+        vprositedomains_u_ignore_for_plot = vprositedomains_u_ignore[:]
+        vpfamdomains_u_ignore_for_plot = vpfamdomains_u_ignore[:]
 
         # Plot data of Prosite
         f_write_log(vsavefolder, vjobid, 'Plot Prosite domains of protein group ' + vgitem + '.\n', 'a')
@@ -836,9 +928,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vheader_id in vmaxids:
-                if max(vprositedomainsofgroup[vheader_id]) > (vmaxcutoff * 100) and \
-                        float(sum(vprositedomainsingenes[vheader_id]))/float(vn_prot_per_group) > vcutoff and \
-                        vprositedomains_u_ignore[vheader_id] == 0:
+                if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
+                        float(sum(vprositedomainsingenes[vheader_id])) / float(vn_prot_per_group) > vcutoff and \
+                        vprositedomains_u_ignore_for_plot[vheader_id] == 0:
                     # Create function
                     a = min(bin_edges[:-1])  # integral lower limit
                     b = max(bin_edges[:-1])  # integral upper limit
@@ -863,11 +955,15 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
                     # Plot Polygon
                     ax.add_patch(poly)
+                else:
+                    vprositedomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
-                plt.ylim(0, 100)
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)  # maximum of proteins in group
+            else:
+                plt.ylim(0, 100)  # 100 %
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -880,6 +976,14 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_prosite.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_prosite_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_prosite_stickfigure.pdf'
+            f_get_stick(vmedlengroup[vug], vprositedomains_u, vprositedomainsofgroup_abs, vprositedomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vprositedomains_u_ignore_for_plot, max(vmedlengroup))
 
         # Plot data of PFAM
         f_write_log(vsavefolder, vjobid, 'Plot PFAM domains of protein group ' + vgitem + '.\n', 'a')
@@ -899,9 +1003,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_pfam_data[1] + 1)
             for vheader_id in vmaxids:
-                if max(vpfamdomainsofgroup[vheader_id]) > (vmaxcutoff * 100) and \
+                if max(vpfamdomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vpfamdomainsingenes[vheader_id])) / \
-                        float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore[vheader_id] == 0:
+                        float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore_for_plot[vheader_id] == 0:
                     # Create function
                     a = min(bin_edges[:-1])  # integral lower limit
                     b = max(bin_edges[:-1])  # integral upper limit
@@ -926,12 +1030,15 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
                     # Plot Polygon
                     ax.add_patch(poly)
-
+                else:
+                    vpfamdomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -944,6 +1051,14 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_pfam.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_pfam_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_pfam_stickfigure.pdf'
+            f_get_stick(vmedlengroup[vug], vpfamdomains_u, vpfamdomainsofgroup_abs, vpfamdomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vpfamdomains_u_ignore_for_plot, max(vmedlengroup))
 
         # Combined plot
         f_write_log(vsavefolder, vjobid, 'Plot all domains of protein group ' + vgitem + '.\n', 'a')
@@ -966,9 +1081,9 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
             for vmaxi in vmaxids:
                 if vmaxi < vsize_of_prosite_data[0]:
-                    if max(vprositedomainsofgroup[vmaxi]) > (vmaxcutoff * 100) and float(
+                    if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
                             sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
-                            vprositedomains_u_ignore[vmaxi] == 0:
+                            vprositedomains_u_ignore_for_plot[vmaxi] == 0:
                         # Create function
                         a = min(bin_edges[:-1])  # integral lower limit
                         b = max(bin_edges[:-1])  # integral upper limit
@@ -993,11 +1108,13 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
                         # Plot Polygon
                         ax.add_patch(poly)
+                    else:
+                        vprositedomains_u_ignore_for_plot[vmaxi] = 1
                 else:
                     vimod = vmaxi - vsize_of_prosite_data[0]
-                    if max(vpfamdomainsofgroup[vimod]) > (vmaxcutoff * 100) and float(
+                    if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
                             sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
-                            vpfamdomains_u_ignore[vimod] == 0:
+                            vpfamdomains_u_ignore_for_plot[vimod] == 0:
                         # Create function
                         a = min(bin_edges[:-1])  # integral lower limit
                         b = max(bin_edges[:-1])  # integral upper limit
@@ -1022,12 +1139,16 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
 
                         # Plot Polygon
                         ax.add_patch(poly)
+                    else:
+                        vpfamdomains_u_ignore_for_plot[vimod] = 1
 
             plt.xlim(min(bin_edges), max(bin_edges))
-            if not vabsolute:
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
                 plt.ylim(0, 100)
             plt.grid(axis='y', alpha=0.75)
-            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' bp', fontsize=vfontsize)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
             if vabsolute:
                 plt.ylabel('# of occurrences', fontsize=vfontsize)
             else:
@@ -1040,9 +1161,32 @@ def f_run_propplot(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroup
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_combined.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_combined.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_combined_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_combined_stickfigure.pdf'
+            vcombineddomains_u = []
+            vcombinedomainsofgroup_abs = []
+            vcombineddomains_u_color = []
+            vcombineddomains_u_ignore = []
+            for vdid in range(len(vprositedomains_u)):
+                vcombineddomains_u.append(vprositedomains_u[vdid])
+                vcombinedomainsofgroup_abs.append(vprositedomainsofgroup_abs[vdid])
+                vcombineddomains_u_color.append(vprositedomains_u_color[vdid])
+                vcombineddomains_u_ignore.append(vprositedomains_u_ignore_for_plot[vdid])
+            for vdid in range(len(vpfamdomains_u)):
+                vcombineddomains_u.append(vpfamdomains_u[vdid])
+                vcombinedomainsofgroup_abs.append(vpfamdomainsofgroup_abs[vdid])
+                vcombineddomains_u_color.append(vpfamdomains_u_color[vdid])
+                vcombineddomains_u_ignore.append(vpfamdomains_u_ignore_for_plot[vdid])
+            f_get_stick(vmedlengroup[vug], vcombineddomains_u, vcombinedomainsofgroup_abs, vcombineddomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vcombineddomains_u_ignore, max(vmedlengroup))
     # Write fifth cookie
-    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
     f_write_log(vsavefolder, vjobid, 'Job ' + vjobid + ' ran successfully.\n', 'a')
+    time.sleep(5)  # make sure pdfs are created
+    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
     print('done')
 
 
@@ -1169,6 +1313,116 @@ def f_get_hex(vtuple):
 
 ########################################################################################################################
 #                                                                                                                      #
+#  f_get_rgb                                                                                                           #
+#  Converts a hex code tuple into rgb values (tuple is assumed to be between 0 and 1).                                 #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vcode [string]: hex color code e.g. #af0010.                                                                    #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - [list]: a list of numbers e.g. (0,0.5,0.912).                                                                   #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def f_get_rgb(vcode):
+    vr = int(vcode[1:3], 16)
+    vg = int(vcode[3:5], 16)
+    vb = int(vcode[5:7], 16)
+    return [vr, vg, vb]
+
+
+def generate_new_color(vcurrcol, all_colors):
+    if vcurrcol >= len(all_colors):
+        vcurrcol = 0
+    this_color = all_colors[vcurrcol]
+    vcurrcol += 1
+    return vcurrcol, this_color
+
+
+def is_not_in_ignorecols(col, ignores):
+    vreturn = True
+    for item in ignores:
+        if item == col:
+            vreturn = False
+    return vreturn
+
+
+def get_all_colors(vignorecols):
+    all_colors = []
+    if is_not_in_ignorecols('#e8ecfb', vignorecols):
+        all_colors.append('#e8ecfb')  #  1
+    if is_not_in_ignorecols('#69b190', vignorecols):
+        all_colors.append('#69b190')  # 18
+    if is_not_in_ignorecols('#6f4c9b', vignorecols):
+        all_colors.append('#6f4c9b')  #  9
+    if is_not_in_ignorecols('#e78c35', vignorecols):
+        all_colors.append('#e78c35')  # 26
+    if is_not_in_ignorecols('#b58fc2', vignorecols):
+        all_colors.append('#b58fc2')  #  5
+    if is_not_in_ignorecols('#bebc48', vignorecols):
+        all_colors.append('#bebc48')  # 22
+    if is_not_in_ignorecols('#4d8ac6', vignorecols):
+        all_colors.append('#4d8ac6')  # 13
+    if is_not_in_ignorecols('#da2222', vignorecols):
+        all_colors.append('#da2222')  # 30
+    if is_not_in_ignorecols('#d1c1e1', vignorecols):
+        all_colors.append('#d1c1e1')  #  3
+    if is_not_in_ignorecols('#8cbc68', vignorecols):
+        all_colors.append('#8cbc68')  # 20
+    if is_not_in_ignorecols('#5568b8', vignorecols):
+        all_colors.append('#5568b8')  # 11
+    if is_not_in_ignorecols('#e4632d', vignorecols):
+        all_colors.append('#e4632d')  # 28
+    if is_not_in_ignorecols('#9b62a7', vignorecols):
+        all_colors.append('#9b62a7')  #  7
+    if is_not_in_ignorecols('#ddaa3c', vignorecols):
+        all_colors.append('#ddaa3c')  # 24
+    if is_not_in_ignorecols('#549eb3', vignorecols):
+        all_colors.append('#549eb3')  # 15
+    if is_not_in_ignorecols('#95211b', vignorecols):
+        all_colors.append('#95211b')  # 32
+    if is_not_in_ignorecols('#ddd8ef', vignorecols):
+        all_colors.append('#ddd8ef')  #  2
+    if is_not_in_ignorecols('#77b77d', vignorecols):
+        all_colors.append('#77b77d')  # 19
+    if is_not_in_ignorecols('#6059a9', vignorecols):
+        all_colors.append('#6059a9')  # 10
+    if is_not_in_ignorecols('#e67932', vignorecols):
+        all_colors.append('#e67932')  # 27
+    if is_not_in_ignorecols('#a778b4', vignorecols):
+        all_colors.append('#a778b4')  #  6
+    if is_not_in_ignorecols('#d1b541', vignorecols):
+        all_colors.append('#d1b541')  # 23
+    if is_not_in_ignorecols('#4e96bc', vignorecols):
+        all_colors.append('#4e96bc')  # 14
+    if is_not_in_ignorecols('#b8221e', vignorecols):
+        all_colors.append('#b8221e')  # 31
+    if is_not_in_ignorecols('#c3a8d1', vignorecols):
+        all_colors.append('#c3a8d1')  #  4
+    if is_not_in_ignorecols('#a6be54', vignorecols):
+        all_colors.append('#a6be54')  # 21
+    if is_not_in_ignorecols('#4e79c5', vignorecols):
+        all_colors.append('#4e79c5')  # 12
+    if is_not_in_ignorecols('#df4828', vignorecols):
+        all_colors.append('#df4828')  # 29
+    if is_not_in_ignorecols('#8c4e99', vignorecols):
+        all_colors.append('#8c4e99')  #  8
+    if is_not_in_ignorecols('#e49c39', vignorecols):
+        all_colors.append('#e49c39')  # 25
+    if is_not_in_ignorecols('#59a5a9', vignorecols):
+        all_colors.append('#59a5a9')  # 16
+    if is_not_in_ignorecols('#721e17', vignorecols):
+        all_colors.append('#721e17')  # 33
+    if is_not_in_ignorecols('#60ab9e', vignorecols):
+        all_colors.append('#60ab9e')  # 17
+    if is_not_in_ignorecols('#521a13', vignorecols):
+        all_colors.append('#521a13')  # 34
+    return all_colors
+
+
+########################################################################################################################
+#                                                                                                                      #
 #  f_read_in_ignoredomainfile                                                                                          #
 #  Reads a file on where each line is assumed to either be the name of a Prosite or a PFAM domain. This list is then   #
 #  later used to ignore the domains when making figures.                                                               #
@@ -1277,14 +1531,14 @@ def f_read_in_groupfile(vfile, vheaders, vsavefolder, vjobid):
                         vhit += 1
                     else:
                         print('Warning: group domain file has more than one entry for ' + vitem + '. Only first '
-                              'instance is used.')
+                                                                                                  'instance is used.')
                         f_write_log(vsavefolder, vjobid, 'Warning: group domain file has more than one entry '
                                                          'for ' + vitem + '. Only first instance is used.\n', 'a')
             vfile_fh.close()
             if vhit == 0:
                 f_write_log(vsavefolder, vjobid, 'Warning: no protein group entry found for ' + vitem +
-                                                 '. Please add one in ' + vfile + '\nUsing "ProteinGroup" as group name'
-                                                 ' instead.\n', 'a')
+                            '. Please add one in ' + vfile + '\nUsing "ProteinGroup" as group name'
+                                                             ' instead.\n', 'a')
                 print('Warning: no protein group entry found for ' + vitem + '. Please add one in ' + vfile)
                 vgroup.append('ProteinGroup')
                 vgroup_u.append('ProteinGroup')
@@ -1392,7 +1646,7 @@ def f_read_in_file(vfile, vsavefolder, vjobid):
         vheaders.append(vtempheader)
         vsequences.append(vtempsequence)
     f_write_log(vsavefolder, vjobid, 'Read ' + str(len(vheaders)) + ' headers and ' + str(len(vsequences)) +
-                                     ' sequences.\n', 'a')
+                ' sequences.\n', 'a')
     return vheaders, vsequences
 
 
@@ -1403,11 +1657,14 @@ def f_read_in_file(vfile, vsavefolder, vjobid):
 #  found.                                                                                                              #
 #                                                                                                                      #
 #  Mandatory arguments:                                                                                                #
+#    - vdbfolder [string]: Indicates the location of the folder where the databases of previous results should be      #
+#                          built up.                                                                                   #
 #    - vhead [string]: Fasta sequence header.                                                                          #
 #    - vseq [string]: Protein sequence.                                                                                #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
 #    - vwarnings_prosite [boolean]: If warnings should be given out or not.                                            #
+#    - vcurrentdate [string]: Indicates the currend date that the record is from.                                      #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
@@ -1416,7 +1673,7 @@ def f_read_in_file(vfile, vsavefolder, vjobid):
 ########################################################################################################################
 
 
-def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_prosite):
+def f_run_sequences_through_prosite(vdbfolder, vhead, vseq, vsavefolder, vjobid, vwarnings_prosite, vcurrentdate):
     # Write that sequences are run to Prosite to the stdout
     f_write_log(vsavefolder, vjobid, 'Submitted Prosite search for sequence "' + vseq[0:16] + '...".\n', 'a')
     if vwarnings_prosite:
@@ -1424,7 +1681,7 @@ def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_
 
     # Check for sequence length
     vout_all = []
-    if len(vseq) >= 16:
+    if 16 <= len(vseq):
         # Run sequence
         try:
             # If a 404 error occurs, then the reason might be that the mirror https://prosite.expasy.org changed to
@@ -1470,7 +1727,82 @@ def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_
         vout_all.append(vout)
         if vwarnings_prosite:
             print(vhead + ' is too short to be run through Prosite (<16 amino acids).')
-    return vout_all
+
+    # Get domain information using the domain ids
+    vout_all2 = f_get_prosite_domain_info(vout_all, vdbfolder, vcurrentdate)
+    return vout_all2
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_get_prosite_domain_info                                                                                           #
+#  Runs a the domain identifier of prosite first through the internal databases, and if there is no record, goes to    #
+#  Prosite to find the description of the domain info.                                                                 #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - vrecords [string]: Prosite domain results of a protein                                                          #
+#    - vdbfolder [string]: Indicates the location of the folder where the databases of previous results should be      #
+#                          built up.                                                                                   #
+#    - vcurrentdate [string]: Indicates the currend date that the record is from.                                      #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - vrecords_out [list]: List of lists, containing the results as sublist, with the sequence header as the first    #
+#                           item, followed by all other information collected from Prosite. the domain ID is swapped   #
+#                           with the description of the domain, and the domain id is listed last                       #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def f_get_prosite_domain_info(vrecords, vdbfolder, vcurrentdate):
+    vprosite_domain_db = join(vdbfolder, 'Prosite_domain_db')
+    vrecords_out = []
+    vinit_db = False
+    for vrecord in vrecords:
+        if vrecord[3] != '':
+            '''print(vrecord)
+            print(vrecord[3])'''
+            vfound = False
+            try:
+                vfh_pdb = open(vprosite_domain_db, 'r')
+                for line in vfh_pdb:
+                    vsplit = line.rstrip('\n').split('\t')
+                    if vsplit[1] == vrecord[3]:
+                        vnew_record = []
+                        for vrecord_i, item in enumerate(vrecord):
+                            if vrecord_i != 3 and vrecord_i != 7:
+                                vnew_record.append(item)
+                            if vrecord_i == 3:
+                                vnew_record.append(vsplit[2])
+                            if vrecord_i == 7:
+                                vnew_record.append(vrecord[3])
+                        vrecords_out.append(vnew_record)
+                        vfound = True
+                        break
+                vfh_pdb.close()
+            except IOError:
+                vinit_db = True
+            if not vfound:
+                handle = ExPASy.get_prosite_raw(vrecord[3])
+                record = Prosite.read(handle)
+                handle.close()
+                vnew_record = []
+                for vrecord_i, item in enumerate(vrecord):
+                    if vrecord_i != 3 and vrecord_i != 7:
+                        vnew_record.append(item)
+                    if vrecord_i == 3:
+                        vnew_record.append(record.name)
+                    if vrecord_i == 7:
+                        vnew_record.append(vrecord[3])
+                vrecords_out.append(vnew_record)
+                if vinit_db:
+                    vfh_pdb = open(vprosite_domain_db, 'w')
+                else:
+                    vfh_pdb = open(vprosite_domain_db, 'a')
+                vfh_pdb.write(str(vcurrentdate) + '\t' + vrecord[3] + '\t' + record.name + '\n')
+                vfh_pdb.close()
+        else:
+            vrecords_out.append(vrecord)
+    return vrecords_out
 
 
 ########################################################################################################################
@@ -1494,6 +1826,11 @@ def f_run_sequences_through_prosite(vhead, vseq, vsavefolder, vjobid, vwarnings_
 
 
 def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfam):
+    # Constants:
+    vmax_pfam_503_iterations = 6
+    vinitial_503_wait_time_multiplier = 5
+    vcurrent_503_try = 0
+
     # Write that sequences are run to PFAM to the stdout
     f_write_log(vsavefolder, vjobid, 'Submitted PFAM search for sequence "' + vseq[0:16] + '...".\n', 'a')
     if vwarnings_pfam:
@@ -1501,10 +1838,60 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
 
     # Check for sequence length
     vout_all = []
-    if len(vseq) >= 16:
+    if 16 <= len(vseq) <= 5000:
         # Run sequence
         try:
-            vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, 0, 0)  # Call PFAM with sequence
+            verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, vwarnings_pfam)  # Call PFAM with
+            # sequence
+            if verrorcode == 503 or verrorcode == 500 or verrorcode == -2:
+                verrorcode_2_display = str(verrorcode)
+                if vwarnings_pfam:
+                    if verrorcode_2_display == '-2':
+                        verrorcode_2_display = 'A seldom error that usually can be rescued was found. '
+                    else:
+                        verrorcode_2_display = 'HTTP ' + verrorcode_2_display + ' Error occurred. '
+                    print(verrorcode_2_display + 'Try to rescue.')
+                f_write_log(vsavefolder, vjobid, verrorcode_2_display + '\nTrying to rescue.\n', 'a')
+                vcurrent_503_try += 1
+                vpassed = False
+                while vcurrent_503_try <= vmax_pfam_503_iterations and vpassed is False:
+                    if vwarnings_pfam:
+                        print('HTTP 500, 503, or a seldom other Error occurred. Rescue attempt #' +
+                              str(vcurrent_503_try) + ' of ' + str(vmax_pfam_503_iterations))
+                    f_write_log(vsavefolder, vjobid,
+                                'Rescue attempt #' + str(vcurrent_503_try) + ' of ' + str(vmax_pfam_503_iterations) +
+                                '.\n', 'a')
+                    vwaittime = (4 ^ vcurrent_503_try) * vinitial_503_wait_time_multiplier
+                    print('Waiting ' + str(vwaittime) + ' seconds.')
+                    time.sleep(vwaittime)
+                    verrorcode, vheader, vresults = f_query_pfam(vseq, vsavefolder, vjobid, vwarnings_pfam)  # Call PFAM
+                    # with sequence
+                    if verrorcode == -1:
+                        vpassed = True
+                    elif verrorcode == 503:
+                        if vwarnings_pfam:
+                            print('HTTP 503 Error occurred again.')
+                    elif verrorcode == 500:
+                        if vwarnings_pfam:
+                            print('HTTP 500 Error occurred again.')
+                    elif verrorcode == -2:
+                        if vwarnings_pfam:
+                            print('Other error than HTTP occurred again. Experience says: just try another time.')
+                    else:
+                        f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam)
+                    vcurrent_503_try += 1
+                if vpassed is False:
+                    f_write_log(vsavefolder, vjobid, 'Was unable to rescue 500/503.\nAbort.\n', 'a')
+                    print('HTTPError 500 or 503, or other seldom errors occurred too many times when trying to access '
+                          'PFAM result.')
+                    f_write_log(vsavefolder, vjobid, 'HTTPError 500, 503 or seldom other errors occurred when trying '
+                                                     'to access PFAM result.\n', 'a')
+                    f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 500, 503 or seldom other errors occurred too '
+                                                            'many times when trying to access PFAM result.')
+                    sys.exit()
+            else:
+                f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam)
+
             if len(vresults) > 0:  # If at least one result was found
                 for vr, vresult in enumerate(vresults):  # For every result (id vr)
                     vout = [vseq]  # Attach sequence as identifier
@@ -1513,7 +1900,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
                         vout.append('')
                     # for vi_41, vitem in enumerate(vresult):  # Check for all attributes and fill them into the output
                     for vi_16, vitem in enumerate(
-                                vresult):  # Check for all attributes and fill them into the output
+                            vresult):  # Check for all attributes and fill them into the output
                         # vout = f_dissect_pfam_key(vout, vheader[vi_41], vitem)
                         vout = f_dissect_pfam_key(vout, vheader[vi_16], vitem)
                     vout_all.append(vout)  # Append the output of this result to the output of all other results
@@ -1535,7 +1922,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
             vout_all.append(vout)
             if vwarnings_pfam:
                 print(vhead + ' has no results in pfam.')
-    else:
+    elif 16 > len(vseq):
         f_write_log(vsavefolder, vjobid, 'Warning, sequence too short (<16 amino acids).\n', 'a')
         vout = [vseq]
         # for _ in range(42 - 1):
@@ -1544,7 +1931,68 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
         vout_all.append(vout)
         if vwarnings_pfam:
             print(vhead + ' is too short to be run through PFAM (<16 amino acids).')
+    elif len(vseq) > 5000:
+        f_write_log(vsavefolder, vjobid, 'Warning, sequence too long (>5000 amino acids).\n', 'a')
+        vout = [vseq]
+        # for _ in range(42 - 1):
+        for _ in range(17 - 1):
+            vout.append('')
+        vout_all.append(vout)
+        if vwarnings_pfam:
+            print(vhead + ' is too long to be run through PFAM (>5000 amino acids).')
     return vout_all  # Return all results
+
+
+########################################################################################################################
+#                                                                                                                      #
+#  f_handle_pfam_error                                                                                                 #
+#  Handles errors given out by running sequences through PFAM                                                          #
+#                                                                                                                      #
+#  Mandatory arguments:                                                                                                #
+#    - verrorcode [string]: Error code that needs handling.                                                            #
+#    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
+#    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings_pfam [boolean]: If warnings should be given out or not.                                               #
+#                                                                                                                      #
+#  Output:                                                                                                             #
+#    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
+#                       followed by all other information collected from pfam.                                         #
+#                                                                                                                      #
+########################################################################################################################
+
+
+def f_handle_pfam_error(verrorcode, vsavefolder, vjobid, vwarnings_pfam):
+    if verrorcode == -1:
+        if vwarnings_pfam:
+            print('Results of search received.')
+    elif verrorcode == 400:
+        print('HTTPError 400 occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'HTTPError 400 occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 400 occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    elif verrorcode == 404:
+        print('HTTPError 404 occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 404 occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    elif verrorcode == -2:
+        print('Error other than HTTPError occurred when trying to access PFAM result.')
+        f_write_log(vsavefolder, vjobid, 'Error other than HTTPError occurred when trying to access PFAM '
+                                         'result.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Error other than HTTPError occurred when trying to access '
+                                                'PFAM result.')
+        sys.exit()
+    else:
+        print('Unknown error ' + str(verrorcode) + ' occurred: ')
+        f_write_log(vsavefolder, vjobid, 'Unknown error ' + str(verrorcode) + ' occurred while trying '
+                                                                              'to reach PFAM.\n', 'a')
+        f_write_cookie(-1, vsavefolder, vjobid, 'Unknown error ' + str(verrorcode) + ' occurred while trying '
+                                                                                     'to reach PFAM.')
+        sys.exit()
 
 
 ########################################################################################################################
@@ -1557,6 +2005,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
 #    - vtype [string]: String indicating whether vfile indicates a byte string ('string') or a file ('file').          #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vrecords [list]: A list of lists, containing the results of a hmmer search as lists stored in a list.           #
@@ -1564,10 +2013,7 @@ def f_run_sequences_through_pfam(vhead, vseq, vsavefolder, vjobid, vwarnings_pfa
 ########################################################################################################################
 
 
-def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
-    # Parameters
-    vsilent = 1
-
+def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid, vwarnings):
     # Open file for real if type is file
     if vtype == 'file':
         # Test if file can be opened, else abort.
@@ -1595,7 +2041,7 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
     for vl, vline in enumerate(vfh_xml):
         vline_stripped = vline.strip()
         if vline_stripped == '':
-            if vsilent == 0:
+            if vwarnings:
                 print('Warning: Empty line: ' + str(vl))
         else:
             vtypeline = f_check_type_line(vline)
@@ -1604,6 +2050,9 @@ def f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid):
                 vrecords.append(vrecord)
             elif vtypeline == 2:
                 vcurr_parent = f_get_parent(vrecords, vline)
+            elif vtypeline == 3:  # comments
+                if vwarnings:
+                    print('Comment on line ' + str(vl) + ': ' + vline)
             else:
                 print('Line is not a correct xml line.')
                 print(vline)
@@ -1674,6 +2123,8 @@ def f_check_type_line(vline):
         vreturn = 2
     elif vline.startswith('<') and vline.endswith('>'):
         vreturn = 1
+    elif vline.startswith('//'):
+        vreturn = 3  # comment
     else:
         vreturn = -1
     return vreturn
@@ -1758,6 +2209,7 @@ def f_read_single_record(vline, vcurr_parent, vtype):
 #    - vtype [string]: String indicating whether vfile indicates a byte string ('string') or a file ('file').          #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vheader [list]: Header indicators with the first few headers being the same as in the tsv output of hmmer.      #
@@ -1766,8 +2218,8 @@ def f_read_single_record(vline, vcurr_parent, vtype):
 ########################################################################################################################
 
 
-def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
-    vrecords = f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid)
+def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid, vwarnings):
+    vrecords = f_read_hmmer_xml(vfile, vtype, vsavefolder, vjobid, vwarnings)
 
     # Create tsv header and the ids that are listed in the xml
     vheader = []
@@ -1841,8 +2293,10 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 #    - vseq [string]: Protein sequence.                                                                                #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vwarnings [boolean]: If warnings should be given out or not.                                                    #
 #                                                                                                                      #
 #  Output:                                                                                                             #
+#    - verrorcode [list]: Error code to check what is going on.                                                        #
 #    - vheader [list]: The header of the records, indicating what is what.                                             #
 #    - vrecords [list]: List of lists with every list being a domain, and every sublist an attribute of the domain     #
 #                       record.                                                                                        #
@@ -1850,12 +2304,9 @@ def f_convert_hmmer_xml_tsv(vfile, vtype, vsavefolder, vjobid):
 ########################################################################################################################
 
 
-def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
-    vmax_iterations = 6
-    if viteration >= vmax_iterations:
-        raise ValueError('PFAM currently down (503 error).')
-    time.sleep(vwaittime)
-
+# noinspection PyBroadException
+def f_query_pfam(vseq, vsavefolder, vjobid, vwarnings):
+    verrorcode = -1
     # Modify sequence
     vseq = ''.join(vseq.split())  # remove spaces within the sequence
     vseq = '>Seq\n' + vseq  # Format sequence for running through hmmer.
@@ -1865,57 +2316,48 @@ def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
     vparameters_encoded = urllib.parse.urlencode(vparameters).encode('utf-8')
     vurllib_request_run = urllib.request.Request('https://www.ebi.ac.uk/Tools/hmmer/search/hmmscan',
                                                  vparameters_encoded)
-    vresult_url = urllib.request.urlopen(vurllib_request_run).geturl()
-    vresult_parameters = {'format': 'xml'}
-    vresult_parameters_encoded = urllib.parse.urlencode(vresult_parameters)
-    vresult_url_with_parameters = vresult_url.replace('results', 'download') + '?' + vresult_parameters_encoded
-    vurllib_request_result = urllib.request.Request(vresult_url_with_parameters)
-
-    # Get results
-    vperform_conversion = True
-    vxml_result = ''
-    try:
-        vxml_result = urllib.request.urlopen(vurllib_request_result).read()
-    except HTTPError as e:
-        vperform_conversion = False
-        if e.code == 500:
-            raise ValueError('No matching Pfam domains were found.')
-        elif e.code == 503:
-            # Currently unavailable
-            viteration += 1
-            if viteration == 1:
-                vwaittime = 5
-            else:
-                vwaittime *= 4
-            try:
-                f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime)
-            except ValueError:
-                f_write_log(vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.\n', 'a')
-                f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError 503 occurred while trying to reach PFAM.')
-                raise ValueError('PFAM currently down (503 error).')
-                sys.exit()
-        elif e.code == 404:
-            f_write_log(vsavefolder, vjobid, 'HTTPError 404 occurred while trying to reach PFAM.\n', 'a')
-            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) +
-                                                    ' occurred while trying to reach PFAM.')
-            raise ValueError('PFAM currently down (404 error).')
-            sys.exit()
-        else:
-            f_write_log(vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach PFAM.\n',
-                        'a')
-            print('HTTPError ' + str(e.code) + ' occurred.')
-            print(e.reason)
-            # Write kill cookie
-            f_write_cookie(-1, vsavefolder, vjobid, 'HTTPError ' + str(e.code) + ' occurred while trying to reach' 
-                                                    ' PFAM.')
-            sys.exit()
-
-    # Modify results such that it comes in form of a table
+    vperform_retrieval = True
+    vperform_conversion = False
     vheader = []
     vrecords = []
+    try:
+        vresult_url = urllib.request.urlopen(vurllib_request_run).geturl()
+    except HTTPError as e:
+        vperform_retrieval = False
+        verrorcode = e.code
+        f_write_log(vsavefolder, vjobid, e.reason + '\n', 'a')
+    except:
+        vperform_retrieval = False
+        verrorcode = -2
+
+    if vperform_retrieval:
+        vresult_parameters = {'format': 'xml'}
+        vresult_parameters_encoded = urllib.parse.urlencode(vresult_parameters)
+        # noinspection PyUnboundLocalVariable
+        vresult_url_with_parameters = vresult_url.replace('results', 'download') + '?' + vresult_parameters_encoded
+        vurllib_request_result = urllib.request.Request(vresult_url_with_parameters)
+
+        # Get results
+        vperform_conversion = True
+        vxml_result = ''
+        try:
+            vxml_result = urllib.request.urlopen(vurllib_request_result).read()
+        except HTTPError as e:
+            vperform_conversion = False
+            if e.code == 500:
+                verrorcode = -1  # Is ok, This means, that no domains were found.
+            else:
+                verrorcode = e.code
+                f_write_log(vsavefolder, vjobid, e.reason + '\n', 'a')
+        except:
+            vperform_conversion = False
+            verrorcode = -2
+
+    # Modify results such that it comes in form of a table
     if vperform_conversion:
-        vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid)
-    return vheader, vrecords
+        # noinspection PyUnboundLocalVariable
+        vheader, vrecords = f_convert_hmmer_xml_tsv(vxml_result, 'string', vsavefolder, vjobid, vwarnings)
+    return verrorcode, vheader, vrecords
 
 
 ########################################################################################################################
@@ -1930,6 +2372,7 @@ def f_query_pfam(vseq, vsavefolder, vjobid, viteration, vwaittime):
 #    - ventry_found [list]: Is the entry that should be saved. First item is the sequence itself.                      #
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
+#    - vcurrentdate [string]: Indicates the currend date that the record is from.                                      #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - no direct output                                                                                                #
@@ -2205,13 +2648,15 @@ def f_dissect_pfam_key(vout, key, value):
 #    - vmaxcutoff_ri [string] gets converted into float: Same as vcutoff, however, before the domain could exist       #
 #                                                        anywhere in the protein. Here the domains need to be present  #
 #                                                        at the same location to make the cut.                         #
-#    - vcustom_scaling_on_ri [string] gets converted into boolean: Allows for custom scaling of the figure. The \      #
+#    - vcustom_scaling_on_ri [string] gets converted into boolean: Allows for custom scaling of the figure. The        #
 #                                                                  standard case is that this is not on, and thus the  #
 #                                                                  scaling is the same regardless of the size of the   #
-#                                                                  protein. If this is on, one can set sbp (default    #
-#                                                                  100 bp per inch) to scale the width of the figure.  #
-#    - vscalingfigure_ri [string] gets converted into float: Indicates the number of bp that are displayed per inch of #
-#                                                            x-axis.                                                   #
+#                                                                  protein. If this is on, one can set with option api #
+#                                                                  (default 100 amino acids per inch) the number of    #
+#                                                                  amino acids displayed per inch to scale the width   #
+#                                                                  of the figure.                                      #
+#    - vscalingfigure_ri [string] gets converted into float: Indicates the number of amino acids per inch that are     #
+#                                                         displayed per inch of x-axis.                                #
 #    - vabsolute_ri [string] gets converted into True/False: Indicates whether absolute numbers are displayed on the   #
 #                                                            y-axis.                                                   #
 #    - vwarnings_ri [string] gets converted into True/False: Indicates whether warnings are written out.               #
@@ -2237,7 +2682,6 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
                        vcolorfile_ri, vignoredomainfile_ri, vcutoff_ri, vmaxcutoff_ri, vcustom_scaling_on_ri,
                        vscalefigure_ri, vabsoluteresults_ri, vwarnings_ri, vfrom_scratch_ri, vnotolderthan_ri,
                        vtemp_db_place_ri):
-
     # Create fasta input file from the databases
     vfastafile = join(vtemp_db_place_ri, vjobid_ri + '_reinitialize.fa')
     vfh_ri_out = open(vfastafile, 'w')
@@ -2253,7 +2697,7 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
                 vsequences.append(vsplit[0])  # Get the sequence entry
             vfh_in.close()  # Close file
 
-    vsequences = list(set(vsequences))  # Make unique list of sequences
+    vsequences = sorted(list(set(vsequences)))  # Make unique list of sequences
     for vs, vsequence in enumerate(vsequences):  # Go through all sequences and numerate them
         vfh_ri_out.write('>Seq_' + str(vs + 1) + '\n')  # Write header
         vfh_ri_out.write(vsequence)  # Write sequence
@@ -2261,13 +2705,11 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
             vfh_ri_out.write('\n')
     vfh_ri_out.close()  # Close temporary Fasta file
 
-    # Run propplot
-    f_run_propplot(vjobid_ri, vfastafile, vignoredb_ri, vsavefolder_ri, vtemp_db_place_ri, vgroupfile_ri,
-                   vcolorfile_ri, vignoredomainfile_ri, vcutoff_ri, vmaxcutoff_ri, vcustom_scaling_on_ri,
-                   vscalefigure_ri, vabsoluteresults_ri, vwarnings_ri, vfrom_scratch_ri, vnotolderthan_ri)  # Run the
+    # Run domainviz
+    f_run_domainviz(vjobid_ri, vfastafile, vignoredb_ri, vsavefolder_ri, vtemp_db_place_ri, vgroupfile_ri,
+                    vcolorfile_ri, vignoredomainfile_ri, vcutoff_ri, vmaxcutoff_ri, vcustom_scaling_on_ri,
+                    vscalefigure_ri, vabsoluteresults_ri, vwarnings_ri, vfrom_scratch_ri, vnotolderthan_ri)  # Run the
     # domain search
-
-    print('Still has to be implemented')
 
     # Replace old databases with new ones
     shutil.rmtree(vdbfolder_ri)  # Remove old databases
@@ -2288,19 +2730,170 @@ def f_reinitialize_dbs(vjobid_ri, vignoredb_ri, vsavefolder_ri, vdbfolder_ri, vg
     print('Old database files have been updated.\n')
 
 
+def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, vfilename, vdomain_ignore, vmaxlim=0):
+    # Constants
+    length_scaling = 4 / 100  # in inches per bp
+
+    # get rid of domains that should not be displayed by new maxlim
+    for vd in range(len(vdomainnames)):
+        vnotdisplay = True
+        for item in vdomain_prevalence[vd]:
+            if item >= vthres:
+                vnotdisplay = False
+        if vnotdisplay:
+            vdomain_ignore[vd] = 1
+
+    # Computing the start end and positions of the domains
+    vdomain_start = []
+    vdomain_end = []
+    vdomain_median = []
+    for vd in range(len(vdomainnames)):
+        if vdomain_ignore[vd] == 0:
+            if sum(vdomain_prevalence[vd]) == 0:
+                vdomain_ignore[vd] = 1
+                vdomain_start.append(0)
+                vdomain_end.append(0)
+                vdomain_median.append(0)
+            else:
+                vlist = []
+                vstartnotset = True
+                vdomain_start_i = 0
+                vdomain_end_i = 0
+                for vi, item in enumerate(vdomain_prevalence[vd]):
+                    if item >= vthres:
+                        if vstartnotset:
+                            vdomain_start_i = vi + 1
+                            vstartnotset = False
+                        vdomain_end_i = vi + 1
+                        for _ in range(int(item)):
+                            vlist.append(vi + 1)
+
+                vdomain_median_i = median(vlist)
+                vdomain_start.append(vdomain_start_i)
+                vdomain_end.append(vdomain_end_i)
+                vdomain_median.append(vdomain_median_i)
+        else:
+            vdomain_start.append(0)
+            vdomain_end.append(0)
+            vdomain_median.append(0)
+
+    # Sorting and correcting of position for better display
+    vids = np.argsort(vdomain_median)
+    for vi in range(len(vids)):
+        if vdomain_ignore[vids[vi]] == 0:
+            vdo_start = True
+            vdo_end = True
+            if vi == 0:
+                vdo_start = False
+            elif vi == len(vids) - 1:
+                vdo_end = False
+            if vdo_start:
+                if vdomain_start[vids[vi]] < vdomain_end[vids[vi - 1]]:
+                    dist_real = abs(vdomain_median[vids[vi]] - vdomain_median[vids[vi - 1]])
+                    dist1 = abs(vdomain_median[vids[vi]] - vdomain_start[vids[vi]])
+                    dist2 = abs(vdomain_end[vids[vi - 1]] - vdomain_median[vids[vi - 1]])
+                    mid = vdomain_median[vids[vi]] - dist_real / (dist1 + dist2) * dist1
+                    if mid - 2 > vdomain_median[vids[vi - 1]]:
+                        vdomain_end[vids[vi - 1]] = mid - 2
+                    else:
+                        vdomain_end[vids[vi - 1]] = mid
+                    if mid + 2 < vdomain_median[vids[vi]]:
+                        vdomain_start[vids[vi]] = mid + 2
+                    else:
+                        vdomain_start[vids[vi]] = mid
+            if vdo_end:
+                if vdomain_end[vids[vi]] > vdomain_start[vids[vi + 1]]:
+                    dist_real = abs(vdomain_median[vids[vi + 1]] - vdomain_median[vids[vi]])
+                    dist1 = abs(vdomain_end[vids[vi]] - vdomain_median[vids[vi]])
+                    dist2 = abs(vdomain_median[vids[vi + 1]] - vdomain_start[vids[vi + 1]])
+                    mid = vdomain_median[vids[vi]] + dist_real / (dist1 + dist2) * dist1
+                    if mid - 2 > vdomain_median[vids[vi]]:
+                        vdomain_end[vids[vi]] = mid - 2
+                    else:
+                        vdomain_end[vids[vi]] = mid
+                    if mid + 2 < vdomain_median[vids[vi + 1]]:
+                        vdomain_start[vids[vi + 1]] = mid + 2
+                    else:
+                        vdomain_start[vids[vi + 1]] = mid
+
+    # Create figure
+    fig, ax = plt.subplots()
+
+    # Create grid for fancy boxes
+    grid = np.mgrid[0:1:1j, 0:1:1j].reshape(2, -1).T
+
+    # Create protein stick
+    patches = []
+    fancybox = mpatches.FancyBboxPatch(grid[0] + [1.0, -0.1],
+                                       length_scaling * vmedlength, 0.2, color='#000000',
+                                       alpha=1, boxstyle=mpatches.BoxStyle("Round", pad=0))
+    patches.append(fancybox)
+    collection = PatchCollection(patches, color='#ffffff', alpha=1, facecolor='#000000')
+    ax.add_collection(collection)
+
+    # Create domain boxes
+    for vi in range(len(vids)):
+        vd = vids[vi]
+        if vdomain_ignore[vd] == 0:
+            if vi % 4 == 0:
+                if vmaxlim == 0:
+                    vh = 1.0 + 1.4 * vmedlength / 400
+                else:
+                    vh = 1.0 + 1.4 * vmaxlim / 400
+            elif (vi + 1) % 4 == 0:
+                if vmaxlim == 0:
+                    vh = 1.0 + 1.0 * vmedlength / 400
+                else:
+                    vh = 1.0 + 1.0 * vmaxlim / 400
+            elif (vi + 2) % 4 == 0:
+                if vmaxlim == 0:
+                    vh = 1.0 + 0.6 * vmedlength / 400
+                else:
+                    vh = 1.0 + 0.6 * vmaxlim / 400
+            else:
+                if vmaxlim == 0:
+                    vh = 1.0 + 0.2 * vmedlength / 400
+                else:
+                    vh = 1.0 + 0.2 * vmaxlim / 400
+            patches = []
+            vpad = 0.3
+            if length_scaling * (vdomain_end[vd] - vdomain_start[vd]) < 2 * vpad:
+                vpad = length_scaling * (vdomain_end[vd] - vdomain_start[vd]) / 2
+            fancybox = mpatches.FancyBboxPatch(grid[0] + [1.0 + vpad + length_scaling * vdomain_start[vd], -0.5-0.3+vpad],
+                                               length_scaling * (vdomain_end[vd] - vdomain_start[vd]) - 2 * vpad, 1+0.6-2*vpad,
+                                               alpha=1, boxstyle=mpatches.BoxStyle("Round", pad=vpad))
+            patches.append(fancybox)
+            collection = PatchCollection(patches, alpha=1, facecolor=vcolors[vd], edgecolor='None')  # color=vcolors[vd]
+            ax.add_collection(collection)
+            ax.text(1 + length_scaling * (vdomain_start[vd] + vdomain_end[vd]) / 2, vh, vdomainnames[vd],
+                    verticalalignment='center', horizontalalignment='center')
+
+    # Scaling
+    plt.axis('equal')
+    plt.axis('off')
+    if vmaxlim == 0:
+        plt.xlim(0, length_scaling * vmedlength + 2)
+    else:
+        plt.xlim(0, length_scaling * vmaxlim + 2)
+    plt.tight_layout()
+
+    # plt.show()
+    plt.savefig(vfilename)
+
+
 ########################################################################################################################
 #                                                                                                                      #
 #  f_print_help                                                                                                        #
-#  Prints the help page of propplot.py                                                                                 #
-#  Can be activated by either running just propplot.py or propplot.py -h                                               #
+#  Prints the help page of domainviz.py                                                                                #
+#  Can be activated by either running just domainviz.py or domainviz.py -h                                             #
 #                                                                                                                      #
 ########################################################################################################################
 
 
 def f_print_help():
-    print('Function: propplot.py\n'
+    print('Function: domainviz.py\n'
           'Function description:\n'
-          'propplot is a script that takes protein sequences as an input, runs them through Prosite and PFAM and\n'
+          'domzinviz is a script that takes protein sequences as an input, runs them through Prosite and PFAM and\n'
           'evaluates which predicted protein domains are existing in many of the proteins delivered and displays\n'
           'the results as a histogram, relative to the median of the protein length.\n'
           '\n'
@@ -2327,7 +2920,8 @@ def f_print_help():
           '                                  is 0.5, 50% of the sequences have to have this domain at the same \n'
           '                                  relative position).\n'
           '  -cs [0 or 1]: Can set custom scaling of figure on (default is off = 0).\n'
-          '  -sbp [number larger than 0]: Indicates the scaling of bp per inch that is used for figures.\n'
+          '  -api [number larger than 0]: Indicates the scaling of amino acids per inch of x axis that is used for\n'
+          '                               figures.\n'
           '  -fs [0 or 1]: Indicates if previous results should be overwritten.'
           '\n'
           'Output:\n'
@@ -2339,8 +2933,8 @@ def f_print_help():
           '  - jobid_domain_color_file.txt [file]: Tsv of the domains and colors used in the plots. Can be modified\n'
           '                                        and funneled back into the script to modify colors. See vcolorfile\n'
           '                                        for structure.\n'
-          '  - jobid_proteingroup_prosite.csv [file]: Results of Prosite for protein group.\n'
-          '  - jobid_proteingroup_pfam.csv [file]: Results of PFAM for protein group.\n'
+          '  - jobid_proteingroup_prosite_domain_results_per_aa.tsv [file]: Results of Prosite for protein group.\n'
+          '  - jobid_proteingroup_pfam_domain_results_per_aa.tsv [file]: Results of PFAM for protein group.\n'
           '  - jobid_prosite_res.tsv [file]: Results of Prosite for this job.\n'
           '  - jobid_pfam_res.tsv [file]: Results of PFAM for this job.\n'
           '  - jobid_cookie[id] [file]: Cookie that shows that this part of code was processed. If cookie -1 shows\n'
@@ -2365,11 +2959,12 @@ def f_print_help():
           'Output:\n'
           'New db files at old locations given by parameter -dbf.\n')
 
+
 ########################################################################################################################
 #                                                                                                                      #
 #  Usual entry point of the script.                                                                                    #
-#  propplot is assumed to be started from the command line with arguments (optional and non-optional ones)             #
-#  Please refer to the help (propplot -h) for more information
+#  domainviz is assumed to be started from the command line with arguments (optional and non-optional ones)            #
+#  Please refer to the help (domainviz -h) for more information                                                        #
 #                                                                                                                      #
 ########################################################################################################################
 
@@ -2452,7 +3047,7 @@ if __name__ == "__main__":
         except IOError:
             print('Path ' + vtemp_db_place_main + ' can not be created.')
             sys.exit()
-        if vwarnings_main == 1:  # Give output about where the db location is, if warnings are on.
+        if vwarnings_main == '1':  # Give output about where the db location is, if warnings are on.
             print('Folder to save dbs: ' + vdbfolder_main)
         f_reinitialize_dbs(vjobid_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
                            vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main,
@@ -2517,7 +3112,7 @@ if __name__ == "__main__":
                 except IOError:
                     print('Path ' + vsavefolder_main + ' can not be created.')
                     sys.exit()
-                if vwarnings_main == 1:  # Give output about where the storing location is, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the storing location is, if warnings are on.
                     print('Folder to save intermediate and output files: ' + vsavefolder_main)
             elif sys.argv[vi] == '-dbf':  # Indicates the location of db files.
                 if len(sys.argv) == vi + 1:  # make sure that there is an argument after -dbf.
@@ -2530,7 +3125,7 @@ if __name__ == "__main__":
                 except IOError:
                     print('Path ' + vdbfolder_main + ' can not be created.')
                     sys.exit()
-                if vwarnings_main == 1:  # Give output about where the db location is, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the db location is, if warnings are on.
                     print('Folder to save dbs: ' + vdbfolder_main)
             elif sys.argv[vi] == '-in':  # Fasta sequence file that contains the protein sequences that should be run.
                 vinputfile_main = sys.argv[vi + 1]
@@ -2541,7 +3136,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vinputfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:  # Give output about where the fasta sequences are, if warnings are on.
+                if vwarnings_main == '1':  # Give output about where the fasta sequences are, if warnings are on.
                     print('Input file stored in: ' + vinputfile_main)
             elif sys.argv[vi] == '-gf':  # A file that contains the groupings of proteins.
                 vgroupfile_main = sys.argv[vi + 1]
@@ -2552,7 +3147,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vgroupfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Group association information stored in: ' + vgroupfile_main)
             elif sys.argv[vi] == '-cf':  # A file that contains the coloring of domains.
                 vcolorfile_main = sys.argv[vi + 1]
@@ -2563,7 +3158,7 @@ if __name__ == "__main__":
                     print('Can not read ' + vcolorfile_main)
                     sys.exit()
                 vfh.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Domain color information stored in: ' + vcolorfile_main)
             elif sys.argv[vi] == '-if':  # A file that contains domains that should not be printed out.
                 vignoredomainfile_main = sys.argv[vi + 1]
@@ -2574,13 +3169,13 @@ if __name__ == "__main__":
                     print('Can not read ' + vignoredomainfile_main)
                     sys.exit()
                 vfh_main.close()
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Information which domains to ignore stored in: ' + vignoredomainfile_main)
             elif sys.argv[vi] == '-ar':  # Indicates whether absolute or relative results should be used.
                 vabsoluteresults_main = sys.argv[vi + 1]
                 vi += 1
                 if vabsoluteresults_main == '1':
-                    if vwarnings_main == 1:
+                    if vwarnings_main == '1':
                         print('Using absolute results.')
                 elif vabsoluteresults_main != '0':
                     print('Unknown option: ' + sys.argv[vi] + ' ' + sys.argv[vi + 1])
@@ -2588,24 +3183,24 @@ if __name__ == "__main__":
             elif sys.argv[vi] == '-cut':  # Indicates at what cutoff domains should be displayed.
                 vcutoff_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Domain display threshold values: ' + vcutoff_main)
             elif sys.argv[vi] == '-mcut':  # Only domains that have a maximum prevalence at a relative place in the
                 # protein group above this ratio are plotted (e.g. if value is 0.5, 50% of the sequences have to have
                 # this domain at the same relative position).
                 vmaxcutoff_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
-                    print('Domain display threshold values at bp level: ' + vmaxcutoff_main)
-            elif sys.argv[vi] == '-sbp':  # Indicates the scaling of bp per inch.
+                if vwarnings_main == '1':
+                    print('Domain display threshold values at amino acid level: ' + vmaxcutoff_main)
+            elif sys.argv[vi] == '-api':  # Indicates the scaling of amino acids per inch.
                 vscalefigure_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Figure scale is 100pb per ' + vmaxcutoff_main + 'inch.')
-            elif sys.argv[vi] == '-cs':  # Indicates the scaling of bp per inch.
+            elif sys.argv[vi] == '-cs':  # Indicates the scaling of amino acids per inch.
                 vcustom_scaling_on_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     if vcustom_scaling_on_main == '1':
                         print('Custom scaling is on.')
                     else:
@@ -2613,12 +3208,12 @@ if __name__ == "__main__":
             elif sys.argv[vi] == '-fs':
                 vfrom_scratch_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('All previous results ignored.')
             elif sys.argv[vi] == '-not':
                 vnotolderthan_main = sys.argv[vi + 1]
                 vi += 1
-                if vwarnings_main == 1:
+                if vwarnings_main == '1':
                     print('Results recovered from databases should not be older than ' + vnotolderthan_main + '.')
             vi += 1
 
@@ -2655,11 +3250,11 @@ if __name__ == "__main__":
         # Produce output about the scaling of the figure
         if vstandardscalefigure_main == vscalefigure_main:
             if vwarnings_main == '1':
-                print('Using figure scaling of 100 bp per ' + str(vscalefigure_main) + ' inches. Change setting with ' +
-                      'scalefigure or -s followed by a value greater than 0.')
-
+                print('Using standard figure scaling. Change setting with scalefigure or -api followed by a value '
+                      'greater than 0 in combination with -cs 1.')
         # Run the script and produce the plots
         print('Running script:')
-        f_run_propplot(vjobid_main, vinputfile_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
-                       vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main, vcustom_scaling_on_main,
-                       vscalefigure_main, vabsoluteresults_main, vwarnings_main, vfrom_scratch_main, vnotolderthan_main)
+        f_run_domainviz(vjobid_main, vinputfile_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
+                        vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main, vcustom_scaling_on_main,
+                        vscalefigure_main, vabsoluteresults_main, vwarnings_main, vfrom_scratch_main,
+                        vnotolderthan_main)

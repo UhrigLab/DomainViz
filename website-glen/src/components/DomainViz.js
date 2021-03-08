@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
-import UploadFile from './UploadFile';
+import UploadFile from './utils/UploadFile';
 import AccordionSetup from './AccordionSetup';
 import isFasta from './utils/ValidateFile';
+import { FastaFileMap } from './utils/FastaFileMap';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import { Box, Button, Checkbox, Container, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import DomainVizIcon from './img/domainviz.png';
 import { saveAs } from 'file-saver';
 
-
-
-//TODO: change color palette (Eg. 191D32, 7f7f7f, 423B0B, D000000, FFBA08[replace with mustard yellow?])
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -81,7 +77,7 @@ function ProtPlot() {
     const resultID = guid();
     const history = useHistory()
 
-    const [fastaFile, setFastaFile] = useState(null);
+    const [fastaFiles, setFastaFiles] = useState([]);
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
@@ -108,50 +104,121 @@ function ProtPlot() {
     }
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
-        setFastaFile({
-            file: "test",
-            name: "test"
-        })
+        setFastaFiles(
+            [ {file: "single_test", name: "single_test_file.fa"} ]
+        )
     }
-    function clearFastaFile() {
-        setFastaFile(null);
+    function uploadMultipleTestFastaFiles() {
+        setFastaFiles(
+            [
+                {file: "mult_test_1", name: "multi_test_file_1.fa"},
+                {file: "mult_test_2", name: "multi_test_file_2.fa"},
+                {file: "mult_test_3", name: "multi_test_file_3.fa"},
+            ]
+        )
     }
-    async function handleFastaFile(file) {
-        //Validate fastaFile:
-        let valid = true;
-
-        // Check the file's size
-        if (((file.size / 1024) / 1024).toFixed(4) > 10) {
-            alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
-            valid = false;
-        }
-        // Check that the file is a fasta file
-        await isFasta(file).then((result) => {
-            valid = result;
-        });
-
-        if (valid) {
-            setFastaFile(file);
-            alert("Sucessfully uploaded file: " + file.name)
+    function clearFastaFile(index) {
+        // Remove the fasta file at a certain index, or if there is no index given, clear all files
+        if (typeof(index)=='number') {
+            setFastaFiles([
+                ...fastaFiles.slice(0, index),
+                ...fastaFiles.slice(index+1)
+            ]);
         }
         else {
+            setFastaFiles([])
+        }
+    }
+    function changeFAFileName(index, newName) {
+        console.log(fastaFiles)
+        console.log(index)
+        // If the fastafile is one of the example files, we only replace its name, otherwise, we replace the whole file
+        // since that is the only way to change a File's name in Javascript. 
+        if (fastaFiles[index].file) {
+            if (fastaFiles[index].file.includes("test")) {
+                setFastaFiles(
+                    [
+                        ...fastaFiles.slice(0, index),
+                        {file: fastaFiles[index].file, name: newName + '.fa'},
+                        ...fastaFiles.slice(index+1)
+                    ]
+                );
+            }
+        }
+        else {
+            let newFAFile = new File([fastaFiles[index]], newName + ".fa");
+            setFastaFiles([
+                ...fastaFiles.slice(0, index),
+                newFAFile,
+                ...fastaFiles.slice(index+1)
+            ]);
+        }
+    }
+    async function handleFastaFiles(fileList) {
+        
+        let files = []
+        for (let i=0; i<fileList.length; i++) {
+            files.push(fileList[i])
+        }
+        if ((files.length + fastaFiles.length) >= 20) {
+            alert("Please restrict your number of files to a maximum of 20 total.");
             return;
         }
+        const promises = files.map(async file => {
+            //Validate fastaFiles
+            let valid = true;
+            
+            // Check the file's size
+            if (((file.size / 1024) / 1024).toFixed(4) > 10) {
+                alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
+                valid = false;
+            }
+            // // Check that the file is a fasta file
+            await isFasta(file).then((result) => {
+                valid = result;
+            });
+
+            return valid;
+        })
+        const validList = await Promise.all(promises);
+
+        let filenames = ""
+        for (let i=0; i<files.length; i++) {
+            if(validList[i] === false) {
+                alert("File " + files[i].name + " is invalid")
+                return;
+            }
+            filenames = filenames + files[i].name + " "
+        }
+        alert("Successfully uploaded file(s): " + filenames)
+        setFastaFiles(oldFaFiles => [...oldFaFiles, ...files])
     }
 
     async function sendPartOneFiles() {
         //Save file to server so the backend can access it 
         const data = new FormData();
 
-        if (fastaFile == null) {
-            alert("Please upload a file before clicking go.");
+        if (fastaFiles.length === 0) {
+            alert("Please upload a fasta file before clicking \"Submit Task\".");
             return;
         }
-        if (fastaFile.name === "test") {
-            data.append(resultID, fastaFile.name)
+        if (fastaFiles[0].file) {
+            if (fastaFiles[0].file.includes("test")) {
+                // This means we are using the example file, or the example file list. 
+                // There may be one or more files, and we append the name and the "file" object for each one, which here is either
+                // single_test or mult_test_X.
+                // Otherwise the entries become unaccessible in the backend, since the data is stored in a dictionary with the
+                // first value being the key.
+                data.append("result_id", resultID)
+                for (let i=0; i<fastaFiles.length; i++) { 
+                    data.append(fastaFiles[i].file, fastaFiles[i].name);
+                }
+            }
         }
         else {
-            data.append(resultID, fastaFile, fastaFile.name);
+            for (let i=0; i<fastaFiles.length; i++) {
+                data.append(fastaFiles[i].name, fastaFiles[i], resultID);
+            }
         }
 
 
@@ -188,7 +255,7 @@ function ProtPlot() {
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
-
+        console.log(data)
         await axios.post('/api/sendfiles', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
@@ -202,7 +269,7 @@ function ProtPlot() {
             history.push("/view-results/" + resultID);
         }).catch(error => {
             console.log(error);
-            alert("Oh dear. Something has gone wrong.")
+            alert("Oh dear. Something has gone wrong. The following error has occured: " + error);
         });
     }
 
@@ -215,31 +282,46 @@ function ProtPlot() {
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
                         <Typography variant='h5'>Protein domain search {'&'} visualization tool</Typography>
-                        <Typography variant='body1'>Use DomainViz by first uploading a protein Fasta file, changing any options as desired and clicking "Submit Task".</Typography>
+                        <Typography variant='body1'>Use DomainViz by first uploading one or more protein Fasta file(s), changing any options as desired and clicking "Submit Task".</Typography>
                     </Paper>
                 </Grid>
 
                 <Grid item xs={2} />
                 <Grid item xs={3}>
-                    <AccordionSetup id='fastatxt' header='Fasta File' body='The file needs to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
+                    <AccordionSetup id='fastatxt' header='Fasta File(s)' body='The file(s) need to contain fasta sequences in files named either .fa or .fasta.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={2}>
-                    <UploadFile value='fasta' handleFile={handleFastaFile} acceptedTypes='.fa,.fasta' />
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear File</Button>
+                    <UploadFile value='fasta' handleFile={handleFastaFiles} acceptedTypes='.fa,.fasta' multiple={true} />
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={clearFastaFile} style={{ marginLeft: "10px" }}>Clear All</Button>
                 </Grid>
                 <Grid item xs={1}>
-                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFile == null) ? false : true} name="fastaFileLoadedCheckbox" />
+                    <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
+
                 <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Example</Button>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile} style={{ marginLeft: "10px" }}>Download Example</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Single Example</Button>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadMultipleTestFastaFiles} style={{ marginLeft: "10px" }}>Load Multiple Examples</Button>
                 </Grid>
-                
-                <Grid item xs={2} />
 
-                <Grid item xs={12} />
-                <Grid item xs={12} />
+                <Grid item xs={12} >
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={downloadTestFastaFile}>Download Examples</Button>
+                </Grid>
 
+                <FastaFileMap fastaFiles={fastaFiles} changeName={changeFAFileName} removeFile={clearFastaFile}></FastaFileMap>
+
+                <Grid item xs={12}/>
+
+                <Grid item xs={12}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
+                        Submit Task
+                    </Button>
+                </Grid>
+
+                <Grid item xs={3}/>
+                <Grid item xs={6}>
+                    <Divider className={classes.divider}></Divider>
+                </Grid>
+                <Grid item xs={3}/>
 
                 <Grid item xs={3}>
                     <AccordionSetup id='cutofftxt' header='Minimum domain prevalence' body='Enter a number between 0 and 1. The default value is 0.05. Only domains occuring in a ratio higher than the number are plotted (e.g. If the value is 0.5, the domain has to occur somewhere in the protein of at least 50% of sequences).'></AccordionSetup>
@@ -256,7 +338,7 @@ function ProtPlot() {
                 </Grid>
 
                 <Grid item xs={3}>
-                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number between 0 and 10. The default value is 1, but this may not reflect well in your plots, and it is recommended that you leave it off. The number you input represents the number of inches per 100pb that the plot is used to display.'></AccordionSetup>
+                    <AccordionSetup id='scale-figuretxt' header='Figure Scaling' body='This parameter is disabled by default. Click the checkbox to enable figure scaling. Enter a number between 0 and 10. The default value is 1, but this may not reflect well in your plots, and it is recommended that you leave it off. The number you input represents the number of inches per 100pb that the plot is used to display. Please note that visualizations on the server will not reflect figure scaling, but in the downloaded package, they will be.'></AccordionSetup>
                 </Grid>
                 <Grid item xs={1}>
                     <TextField disabled={(checkboxes.scaleFigureCheckbox) ? false : true} id='scale-figure' name='scaleFigureTextField' value={textFields.scaleFigureTextField} type='number' inputProps={{ min: 0, max: 10, step: '0.1' }} onChange={handleTextField} />
@@ -274,12 +356,6 @@ function ProtPlot() {
                     <FormControlLabel
                         control={<Checkbox checked={checkboxes.absoluteResultsCheckbox} onChange={handleCheckBox} name="absoluteResultsCheckbox" />}
                         label="Yes" />
-                </Grid>
-
-                <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
-                        Submit Task
-                    </Button>
                 </Grid>
 
                 <Grid item xs={6}>
