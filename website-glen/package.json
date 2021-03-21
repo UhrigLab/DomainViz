@@ -1,50 +1,50 @@
 {
-  "name": "website-glen",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.56",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
-    "axios": "^0.21.0",
-    "babel": "^6.23.0",
-    "core-util-is": "^1.0.2",
-    "file-saver": "^2.0.2",
-    "fontsource-roboto": "^3.0.3",
-    "material-ui": "^0.20.2",
-    "pip": "^0.0.1",
-    "react": "^16.14.0",
-    "react-color": "^2.19.3",
-    "react-dom": "^16.14.0",
-    "react-pdf": "^5.0.0",
-    "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.0",
-    "react-transition-group": "^4.4.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "proxy": "http://localhost:5000",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+    "name": "website-glen",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@material-ui/core": "^4.11.0",
+        "@material-ui/icons": "^4.9.1",
+        "@material-ui/lab": "^4.0.0-alpha.56",
+        "@testing-library/jest-dom": "^4.2.4",
+        "@testing-library/react": "^9.3.2",
+        "@testing-library/user-event": "^7.1.2",
+        "axios": "^0.21.0",
+        "babel": "^6.23.0",
+        "core-util-is": "^1.0.2",
+        "file-saver": "^2.0.2",
+        "fontsource-roboto": "^3.0.3",
+        "material-ui": "^0.20.2",
+        "pip": "^0.0.1",
+        "react": "^16.14.0",
+        "react-color": "^2.19.3",
+        "react-dom": "^16.14.0",
+        "react-pdf": "^5.0.0",
+        "react-router": "^5.2.0",
+        "react-router-dom": "^5.2.0",
+        "react-scripts": "^4.0.0",
+        "react-transition-group": "^4.4.1"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "proxy": "http://localhost:5000",
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
 }

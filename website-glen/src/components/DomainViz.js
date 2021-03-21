@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import UploadFile from './utils/UploadFile';
 import AccordionSetup from './AccordionSetup';
-import isFasta from './utils/ValidateFile';
+import { isFileFasta, isStringFasta } from './utils/ValidateInputs';
 import { FastaFileMap } from './utils/FastaFileMap';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,6 +13,7 @@ import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } fr
 import { useHistory } from 'react-router';
 import DomainVizIcon from './img/domainviz.png';
 import { SketchPicker } from 'react-color';
+import { saveAs } from 'file-saver';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -113,6 +114,11 @@ function ProtPlot() {
         setTextFields({ ...textFields, [event.target.name]: event.target.value })
     }
 
+    function downloadTestFastaFile() {
+        fetch('/api/testFasta').then(response => {
+            saveAs(response.url);
+        });
+    }
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
@@ -185,7 +191,7 @@ function ProtPlot() {
                 valid = false;
             }
             // // Check that the file is a fasta file
-            await isFasta(file).then((result) => {
+            await isFileFasta(file).then((result) => {
                 valid = result;
             });
 
@@ -226,8 +232,8 @@ function ProtPlot() {
                 }
             }
         }
-        else if (fastaFile.name === "manual") {
-            data.append(resultID, fastaFile.file)
+        else if (fastaFiles[0].name === "manual") {
+            data.append(resultID, fastaFiles[0].file)
         }
         else {
             for (let i=0; i<fastaFiles.length; i++) {
@@ -326,7 +332,7 @@ function ProtPlot() {
                 <Grid item xs={12}/>
 
                 <Grid item xs={12}>
-                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendPartOneFiles}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={sendDomainvizFiles}>
                         Submit Task
                     </Button>
                 </Grid>

@@ -10,7 +10,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import { isFileFasta, isStringFasta } from './utils/ValidateInputs';
 import { downloadTestFastaFile } from './utils/HTTPRequests';
 import AccordionSetup from './AccordionSetup';
-import UploadFile from './UploadFile';
+import UploadFile from './utils/UploadFile';
 
 
 const useStyles = makeStyles((theme) => ({
