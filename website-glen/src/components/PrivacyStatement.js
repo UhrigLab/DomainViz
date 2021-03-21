@@ -9,6 +9,11 @@ const useStyles = makeStyles((theme) => ({
       textAlign: 'left',
       color: theme.palette.text.secondary,
   },
+  link: {
+    fontWeight: 'fontWeightBold',
+    color: 'black',
+    textDecoration: 'underline',
+  },
 }));
 export const PrivacyStatement = () => {
   const classes = useStyles()
@@ -21,7 +26,11 @@ export const PrivacyStatement = () => {
             <Typography variant='body1' paragraph>This Privacy Statement explains what personal data is collected by the specific Uhrig Lab tool and service you are requesting, for what purposes, how it is processed, and how we keep it secure.</Typography>
             <Typography variant='body1'>The data controller’s contact details are the following and should be used only for data protection queries:</Typography>
             <Typography variant='body1'>R. Glen Uhrig</Typography>
-            <Typography variant='body1' paragraph>Email: ruhrig@ualberta.ca</Typography>
+            <Typography variant='body1' display='inline'>Email:{' '}</Typography> 
+            <a className={classes.link} href={`mailto:ruhrig@ualberta.ca?subject=DomainViz Privacy Concern`}>
+              <Typography variant='body1' display='inline'>ruhrig@ualberta.ca</Typography>
+            </a>
+            <Typography paragraph/>
 
             <Typography variant='h5'>Why do we collect your personal data?</Typography>
             <Typography variant='body1' paragraph>Processing your personal data is necessary for our legitimate interest in allowing the day-to-day management, operation and functioning of Uhrig Lab Protein Tools.</Typography>

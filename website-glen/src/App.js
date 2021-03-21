@@ -7,7 +7,7 @@ import {
   BrowserRouter,
   Switch,
   Route,
-  Link,
+  Link as RouterLink,
 } from 'react-router-dom';
 
 import { ViewPDF } from './components/ViewPDF';
@@ -28,12 +28,6 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     display: 'box',
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
-    width: 90,
-    height: 90,
-    // backgroundColor: '#7F7F7F' 
-  },
   subtitle: {
     flexGrow: 1,
     fontFamily: `"Raleway"`,
@@ -42,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: `"Raleway"`,
     fontSize: 20,
     fontStyle: "bold",
-    color: "black"
+    color: "black",
   },
   divider: {
     scale: 1.0,
@@ -77,7 +71,13 @@ const theme = createMuiTheme({
   },
 });
 
-
+// NOTE that this <Link> component in this App is different than the <Link> component in other pages such as Help and About.
+// This is an unfortunate circumstance due to React Router DOM and MaterialUI using the same component name for different 
+// functionalities. Therefore, I am using the Alias <RouterLink> for the React Router DOM <Link> component.
+// Please see:
+// https://reactrouter.com/web/api/Link
+// and
+// https://material-ui.com/components/links/
 function App() {
   const classes = useStyles();
   return (
@@ -94,23 +94,23 @@ function App() {
             </Box>
             <Typography variant="h6" className={classes.subtitle}/> {/* Need this for spacing for now */}
             
-            <Link to='/'>
-              <Button color='inherit' className={classes.linkButton}>Home</Button>
-            </Link>
-            {/* <Link to='/domainviz'> */}
-            {/* <Link to='/domainviz'>
+            {/* <RouterLink to='/'>
+              <Button color='inherit'>Home</Button>
+            </RouterLink> */}
+            {/* <RouterLink to='/domainviz'> */}
+            <RouterLink to='/domainviz'>
               <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
-            </Link> */}
-            <Link to='/u-motif'>
-              <Button color='inherit' className={classes.linkButton}>U-Motif</Button>
-            </Link>
-            <Link to='/about'>
+            </RouterLink>
+            {/* <RouterLink to='/motif-x'>
+              <Button color='inherit'>MotifX</Button>
+            </RouterLink> */}
+            <RouterLink to='/about'>
               <Button color='inherit' className={classes.linkButton}>About Us</Button>
-            </Link>
-            <Link to='/help'>
+            </RouterLink>
+            <RouterLink to='/help'>
               <Button color='inherit' className={classes.linkButton}>Help</Button>
-            </Link>
-            <Button target="_blank" color='inherit' href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
+            </RouterLink>
+            <Button color='inherit' target="_blank" href="https://www.uhriglab.com/" className={classes.linkButton}>Lab Website</Button>
 
           </Toolbar>
         </AppBar>

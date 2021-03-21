@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UploadFile({ value, handleFile, acceptedTypes=".tsv" }) {
+function UploadFile({ value, handleFile, acceptedTypes=".tsv", multiple=false }) {
   const classes = useStyles();
   const [inputValue, setInputValue] = useState("")
   const returnFile = (file) => {
@@ -26,10 +26,11 @@ function UploadFile({ value, handleFile, acceptedTypes=".tsv" }) {
         accept={acceptedTypes}
         className={classes.input}
         id={value}
-        type="file"
+        type='file'
         style={{ display: 'none' }}
         value={inputValue}
-        onChange={e => returnFile(e.target.files[0])}
+        onChange={e => returnFile(e.target.files)}
+        multiple={ multiple }
       />
       <label htmlFor={value}>
         <Button
