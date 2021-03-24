@@ -42,7 +42,6 @@ export const ViewPDF = () => {
     const [colorGroups, setColorGroups] = useState([])
     const [failed, setFailed] = useState(false);
     const [showExitDialog, setShowExitDialog] = useState(false);
-    const [open, setOpen] = useState(false);
 
     const classes = useStyles();
     let history = useHistory();

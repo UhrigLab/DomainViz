@@ -19,7 +19,7 @@ import { Help } from './components/Help';
 import { TermsOfUse } from './components/TermsOfUse';
 import { PrivacyStatement } from './components/PrivacyStatement';
 import DomainViz from './components/DomainViz';
-import MotifX from './components/MotifX';
+import UMotif from './components/UMotif';
 
 const useStyles = makeStyles((theme) => ({
   app: {
@@ -101,9 +101,9 @@ function App() {
             <RouterLink to='/domainviz'>
               <Button color='inherit' className={classes.linkButton}>DomainViz</Button>
             </RouterLink>
-            {/* <RouterLink to='/motif-x'>
-              <Button color='inherit'>MotifX</Button>
-            </RouterLink> */}
+            <RouterLink to='/u-motif'>
+              <Button color='inherit' className={classes.linkButton}>U-Motif</Button>
+            </RouterLink>
             <RouterLink to='/about'>
               <Button color='inherit' className={classes.linkButton}>About Us</Button>
             </RouterLink>
@@ -123,7 +123,7 @@ function App() {
           <Route path="/help" component={Help} />
           <Route path='/terms-of-use' component={TermsOfUse}/>
           <Route path='/privacy-statement' component={PrivacyStatement}/>
-          <Route path="/u-motif" component={MotifX} />
+          <Route path="/u-motif" component={UMotif} />
         </Switch>
 
       </ThemeProvider>

@@ -51,6 +51,14 @@ def index():
 def test_fasta():
     return send_file(os.path.abspath(example_file_path + "example.zip"), as_attachment=True)
 
+@main.route('/api/color-files/<username>', methods=['GET'])
+def colorFiles(username):
+    result_id = username
+    color_file = open(os.path.abspath(file_path+result_id+"_domain_color_file.txt"), 'r')
+    lines = color_file.readlines()
+
+    return jsonify({'colorGroups' : lines})
+
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
