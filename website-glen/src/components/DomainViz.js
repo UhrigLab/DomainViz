@@ -111,9 +111,25 @@ function ProtPlot() {
         fastaTextField: '',
     });
     const handleTextField = (event) => {
-        setTextFields({ ...textFields, [event.target.name]: event.target.value })
+        setTextFields({ ...textFields, [event.target.name]: event.target.value });
     }
 
+    async function validateFastaText() {
+        alert(textFields.fastaTextField)
+        let valid = true;
+        await isStringFasta(textFields.fastaTextField).then((result) => {
+            valid = result;
+        });
+        if (valid) {
+            setFastaFiles(
+                [{ file: textFields.fastaTextField, name: "manual" }]
+            );
+        }
+        else {
+            return;
+        }
+        alert("Text accepted as fasta file.")
+    }
     function downloadTestFastaFile() {
         fetch('/api/testFasta').then(response => {
             saveAs(response.url);
@@ -123,7 +139,7 @@ function ProtPlot() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
             [ {file: "single_test", name: "single_test_file.fa"} ]
-        )
+        );
     }
     function uploadMultipleTestFastaFiles() {
         setFastaFiles(
@@ -132,7 +148,7 @@ function ProtPlot() {
                 {file: "mult_test_2", name: "multi_test_file_2.fa"},
                 {file: "mult_test_3", name: "multi_test_file_3.fa"},
             ]
-        )
+        );
     }
     function clearFastaFile(index) {
         // Remove the fasta file at a certain index, or if there is no index given, clear all files
@@ -172,12 +188,11 @@ function ProtPlot() {
         }
     }
     async function handleFastaFiles(fileList) {
-        
         let files = []
         for (let i=0; i<fileList.length; i++) {
             files.push(fileList[i])
         }
-        if ((files.length + fastaFiles.length) >= 20) {
+        if ((files.length + fastaFiles.length) > 20) {
             alert("Please restrict your number of files to a maximum of 20 total.");
             return;
         }
@@ -212,7 +227,7 @@ function ProtPlot() {
     }
 
     async function sendDomainvizFiles() {
-        //Save file to server so the backend can access it 
+        //send files and other data from the form via POST so the backend can access it 
         const data = new FormData();
 
         if (fastaFiles.length === 0) {
@@ -317,6 +332,17 @@ function ProtPlot() {
                 <Grid item xs={1}>
                     <Checkbox disabled style={{ color: 'green' }} checked={(fastaFiles.length === 0) ? false : true} name="fastaFileLoadedCheckbox" />
                 </Grid>
+                <Grid item xs={4} />
+
+
+                {/* <Grid item xs={2} /> // TODO Currently broken in that the backend interprets the text fasta file as "test" fasta, also may have issue with renaming
+                <Grid item xs={6} >
+                    <TextField id="fasta-textfield" name='fastaTextField' label="Fasta File" placeholder="Paste Text Here" multiline fullWidth rowsMax={5} variant='outlined' value={textFields.fastaTextField} onChange={handleTextField} />
+                </Grid>
+                <Grid item xs={1}>
+                    <Button variant='contained' color='default' component='span' className={classes.button} onClick={validateFastaText} >Validate Text</Button>
+                </Grid>
+                <Grid item xs={3} /> */}
 
                 <Grid item xs={12}>
                     <Button variant='contained' color='default' component='span' className={classes.button} onClick={uploadTestFastaFile}>Load Single Example</Button>

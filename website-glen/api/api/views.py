@@ -221,5 +221,67 @@ def download(username):
     
     return send_file(os.path.abspath(file_path + result_id + '.zip'), as_attachment=True)
 
+
+@main.route('/api/u-motif', methods=["POST"])
+def u_motif():
+    # retrieve the fasta file(s) from the POST
+    # Each file in request.files has the layout:
+    # (<foreground or background><str>, file<FileStorage>, file_name<str>)
+    # Eg. ("foreground", <FileStorage: file_name ('application/octet-stream')>)
+    result_id=request.form['result_id']
+    fg_fasta_file = None
+    fg_fasta_filename = None
+    bg_fasta_file = None
+    bg_fasta_filename = None
+
+    # assign all files to their respective locations
+    for key in request.files.keys():
+        file=request.files[key]
+        file_name=key
+        fg_bg=file.filename # a technical misuse of this variable, but it works for our purposes
+        
+         # A failsafe in case the wrong type of files have been uploaded. In this case, we ignore it, and move on to the next file
+        if ".fa" not in file_name and ".fasta" not in file_name:
+            print("File " + file_name + " is not a fastafile, and is being skipped.")
+            continue
+
+        if fg_bg == "foreground":
+            fg_fasta_file=file
+            fg_fasta_filename=file_name
+        else:
+            bg_fasta_file=file
+            bg_fasta_filename=file_name
+
+    # This block runs if there are no files being sent to the backend, in which case, there is a form sent instead
+    # that just has the name of the group that the test file should be saved under.
+    if fg_fasta_file == None:
+        for key in request.form.keys():
+            print("Key", key)
+            print("form with key:", request.form[key])
+            # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it  
+            if key == "manual":
+                fasta_text=request.form[key]
+                print("manual file found")
+                #TODO save fasta text
+            elif key == "test": # currently only have a single test file
+                fg_fasta_filename=example_multiple_files["single_test"]
+                print("test file found")
+    
+    if bg_fasta_file == None:
+
+        for key in request.form.keys():
+            # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
+            if '.fa' in request.form[key]:
+                # set the variables for the call to the example variables, and "save" the fasta file.
+                group_name = request.form[key].split('.fa')[0]  # remove the .fa from group_name    
+                #key will be "testX" where X is the number. This key is passed to the example_multiple_files dictionary, which is then
+                #used to grab the correct test file.
+   #             save_fasta_file(example_file_path, example_multiple_files[key], result_id, group_name) 
+
+
+    # we want the outputs saved to result_id.whatever for easy retrieval later
+    save_to = result_id
+
+    return "Done", 201
 #after request [POST] requests only
 #validate file exists, if it does, delete file
