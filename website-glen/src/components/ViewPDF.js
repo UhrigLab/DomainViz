@@ -1,7 +1,7 @@
 import { React, useEffect, useState } from 'react';
 import { PDFMap } from './utils/PDFMap';
 import { MessageMap } from './utils/MessageMap';
-import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress, TextField } from '@material-ui/core';
+import { Typography, Grid, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 import DomainVizIcon from './img/domainviz.png';
@@ -131,7 +131,7 @@ export const ViewPDF = () => {
             );
         }, 5000);
         return () => clearInterval(interval);
-    }, []);
+    }, [uid]);
     useEffect(() => {
         if (images.length > 0) {
             setDisplayImages(true);
@@ -144,12 +144,12 @@ export const ViewPDF = () => {
         if (!messages.includes(currentMessage) && currentMessage.length > 0) {
             setMessages(currentMessages => [...currentMessages, currentMessage]);
         }
-    }, [images, failed, currentMessage]);
+    }, [images, failed, currentMessage, messages]);
 
     return (
         <Grid container spacing={3} alignItems='center' style={{marginTop: '90px'}}>
             <Grid item xs={12}>
-                <img src={DomainVizIcon} className={classes.img}></img>
+                <img src={DomainVizIcon} className={classes.img} alt="Domain Viz Icon"></img>
             </Grid>
 
             <Grid item xs={12}>
@@ -158,7 +158,7 @@ export const ViewPDF = () => {
                 </Paper>
             </Grid>
 
-            {(displayImages && !showProgressBar && failed == false) &&
+            {(displayImages && !showProgressBar && failed === false) &&
                 <>
                     <PDFMap images={images} uid={uid} groupNames={groupNames} />
                     <Grid item xs={12}>
@@ -168,7 +168,7 @@ export const ViewPDF = () => {
                     <Grid item xs={12}/>
                 </>
             }
-            {(!displayImages && showProgressBar && failed == false) &&
+            {(!displayImages && showProgressBar && failed === false) &&
                 <>
                     <Grid item xs={12}>
                         <Paper className={classes.paper} variant='outlined'>

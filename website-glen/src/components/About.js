@@ -1,7 +1,7 @@
 import React from 'react';
 import { Grid, Paper, Typography, Link } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Flowchart from './img/flowchart.png'
+// import Flowchart from './img/flowchart.png'
 import {  Link as RouterLink } from 'react-router-dom';
 
 

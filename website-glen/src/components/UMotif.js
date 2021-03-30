@@ -89,7 +89,7 @@ function MotifX() {
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFGFastaFiles(
-            [ { file: "test", name: "test"} ]
+            [ { file: "single_test", name: "test.fa"} ]
         );
     }
     function clearFastaFiles(foreground) {
@@ -186,7 +186,7 @@ function MotifX() {
         });
         if (valid) {
             setFGFastaFiles(
-                [{ file: "manual", name: textFields.fastaTextField }]
+                [{ file: textFields.fastaTextField, name: "manual.fa", type: "manual" }]
             );
         }
         else {
@@ -218,9 +218,15 @@ function MotifX() {
                     data.append(fgFastaFiles[i].file, fgFastaFiles[i].name);
                 }
             }
-            else if (fgFastaFiles[0].file.includes("manual")) {
-                console.log("appending manual")
-                data.append("manual", fgFastaFiles[0].file);
+            else if (fgFastaFiles[0].type) {
+                if (fgFastaFiles[0].type.includes("manual")) {
+                    // Here we append 2 different (key, value) pairs because we need the name, in case the user renamed the file,
+                    // as well as the data as a string, and FormData() objects dont need
+                    data.append("manual", fgFastaFiles[0].name);
+                    data.append(fgFastaFiles[0].name, fgFastaFiles[0].file)
+                }
+                else 
+                    alert("Something went wrong with your fasta text, we could not process it correctly.")
             }
             else {
                 alert("Something went wrong with your fasta file.", fgFastaFiles[0]);

@@ -12,7 +12,6 @@ import Paper from '@material-ui/core/Paper';
 import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router';
 import DomainVizIcon from './img/domainviz.png';
-import { SketchPicker } from 'react-color';
 import { saveAs } from 'file-saver';
 
 const useStyles = makeStyles((theme) => ({
@@ -63,7 +62,7 @@ function ProtPlot() {
             alert("Please enter a result ID.");
             return;
         }
-        if (id.length != 36) {
+        if (id.length !== 36) {
             alert("Please enter a valid result ID, this ID is the wrong length.");
             return;
         }
@@ -72,8 +71,8 @@ function ProtPlot() {
             return;
         }
         let idSplit = id.split('.')
-        if (idSplit.length != 5 || idSplit[0].length != 8 || idSplit[1].length != 4 || idSplit[2].length != 4 
-            || idSplit[3].length != 4 || idSplit[4].length != 12) {
+        if (idSplit.length !== 5 || idSplit[0].length !== 8 || idSplit[1].length !== 4 || idSplit[2].length !== 4 
+            || idSplit[3].length !== 4 || idSplit[4].length !== 12) {
             alert("Please enter a valid result ID, this ID isn't formatted correctly.")
             return
         }
@@ -85,15 +84,6 @@ function ProtPlot() {
     const history = useHistory()
 
     const [fastaFiles, setFastaFiles] = useState([]);
-
-    const [showColorPicker, setShowColorPicker] = useState(false);
-    function handleColorPicker() {
-        setShowColorPicker(!showColorPicker);
-    }
-    const [cfColor, setCfColor] = useState('#fff'); // cfColor is one of the colors that will be used to generate a colorfile
-    const handleCfColorChange = (color) => {
-        setCfColor(color.hex)
-    }
 
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
@@ -113,23 +103,23 @@ function ProtPlot() {
     const handleTextField = (event) => {
         setTextFields({ ...textFields, [event.target.name]: event.target.value });
     }
-
-    async function validateFastaText() {
-        alert(textFields.fastaTextField)
-        let valid = true;
-        await isStringFasta(textFields.fastaTextField).then((result) => {
-            valid = result;
-        });
-        if (valid) {
-            setFastaFiles(
-                [{ file: textFields.fastaTextField, name: "manual" }]
-            );
-        }
-        else {
-            return;
-        }
-        alert("Text accepted as fasta file.")
-    }
+    // Commented out b/c visual component is not used atm
+    // async function validateFastaText() {
+    //     alert(textFields.fastaTextField)
+    //     let valid = true;
+    //     await isStringFasta(textFields.fastaTextField).then((result) => {
+    //         valid = result;
+    //     });
+    //     if (valid) {
+    //         setFastaFiles(
+    //             [{ file: textFields.fastaTextField, name: "manual" }]
+    //         );
+    //     }
+    //     else {
+    //         return;
+    //     }
+    //     alert("Text accepted as fasta file.")
+    // }
     function downloadTestFastaFile() {
         fetch('/api/testFasta').then(response => {
             saveAs(response.url);

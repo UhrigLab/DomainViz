@@ -229,10 +229,10 @@ def u_motif():
     # (<foreground or background><str>, file<FileStorage>, file_name<str>)
     # Eg. ("foreground", <FileStorage: file_name ('application/octet-stream')>)
     result_id=request.form['result_id']
+    # initalize these as None so that later on we can tell if they were saved as files, or if they need to be saved
+    # as text, or if example files need to be used.
     fg_fasta_file = None
-    fg_fasta_filename = None
     bg_fasta_file = None
-    bg_fasta_filename = None
 
     # assign all files to their respective locations
     for key in request.files.keys():
@@ -245,22 +245,22 @@ def u_motif():
             print("File " + file_name + " is not a fastafile, and is being skipped.")
             continue
 
-        if fg_bg == "foreground":
-            fg_fasta_file=file
-            fg_fasta_filename=file_name
+        if fg_bg == "foreground":            
+            fg_fasta_file=result_id + "_fg.fa"
+            file.save(file_path + fg_fasta_file)
         else:
-            bg_fasta_file=file
-            bg_fasta_filename=file_name
+            bg_fasta_file=result_id + "_bg.fa"
+            file.save(file_path + bg_fasta_file)
 
     # This block runs if there are no files being sent to the backend, in which case, there is a form sent instead
     # that just has the name of the group that the test file should be saved under.
     if fg_fasta_file == None:
         for key in request.form.keys():
-            print("Key", key)
-            print("form with key:", request.form[key])
             # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it  
             if key == "manual":
-                fasta_text=request.form[key]
+                fg_filename=request.form[key]
+                fg_text=request.form[fg_filename]
+                f = open(fg_filename)
                 print("manual file found")
                 #TODO save fasta text
             elif key == "test": # currently only have a single test file
