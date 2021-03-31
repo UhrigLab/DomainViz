@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-api_path = "api/api/"
+#api_path = "api/api/"
 #PRODUCTION
-#api_path = "api/"
+api_path = "api/"
 
 #DEVELOPMENT
-virtual_env = "api/api/propplotenvDEV/"
+#virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-#virtual_env = "api/propplotenv/"
+virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
@@ -228,11 +228,11 @@ def u_motif():
     # Each file in request.files has the layout:
     # (<foreground or background><str>, file<FileStorage>, file_name<str>)
     # Eg. ("foreground", <FileStorage: file_name ('application/octet-stream')>)
-    result_id=request.form['result_id']
+    result_id = request.form['result_id']
     # initalize these as None so that later on we can tell if they were saved as files, or if they need to be saved
     # as text, or if example files need to be used.
-    fg_fasta_file = None
-    bg_fasta_file = None
+    fg_fasta_filepath = None
+    bg_fasta_filepath = None
 
     # assign all files to their respective locations
     for key in request.files.keys():
@@ -244,44 +244,88 @@ def u_motif():
         if ".fa" not in file_name and ".fasta" not in file_name:
             print("File " + file_name + " is not a fastafile, and is being skipped.")
             continue
-
         if fg_bg == "foreground":            
-            fg_fasta_file=result_id + "_fg.fa"
-            file.save(file_path + fg_fasta_file)
-        else:
-            bg_fasta_file=result_id + "_bg.fa"
-            file.save(file_path + bg_fasta_file)
+            fg_fasta_filepath = file_path + result_id + "_fg.fa"
+            file.save(fg_fasta_filepath)
+            print("foreground file being used, saved as:" + result_id + "_fg.fa")
+        elif fg_bg == "background":
+            bg_fasta_filepath = file_path + result_id + "_bg.fa"
+            file.save(bg_fasta_filepath)
+            print("background file being used, saved as:" + result_id + "_bg.fa")
 
-    # This block runs if there are no files being sent to the backend, in which case, there is a form sent instead
-    # that just has the name of the group that the test file should be saved under.
-    if fg_fasta_file == None:
+
+    # This block runs if the user selected an example file, or manually entered text, in which case, there is a form sent instead
+    # that just has the name of the file that the test file or manual text should be saved under.
+    if fg_fasta_filepath == None:
         for key in request.form.keys():
-            # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it  
-            if key == "manual":
-                fg_filename=request.form[key]
-                fg_text=request.form[fg_filename]
-                f = open(fg_filename)
+            if "manual" in key:
+                fg_fasta_filepath = file_path + result_id + "_fg.fa"
+                file_name = request.form[key]
+                text = request.form[file_name]
+                f = open(fg_fasta_filepath, 'w')
+                f.write(text)
+                f.close()
                 print("manual file found")
-                #TODO save fasta text
-            elif key == "test": # currently only have a single test file
-                fg_fasta_filename=example_multiple_files["single_test"]
+            elif "test" in key: # currently only have a single test file
+                fg_fasta_filepath = example_file_path + example_multiple_files["single_test"]
                 print("test file found")
-    
-    if bg_fasta_file == None:
 
-        for key in request.form.keys():
-            # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
-            if '.fa' in request.form[key]:
-                # set the variables for the call to the example variables, and "save" the fasta file.
-                group_name = request.form[key].split('.fa')[0]  # remove the .fa from group_name    
-                #key will be "testX" where X is the number. This key is passed to the example_multiple_files dictionary, which is then
-                #used to grab the correct test file.
-   #             save_fasta_file(example_file_path, example_multiple_files[key], result_id, group_name) 
+    if bg_fasta_filepath == None:
+        try: 
+            bg_filename = request.form["background"]
+            # TODO add actual example background files. Currently dont understand what or where they are from.
+            bg_fasta_filepath = example_file_path + "example_background.fa"
+            print("Using default background: " + bg_filename)
+        except:
+            return "User did not give background file", 400
+        # currently disallow manual entry of background.
+        # for key in request.form.keys():
+        #     if key == "manual":
+        #         bg_fasta_file=result_id + "_fg.fa"
+        #         file_name=request.form[key]
+        #         text=request.form[file_name]
+        #         f = open(file_path + bg_fasta_file, 'w')
+        #         f.write(text)
+        #         f.close()
+        #         print("manual file found")
+        #     elif key == "test": # currently only have a single test file
+        #         bg_fasta_file=example_multiple_files["single_test"]
+        #         print("test file found")
 
+    # TODO Add modification list file properly - likely will have to create it. Ask Devang.
+    # TODO Add background. Unsure how atm.
+    call = virtual_env +  "bin/python " + api_path + "PSMFinder.py " + example_file_path + "Pi_NoPi_motif.txt " + example_file_path + "TestMods.txt " + fg_fasta_filepath
+
+    foreground_format = None
+    central_char = None
+    width = None
+    occurrences = None
+    significance = None
+    try:
+        foreground_format = request.form["foregroundFormat"]
+    except:
+        print("no foreground format found")
+    try:
+        central_char = request.form["centralChar"]
+    except:
+        print("no central character found")
+    try:
+        width=int(request.form["width"])
+        num_flanking_aas = int(width / 2) #ie. if the width is 13, there will be 6 AAs on each side
+        call = call + " " + str(num_flanking_aas)
+    except:
+        print("No width was found, adding flanking AAs of 6")
+        call = call + " 6"
 
     # we want the outputs saved to result_id.whatever for easy retrieval later
-    save_to = result_id
+    call = call + " " + file_path + result_id + "_outputs.txt"
+
+    print(call)
+
+    subprocess.Popen(call, shell=True)
 
     return "Done", 201
+
+
 #after request [POST] requests only
 #validate file exists, if it does, delete file

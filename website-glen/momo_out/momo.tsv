@@ -1,0 +1,4 @@
+
+# MoMo (Modification Motifs): Version 5.1.1 compiled on Mar 30 2021 at 00:00:43
+# The format of this file is described at @SITE_URL@/doc/momo-output-format.html.
+# momo motifx --width 13 --protein-database api/api/tmp/35abb5e3.43c3.25d5.3697.a81f5ba6796c_fg.fa --remove-unknowns F api/api/tmp/35abb5e3.43c3.25d5.3697.a81f5ba6796c_outputs.txt.momo.txt
