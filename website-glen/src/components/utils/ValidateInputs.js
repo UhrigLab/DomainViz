@@ -18,9 +18,9 @@ async function checkFileFasta(file) {
         for (var i in lines) {
             let line = lines[i];
 
-            if (headers.length > 3000) {
-                return (false, 'Fasta file contains too many headers. Please limit your file to 3000 headers.');
-            }
+            // if (headers.length > 3000) {
+            //     return (false, 'Fasta file contains too many headers. Please limit your file to 3000 headers.');
+            // }
 
             if (line[0] === '>') {
                 headers.push(line);
@@ -76,12 +76,6 @@ async function checkStringFasta(text) {
     
 }
 export async function isFileFasta(file) {
-
-    // Check the file's size
-    if (((file.size / 1024) / 1024).toFixed(4) > 10) {
-        alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
-        return false;
-    }
 
     // Check if file can be read
     let valid = false;

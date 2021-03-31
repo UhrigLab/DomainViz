@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
@@ -294,7 +294,7 @@ def u_motif():
 
     # TODO Add modification list file properly - likely will have to create it. Ask Devang.
     # TODO Add background. Unsure how atm.
-    call = virtual_env +  "bin/python " + api_path + "PSMFinder.py " + example_file_path + "Pi_NoPi_motif.txt " + example_file_path + "TestMods.txt " + fg_fasta_filepath
+    call = virtual_env +  "bin/python " + api_path + "PSMFinder.py " + example_file_path + "phossites.txt " + example_file_path + "SearchedModifications.txt " + fg_fasta_filepath
 
     foreground_format = None
     central_char = None
