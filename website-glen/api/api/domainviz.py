@@ -2783,6 +2783,8 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
         if vdomain_ignore[vids[vi]] == 0:
             vdo_start = True
             vdo_end = True
+            if len(vids) == 1:
+                vdo_end = False
             if vi == 0:
                 vdo_start = False
             elif vi == len(vids) - 1:
