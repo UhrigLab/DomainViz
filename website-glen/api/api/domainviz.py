@@ -56,6 +56,11 @@ except ImportError:
     print('Error, module os is required.')
     sys.exit()
 try:
+    from os import remove
+except ImportError:
+    print('Error, module os is required.')
+    sys.exit()
+try:
     from os.path import isfile, join, isdir
 except ImportError:
     print('Error, module os is required.')
@@ -189,10 +194,972 @@ except ImportError:
     print('Error, module datetime is required.')
     sys.exit()
 
+# test if subprocess is installed in python
+try:
+    import subprocess
+except ImportError:
+    print('Error, module subprocess is required.')
+    sys.exit()
+
+# test if glob is installed in python
+try:
+    import glob
+except ImportError:
+    print('Error, module glob is required.')
+    sys.exit()
+
+# test if plotly is installed in python
+try:
+    import plotly.graph_objects as go
+except ImportError:
+    print('Error, module plotly is required.')
+    sys.exit()
+
+
+def f_get_plotly_color(vcolor, valpha):
+    vrgb = f_get_rgb(vcolor)
+    vreturn = 'rgba(' + str(vrgb[0]) + ', ' + str(vrgb[1]) + ', ' + str(vrgb[2]) + ', ' + str(valpha) + ')'
+    return vreturn
+
+
+def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, vnr, vout):
+    fig = go.Figure()
+    domainlevels = {}
+    valpha = 0.5
+    vx_p = [1, 1, vlen, vlen]
+    vy_p = [0, -1, -1, 0]
+    vcolor_temp = f_get_plotly_color('#000000', 1)
+    domainlevels['domainlevel_' + str(-1)] = go.Scatter(x=vx_p, y=vy_p, fill="tozeroy", mode='lines',
+                                                        line=dict(width=0.5, color=vcolor_temp), hovertemplate=
+                                                        '<b>%{text}</b>'
+                                                        '<extra></extra>',
+                                                        text=['Median protein length: ' + str(vlen) for _ in range(len(vx_p))])
+    data = list(domainlevels.values())
+    print(len(vx))
+    print(len(vy))
+    print(len(vcolor))
+    for vi in range(0, len(vx)):
+        vcolor_temp = f_get_plotly_color(vcolor[vi], valpha)
+        domainlevels['domainlevel_' + str(vi)]=go.Scatter(x=vx[vi], y=vy[vi], fill="tozeroy", mode='lines', line=dict(width=0.5, color=vcolor_temp), hovertemplate =
+    '<b>%{text}</b>'
+    '<extra></extra>',
+    text = [vlegend[vi] for _ in range(len(vx[vi]))])
+    data=list(domainlevels.values())
+    fig=go.Figure(data)
+    fig.update_layout(hovermode='closest')
+    fig.update_layout({'plot_bgcolor': 'rgba(0, 0, 0, 0)', 'paper_bgcolor': 'rgba(0, 0, 0, 0)', 'hoverlabel_font_color': 'rgb(10,10,10)', 'showlegend': False, 'legend_bgcolor': 'rgb(10,10,10)'})  #
+    #fig.update_layout(hoverlabel_font_color='rgb(10,10,10)')
+    #fig.show()
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=10
+        )
+    )
+    if vabs:
+        fig.update_yaxes(tick0=0, dtick=vnr/5, showgrid=True, gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+        fig.update_xaxes(showgrid=False, gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+    else:
+        fig.update_yaxes(tick0=0, dtick=20, showgrid=True, gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+        fig.update_xaxes(showgrid=False, gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+    fig.update_yaxes(title={'text': ylabel})
+    fig.update_xaxes(title={'text': xlabel})
+    fig.write_html(vout)
+
+
+def get_round_rect(x0, y0, vwidth_i, vheight_i):
+    '''x0 = 3
+    y0 = 1
+    x1 = 6
+    y1 = 2'''
+    if vheight_i < vwidth_i:
+        h = vheight_i/2
+    else:
+        h = vwidth_i / 2
+    '''if vwidth_i < h:
+        h = vwidth_i / 10
+        vwidth_i = h * 8'''
+    '''else:
+        vwidth_i = vwidth_i - 2.5*h'''
+    x1 = x0 + vwidth_i
+    y1 = y0 + vheight_i
+
+    rounded_bottom_left = f' M {x0 +h}, {y0} Q {x0}, {y0} {x0}, {y0 +h}'
+    rounded_top_left = f' L {x0}, {y1 -h} Q {x0}, {y1} {x0 +h}, {y1}'
+    rounded_top_right = f' L {x1 -h}, {y1} Q {x1}, {y1} {x1}, {y1 -h}'
+    rounded_bottom_right = f' L {x1}, {y0 +h} Q {x1}, {y0} {x1 -h}, {y0}Z'
+    path = rounded_bottom_left + rounded_top_left + \
+           rounded_top_right +rounded_bottom_right
+    return path
+
+
+def f_plot_sticks_plotly(vx, vy, vwidth, vheight, vcolor, vlegend, vlen, vout):
+    domainlevels = {}
+    valpha = 0.5
+    vx_p = [1, vlen, vlen, 1]
+    vy_p = [0.1, 0.1, -0.1, -0.1]
+    vcolor_temp = f_get_plotly_color('#000000', 1)
+    domainlevels['domainlevel_' + str(-1)] = go.Scatter(x=vx_p,
+                                                        y=vy_p,
+                                                        fill="tozeroy",
+                                                        mode='lines',
+                                                        line=dict(width=0,
+                                                                  color=vcolor_temp),
+                                                        hovertemplate='<b>%{text}</b><extra></extra>',
+                                                        text=['Median protein length: ' + str(vlen) for _ in range(len(vx_p))])
+    vcolor_keep = []
+    for vi in range(len(vx)):
+        vcolor_temp = f_get_plotly_color(vcolor[vi], valpha)
+        vcolor_keep.append(vcolor_temp)
+        vtempx = [vx[vi], vx[vi] + vwidth[vi], vx[vi] + vwidth[vi], vx[vi]]
+        vtempy = [vy[vi], vy[vi], vy[vi] + vheight[vi], vy[vi] + vheight[vi]]
+        domainlevels['domainlevel_' + str(vi)] = go.Scatter(x=vtempx,
+                                                            y=vtempy,
+                                                            fill="none",
+                                                            mode='lines',
+                                                            line=dict(width=0,
+                                                                      color=vcolor_temp),#'rgba(0, 0, 0, 1)'),
+                                                            hovertemplate = '<b>%{text}</b>''<extra></extra>',
+                                                            text = [vlegend[vi] for _ in range(len(vtempx))])
+    data=list(domainlevels.values())
+    fig=go.Figure(data)
+    fig.update_layout(hovermode='closest')
+    fig.update_layout({'plot_bgcolor': 'rgba(0, 0, 0, 0)', 'paper_bgcolor': 'rgba(0, 0, 0, 0)', 'hoverlabel_font_color': 'rgb(10,10,10)', 'showlegend': False, 'legend_bgcolor': 'rgb(10,10,10)'})  #
+    #fig.update_layout(hoverlabel_font_color='rgb(10,10,10)')
+    #fig.show()
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor="white",
+            font_size=10
+        )
+    )
+    for vi in range(len(vx)):
+        path = get_round_rect(vx[vi], vy[vi], vwidth[vi], vheight[vi])
+        fig.add_shape(dict(type='path',
+             path=path,
+             fillcolor=vcolor_keep[vi],
+             layer='above',
+             line=dict(color=vcolor_keep[vi], width=0.1)))
+    fig.update_yaxes(visible=False, showticklabels=False)
+    fig.update_xaxes(visible=False, showticklabels=False)
+    fig.write_html(vout)
+
+
+def f_send_to_iprscan5(vheaders, vsequences, vemail):
+    vjobids = []
+    for vsequence in vsequences:
+        vmodsequence = re.sub("\*", '', vsequence)
+        try:
+            iprscan_return = subprocess.run(['python', 'iprscan5.py', '--email', vemail, '--asyncjob',
+                                           '--sequence', vmodsequence], capture_output=True)
+        except subprocess.CalledProcessError:
+            print('Error, could not run iprscan request command.')
+            sys.exit()
+        vout_b = iprscan_return.stdout
+        vout = vout_b.decode("utf-8").split('\n')
+        print(vout)
+        vjobids.append(vout[0].strip())
+
+    vjobok = []
+    for _ in vjobids:
+        vjobok.append(0)
+    vinitrun = True
+    ventries = []
+    while sum(vjobok) < len(vjobok):
+        print(str(sum(vjobok)) + ' of ' + str(len(vjobok)) + ' results in.')
+        for vj in range(len(vjobids)):
+            vjobid = vjobids[vj]
+            if vjobok[vj] == 0:
+                try:
+                    iprcheckresults_return = subprocess.run(['python', 'iprscan5.py', '--status', '--jobid', vjobid], capture_output=True)
+                except subprocess.CalledProcessError:
+                    print('Error, could not run job check request command.')
+                    sys.exit()
+                vout_b = iprcheckresults_return.stdout
+                vout = vout_b.decode("utf-8").split('\n')
+                if vout[1] == 'FINISHED':
+                    # Get results
+                    try:
+                        iprgetresults_return = subprocess.run(['python', 'iprscan5.py', '--polljob', '--jobid', vjobid], capture_output=True)
+                    except subprocess.CalledProcessError:
+                        print('Error, could not run job retrieval command.')
+                        sys.exit()
+                    vout_b = iprgetresults_return.stdout
+                    vout = vout_b.decode("utf-8").split('\n')
+
+                    # Read results
+                    with open(vjobid + '.tsv.tsv', 'r') as fh:
+                        for line in fh:
+                            line_split = line.strip().split('\t')
+                            vtempentry = []
+                            vtempentry.append(vheaders[vj])
+                            vtempentry.append(vsequences[vj])
+                            for item in line_split:
+                                vtempentry.append(item)
+                            ventries.append(vtempentry)
+
+                    '''# remove temporary files
+                    for filename in glob.glob("./" + vjobid + "*"):
+                        remove(filename)
+                    vjobok[vj] = 1'''
+        if vinitrun:
+            time.sleep(25)
+            vinitrun = False
+        else:
+            time.sleep(2)
+    print(ventries)
+    sys.exit()
+    return ventries
+
+
+def f_run_domainviz_iprscan(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgroupfile, vcolorfile, vignoredomainfile,
+                    vcutoff, vmaxcutoff, vcustom_scaling_on, vscalingfigure, vabsolute, vwarnings, vfrom_scratch,
+                    vnotolderthan):
+    # Write initial cookie
+    f_write_cookie(0, vsavefolder, vjobid, 'Job initialized')
+
+    # Constants:
+    # For plotting:
+    vstandardwidth = 7
+    vstandardheight = 4.49
+    vpaddingwidth = 1.0
+    vpaddingheight = 0.7
+    vfontsize = 10
+    vcurrentdate = int(re.sub('-', '', str(date.fromtimestamp(time.time()))))
+
+    # Write initial job:
+    f_write_log(vsavefolder, vjobid, 'Job initialized with following parameters\nJobid: ' + vjobid + '\nInputfile: ' +
+                vinputfile + '\nIgnoredb: ' + vignoredb + '\nSavefolder: ' + vsavefolder + '\nDbfolder: ' + vdbfolder +
+                '\nGroupfile: ' + vgroupfile + '\nColorfile: ' + vcolorfile + '\nIgnoredomainfile: ' +
+                vignoredomainfile + '\nCutoff: ' + vcutoff + '\nMaxcutoff: ' + vmaxcutoff + '\nCustomscaling: ' +
+                vcustom_scaling_on + '\nScalingfigure: ' + vscalingfigure + '\nAbsolute: ' + vabsolute +
+                '\nWarnings: ' + vwarnings + '\nFrom_scratch: ' + vfrom_scratch + '\nNotolderthan: ' + vnotolderthan +
+                '\n\n', 'w')
+
+    # Modify parameters
+    f_write_log(vsavefolder, vjobid, 'Modifying parameters: ', 'a')
+    if vignoredb == '0':
+        vignoredb = False
+    elif vignoredb == '1':
+        vignoredb = True
+    else:
+        vignoredb = False
+    vcutoff = float(vcutoff)
+    vmaxcutoff = float(vmaxcutoff)
+    if vcustom_scaling_on == '0':
+        vcustom_scaling_on = False
+    elif vcustom_scaling_on == '1':
+        vcustom_scaling_on = True
+    else:
+        vcustom_scaling_on = False
+    vscalingfigure = float(vscalingfigure)
+    if vabsolute == '0':
+        vabsolute = False
+    elif vabsolute == '1':
+        vabsolute = True
+    else:
+        vabsolute = False
+    if vwarnings == '0':
+        vwarnings = False
+    elif vwarnings == '1':
+        vwarnings = True
+    else:
+        vwarnings = False
+    if vfrom_scratch == '0':
+        vfrom_scratch = False
+    elif vfrom_scratch == '1':
+        vfrom_scratch = True
+    else:
+        vfrom_scratch = False
+    vnotolderthan = int(vnotolderthan)
+    f_success(vsavefolder, vjobid)
+
+    # Additional internal constants
+    f_write_log(vsavefolder, vjobid, 'Add internal constants parameters: ', 'a')
+    vlen_dbid = 5  # Length of db names (defines how many different db files are made.)
+    f_success(vsavefolder, vjobid)
+
+    # Read in headers and sequences that were used to produce the Prosite and or PFAM results
+    f_write_log(vsavefolder, vjobid, 'Reading in fasta file:\n', 'a')
+    vheaders, vsequences = f_read_in_file(vinputfile, vsavefolder, vjobid)
+    if vwarnings:
+        print('Headers: ' + str(len(vheaders)) + ', Sequences: ' + str(len(vsequences)))
+    f_write_log(vsavefolder, vjobid, 'Fasta file read in successfully.\n', 'a')
+
+    # Write first cookie
+    f_write_cookie(1, vsavefolder, vjobid, 'Input file successfully read')
+
+    # Get Prosite results
+    f_write_log(vsavefolder, vjobid, 'Gathering interproscan domains:\n', 'a')
+    viprfile = join(vsavefolder, vjobid + '_ipr_res.tsv')
+
+    # Check if Interproscan results have been produced that can be loaded.
+    f_write_log(vsavefolder, vjobid, 'Check if interproscan domain results file exists: ', 'a')
+    try:
+        vfh_ipr = open(viprfile, 'r')
+        vipr_already_done = True
+        vfh_ipr.close()
+        f_success(vsavefolder, vjobid)
+    except IOError:
+        vipr_already_done = False
+        f_no(vsavefolder, vjobid)
+
+    # Check if results should be run from scratch
+    if vfrom_scratch:
+        f_write_log(vsavefolder, vjobid, 'All results for Interproscan will be run from scratch (no dbs, no previous '
+                                         'saves).\n', 'a')
+        vipr_already_done = False
+
+    # Getting results from Prosite
+    if not vipr_already_done:
+        f_write_log(vsavefolder, vjobid, 'Create new Interproscan output file: ', 'a')
+        vfh_ipr_output = open(viprfile, 'w')  # Emptying the prosite output file.
+        vfh_ipr_output.close()
+        f_success(vsavefolder, vjobid)
+
+        # Defining storing places of dbs
+        if vdbfolder == '':
+            vdbfiles = 'Ipr_db'
+        else:
+            vdbfiles = join(vdbfolder, 'Ipr_db')
+        f_write_log(vsavefolder, vjobid, 'Interproscan DB files stored at: ' + vdbfiles + '\n', 'a')
+
+        # Process every header
+        vdb_entryfound = []
+        for vheader_id, vheader in enumerate(vheaders):
+            if vwarnings:
+                print('Searching header ' + str(vheader_id + 1) + ' of ' + str(len(vheaders)) + '.')
+            f_write_log(vsavefolder, vjobid, 'Processing header: ' + vheader + '\n', 'a')
+            vdbid = vsequences[vheader_id][0:vlen_dbid]  # Defines the db file that should be searched.
+            vfound = False
+            if not vignoredb:  # If the db should be searched.
+                f_write_log(vsavefolder, vjobid, 'Searching in Interproscan DB ' + vdbid + ': ', 'a')
+                try:  # Check if db exists.
+                    vfh_db_ipr = open(vdbfiles + '_' + vdbid, 'r')  # Open db.
+                    f_write_log(vsavefolder, vjobid, 'exists\n', 'a')
+                    for ventry in vfh_db_ipr:  # Go through all entries of db.
+                        ventry = ventry.rstrip('\n')  # Get rid of new line character at the end.
+                        vsplitentry = ventry.split('\t')  # Split record into its attributes.
+                        if int(vsplitentry[0]) >= vnotolderthan:  # Check if the entry is young enough.
+                            if vsequences[vheader_id] == vsplitentry[1]:  # check if first attribute is sequence of
+                                # interest.
+                                vfound = True  # if it is, say that the sequence was found in the db.
+                                f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
+                                f_write_pfam_prosite_res(viprfile, vheader, vsplitentry[1:], True, True,
+                                                         vsavefolder, vjobid)  # Write the record to the
+                                # output file.
+                    vfh_db_ipr.close()
+                except IOError:  # If the db can not be read, it likely does not exist.
+                    f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
+                    if vwarnings:
+                        print(vdbfiles + '_' + vdbid + ' does not yet exist.')
+            if vfound:
+                vdb_entryfound.append(True)
+            else:
+                vdb_entryfound.append(False)
+        vsequences_to_be_sent = []
+        vheaders_to_be_sent = []
+        for vheader_id, vheader in enumerate(vheaders):
+            if not vdb_entryfound[vheader_id]:
+                f_write_log(vsavefolder, vjobid, 'Sending sequence to Interproscan\n', 'a')
+                vsequences_to_be_sent.append(vsequences[vheader_id])
+                vheaders_to_be_sent.append(vheader)
+
+        ventries = f_send_to_iprscan5(vheaders_to_be_sent, vsequences_to_be_sent, 'pas@ethz.ch')
+
+        for vsplitentry in ventries:
+            f_write_pfam_prosite_db(vdbfiles, vdbid, vsplitentry[1:], vsavefolder, vjobid, vcurrentdate)
+
+        for vheader_id, vheader in enumerate(vheaders):
+            try:  # Check if db exists.
+                vfh_db_ipr = open(vdbfiles + '_' + vdbid, 'r')  # Open db.
+                f_write_log(vsavefolder, vjobid, 'exists\n', 'a')
+                for ventry in vfh_db_ipr:  # Go through all entries of db.
+                    ventry = ventry.rstrip('\n')  # Get rid of new line character at the end.
+                    vsplitentry = ventry.split('\t')  # Split record into its attributes.
+                    if int(vsplitentry[0]) >= vnotolderthan:  # Check if the entry is young enough.
+                        if vsequences[vheader_id] == vsplitentry[1]:  # check if first attribute is sequence of
+                            # interest.
+                            f_write_log(vsavefolder, vjobid, 'Found entry in DB ' + vdbid + '\n', 'a')
+                            f_write_pfam_prosite_res(viprfile, vheader, vsplitentry[1:], True, True,
+                                                     vsavefolder, vjobid)  # Write the record to the
+                            # output file.
+                vfh_db_ipr.close()
+            except IOError:  # If the db can not be read, it likely does not exist.
+                f_write_log(vsavefolder, vjobid, 'does not yet exist\n', 'a')
+                if vwarnings:
+                    print(vdbfiles + '_' + vdbid + ' does not yet exist.')
+            # Update cookies
+            vcid = math.floor((vheader_id + 1) / len(vheaders) * 100 / 5) + 1
+            if vcid > 1:
+                f_write_cookie(vcid, vsavefolder, vjobid, str((vcid - 1) * 5) + '% of sequences evaluated for ' +
+                               'prosite domains.')
+
+    viprdata = f_read_tsv(viprfile, vsavefolder, vjobid)  # Read the data of prosite from the result file.
+    print(viprdata[1:3][:8])
+    sys.exit()
+    f_write_log(vsavefolder, vjobid, 'Successfully gathered Prosite domain results.\n', 'a')
+    f_write_cookie(22, vsavefolder, vjobid, 'Finished searching Prosite')
+
+    # Gather protein groups of protein data
+    if vgroupfile == '':  # Default case, if no group association file is handed over.
+        f_write_log(vsavefolder, vjobid, 'No custom protein group file used\n', 'a')
+        vgroup = []
+        vgroup_u = []
+        for vheader in vheaders:
+            f_write_log(vsavefolder, vjobid, 'Appending ' + vheader + ' to protein group "ProteinGroup".\n', 'a')
+            if vwarnings:
+                print('Appending ' + vheader + ' to protein group "ProteinGroup".')
+            vgroup.append('ProteinGroup')
+            vgroup_u.append('ProteinGroup')
+    else:
+        f_write_log(vsavefolder, vjobid, 'Reading in protein group file:\n', 'a')
+        vgroup, vgroup_u = f_read_in_groupfile(vgroupfile, vheaders, vsavefolder, vjobid)
+    vgroup_u = sorted(list(set(vgroup_u)))
+    f_write_log(vsavefolder, vjobid, 'Read protein group file successfully\n', 'a')
+
+    # Per group of protein: get median sequence length
+    f_write_log(vsavefolder, vjobid, 'Calculating median length of proteins for each protein group: ', 'a')
+    vmedlengroup = []
+    for vgitem in vgroup_u:
+        vlenproteins = []
+        for vg, vitem in enumerate(vgroup):
+            if vitem == vgitem:
+                vlenproteins.append(len(vsequences[vg]))
+        vmedlengroup.append(math.ceil(median(vlenproteins)))
+    f_success(vsavefolder, vjobid)
+
+    # Get specific coloring
+    if vcolorfile != '':
+        f_write_log(vsavefolder, vjobid, 'Reading in color file:\n', 'a')
+        vcolor_domain, vcolor_hexcode = f_read_in_colorfile(vcolorfile, vsavefolder, vjobid)
+        f_write_log(vsavefolder, vjobid, 'Read color file successfully\n', 'a')
+    else:
+        f_write_log(vsavefolder, vjobid, 'No custom color file used\n', 'a')
+        vcolor_domain = []
+        vcolor_hexcode = []
+
+    # Get list of domains to ignore
+    if vignoredomainfile != '':
+        f_write_log(vsavefolder, vjobid, 'Reading in ignore domain file:\n', 'a')
+        vignore_domain = f_read_in_ignoredomainfile(vignoredomainfile, vsavefolder, vjobid)
+        f_write_log(vsavefolder, vjobid, 'Read ignore domain file successfully\n', 'a')
+    else:
+        f_write_log(vsavefolder, vjobid, 'No custom ignore domain file used\n', 'a')
+        vignore_domain = []
+
+    # Get unique list of Prosite domains
+    f_write_log(vsavefolder, vjobid, 'Produce unique list of Interpro domains: ', 'a')
+    viprdomains_u = []
+    viprdomains_u_color = []
+    viprdomains_u_ignore = []
+    if viprfile != '':
+        for vprdc in range(len(viprdata.columns)):
+            viprdomains_u.append(viprdata[vprdc][3])
+        viprdomains_u = sorted(list(set(viprdomains_u)))
+        for vitem in viprdomains_u:
+            vfound = 0
+            for vc, vcitem in enumerate(vcolor_domain):
+                if vitem == vcitem:
+                    if vfound == 0:
+                        viprdomains_u_color.append(vcolor_hexcode[vc])
+                        vfound = 1
+            if vfound == 0:
+                viprdomains_u_color.append('')
+
+            vfound = 0
+            for viitem in vignore_domain:
+                if vitem == viitem:
+                    if vfound == 0:
+                        viprdomains_u_ignore.append(1)
+                        vfound = 1
+            if vfound == 0:
+                viprdomains_u_ignore.append(0)
+    f_success(vsavefolder, vjobid)
+
+    # Generate unique colors for every domain (unless it should be ignored)
+    vcollected_colors = []
+    for vc, color_hex in enumerate(viprdomains_u_color):
+        if viprdomains_u_ignore[vc] == 0:
+            if not color_hex == '':
+                #color_rgb = f_get_rgb(color_hex)
+                #vcollected_colors.append(color_hex)
+                vcollected_colors.append(color_hex)
+
+    all_colors = get_all_colors(vcollected_colors)
+    vcurrcol = 0
+    for vc, color_hex in enumerate(viprdomains_u_color):
+        if viprdomains_u_ignore[vc] == 0:
+            if color_hex == '':
+                vcurrcol, vhexcolorcode = generate_new_color(vcurrcol, all_colors)
+                viprdomains_u_color[vc] = vhexcolorcode
+
+    # Remove beginning ('>') from fasta
+    f_write_log(vsavefolder, vjobid, 'Processing fasta headers\n', 'a')
+    vheaders_no_fastastart = []
+    for vitem in vheaders:
+        vheaders_no_fastastart.append(vitem.lstrip('>'))
+
+    f_write_cookie(60, vsavefolder, vjobid, 'Finished reading and processing additional data')
+
+    # Per group of protein: get annotations of Prosite and PFAM domains and make one plot per protein group.
+    f_write_log(vsavefolder, vjobid, 'Collecting Prosite and PFAM domain information per protein group\n', 'a')
+    viprdomainsofgroup_all = []
+    viprdomainsofgroup_abs_all = []
+    viprdomainsingenes_all = []
+    vsize_of_ipr_data_all = []
+    viprdomainsofgroup_rel_all = []
+    vn_prot_per_group_all = []
+    viprdomainsofgroup = np.zeros((0, 0), dtype=float)
+    viprdomainsingenes = np.zeros((0, 0), dtype=float)
+
+    # Define domain colors
+    if vsavefolder != '':
+        vdomaincolorfile = join(vsavefolder, vjobid + '_domain_color_file.txt')
+    else:
+        vdomaincolorfile = vjobid + '_domain_color_file.txt'
+    f_write_log(vsavefolder, vjobid, 'Storing domain color information in ' + vdomaincolorfile + '\n', 'a')
+    vfh_colors = open(vdomaincolorfile, 'w')
+
+    # Prepare switches for each domain to decide if they should be processed
+    viprdomains_u_process = []
+    for _ in viprdomains_u:
+        viprdomains_u_process.append(True)
+
+    # Prepare dummy figure that contains all domains of all groups to get consistent coloring
+    f_write_log(vsavefolder, vjobid, 'Prepare dummy figure of all domains and proteins: ', 'a')
+
+    if not vcustom_scaling_on:
+        vscalingfigure = vscalingfigure * 500 / max(vmedlengroup)
+    else:
+        vstandardwidth = (vstandardwidth - 2 * vpaddingwidth) * vscalingfigure * max(vmedlengroup) / 500 + \
+                         (2 * vpaddingwidth)
+
+    fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
+    h = [Size.Fixed(vpaddingwidth),
+         Size.Fixed(vscalingfigure * max(vmedlengroup) / 100)]
+    v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
+    divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+    ax = Axes(fig, divider.get_position())
+    ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
+    fig.add_axes(ax)
+    for vug, vgitem in enumerate(vgroup_u):  # Go through all groups of proteins
+        f_write_log(vsavefolder, vjobid, 'Processing protein group ' + vgitem + '\n', 'a')
+        vn_prot_per_group = 0  # Initialize the counting of sequences per group
+        if viprfile != '':
+            viprdomainsofgroup = np.zeros((len(viprdomains_u), vmedlengroup[vug]), dtype=float)  # Initialize
+            # with number of unique prosite domains and median length of proteins
+            viprdomainsingenes = np.zeros((len(viprdomains_u), len(vheaders)), dtype=int)  # Stores if a domain
+            # has been found for a gene
+        vseqaddedfromprosite = 0
+        vseqaddedfrompfam = 0
+        for vh, vitem in enumerate(vheaders_no_fastastart):  # Go through all sequences
+            if vgroup[vh] == vgitem:  # If the sequence has the same group association as is currently searched
+                vn_prot_per_group = vn_prot_per_group + 1  # Count the number of sequence per this group up by one
+
+                if viprfile != '':
+                    # Process Prosite
+                    for vheader_id in range(len(viprdata.columns)):  # go through all prosite data
+                        if viprdata[vheader_id][0] == vitem:  # If the prosite data is about the sequence we
+                            # currently look at
+                            for vp, vpd in enumerate(viprdomains_u):  # Go through all domains
+                                if viprdata[vheader_id][3] == vpd:  # Check if the domain is the domain we currently
+                                    # look at
+                                    vmedianstartaa = f_float2int((int(viprdata[vheader_id][1]) - 1) /
+                                                                 len(vsequences[vh]) * vmedlengroup[vug])  # Calculate
+                                    # the start position relative to the median length of the protein group:
+                                    vmedianendaa = f_float2int((int(viprdata[vheader_id][2]) - 1) /
+                                                               len(vsequences[vh]) * vmedlengroup[vug])  # Calculate the
+                                    # end position relative to the median length of the protein group:
+                                    vprositedomainsofgroup[vp, vmedianstartaa:vmedianendaa] += 1  # Mark the placing of
+                                    # the domain
+                                    viprdomainsingenes[vp, vh] = 1  # Define that the domain has been found for that
+                                    # gene
+                                    vseqaddedfromprosite += 1
+        f_write_log(vsavefolder, vjobid, 'Added domain information from ' + str(vseqaddedfromprosite) + ' sequences for'
+                                         ' Interproscan.\n', 'a')
+        viprdomainsingenes_all.append(viprdomainsingenes)
+
+        vsize_of_ipr_data = [0, 0]
+        vsize_of_pfam_data = [0, 0]
+        if viprfile != '':
+            vsize_of_prosite_data = vprositedomainsofgroup.shape
+        vsize_of_ipr_data_all.append(vsize_of_prosite_data)
+
+        # Normalization of data
+        f_write_log(vsavefolder, vjobid, 'Compute relative prevalence of domains per group: ', 'a')
+        viprdomainsofgroup_rel = np.zeros((0, 0), dtype=float)
+        if viprfile != '':
+            viprdomainsofgroup_rel = np.zeros((len(viprdomains_u), vmedlengroup[vug]), dtype=float)
+            for vprd in range(vsize_of_ipr_data[0]):
+                for vj in range(vsize_of_ipr_data[1]):
+                    if viprdomainsofgroup[vprd][vj] != 0:
+                        viprdomainsofgroup_rel[vprd][vj] = viprdomainsofgroup[vprd][vj] / vn_prot_per_group * \
+                                                               100
+        viprdomainsofgroup_rel_all.append(viprdomainsofgroup_rel)
+        vn_prot_per_group_all.append(vn_prot_per_group)
+        f_success(vsavefolder, vjobid)
+
+        # If not using absolute values
+        viprdomainsofgroup_abs_all.append(viprdomainsofgroup)
+        if not vabsolute:
+            f_write_log(vsavefolder, vjobid, 'Use relative prevalence of domains per group.\n', 'a')
+            if viprfile != '':
+                vprositedomainsofgroup = viprdomainsofgroup_rel
+        else:
+            f_write_log(vsavefolder, vjobid, 'Use absolute prevalence of domains per group.\n', 'a')
+        viprdomainsofgroup_all.append(viprdomainsofgroup)
+
+        # Save of data
+        f_write_log(vsavefolder, vjobid, 'Save domain data of group as .tsvs: ', 'a')
+        if viprfile != '':
+            if vsavefolder != '':
+                vfilename = join(vsavefolder, vjobid + '_' + vgitem + '_ipr_domain_results_per_aa.tsv')
+            else:
+                vfilename = vjobid + '_' + vgitem + '_ipr_domain_results_per_aa.tsv'
+            vfh_filename = open(vfilename, 'w')
+
+            # Write header:
+            vfh_filename.write('Median protein (' + vgitem + ') amino acid position')
+            for item in viprdomains_u:
+                vfh_filename.write('\t' + item)
+            vfh_filename.write('\n')
+
+            # Write content
+            for vj in range(vsize_of_ipr_data[1]):
+                vfh_filename.write(str(vj + 1))
+                for vprd in range(vsize_of_prosite_data[0]):
+                    vfh_filename.write('\t' + str(viprdomainsofgroup[vprd][vj]))
+                vfh_filename.write('\n')
+            vfh_filename.close()
+        f_success(vsavefolder, vjobid)
+
+        # Plot domains into figure with all domains of all groups to get coloring identical
+        f_write_log(vsavefolder, vjobid, 'Add domains into dummy figure to get consistent domain data of group as'
+                                         ' .tsvs: ', 'a')
+        vmaxes = []
+        for vprd in range(vsize_of_ipr_data[0]):
+            vmaxes.append(max(viprdomainsofgroup_rel[vprd]))
+        vmaxids = np.argsort(vmaxes)[::-1]
+        bin_edges = np.arange(vsize_of_ipr_data[1] + 1)
+        for vmaxi in vmaxids:
+            if vmaxi < vsize_of_ipr_data[0]:
+                if max(viprdomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
+                        sum(viprdomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
+                        viprdomains_u_ignore[vmaxi] == 0 and viprdomains_u_process[vmaxi]:
+                    if viprdomains_u_color[vmaxi] == '':
+                        vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
+                                          label=viprdomains_u[vmaxi])
+                    else:
+                        vcurrbar = ax.bar(bin_edges[:-1], vprositedomainsofgroup[vmaxi], width=1, alpha=0.7,
+                                          label=viprdomains_u[vmaxi],
+                                          color=viprdomains_u_color[vmaxi])
+                    vcurrcolor = f_get_hex(vcurrbar.patches[0].get_facecolor())
+                    viprdomains_u_color[vmaxi] = vcurrcolor
+                    vfh_colors.write(viprdomains_u[vmaxi] + '\t' + vcurrcolor + '\n')
+                    viprdomains_u_process[vmaxi] = False
+    vfh_colors.close()
+
+    # Write fifth cookie
+    f_write_cookie(80, vsavefolder, vjobid, 'Finished collecting and formatting all data')
+
+    for vug, vgitem in enumerate(vgroup_u):  # Go through all groups of proteins
+        vprositedomainsofgroup = vprositedomainsofgroup_all[vug]
+        vpfamdomainsofgroup = vpfamdomainsofgroup_all[vug]
+        vprositedomainsofgroup_abs = vprositedomainsofgroup_abs_all[vug]
+        vpfamdomainsofgroup_abs = vpfamdomainsofgroup_abs_all[vug]
+        vn_prot_per_group = vn_prot_per_group_all[vug]
+        vprositedomainsofgroup_rel = vprositedomainsofgroup_rel_all[vug]
+        vpfamdomainsofgroup_rel = vpfamdomainsofgroup_rel_all[vug]
+        vprositedomainsingenes = vprositedomainsingenes_all[vug]
+        vpfamdomainsingenes = vpfamdomainsingenes_all[vug]
+        vsize_of_prosite_data = vsize_of_prosite_data_all[vug]
+        vsize_of_pfam_data = vsize_of_pfam_data_all[vug]
+        vprositedomains_u_ignore_for_plot = vprositedomains_u_ignore[:]
+        vpfamdomains_u_ignore_for_plot = vpfamdomains_u_ignore[:]
+
+        # Plot data of Prosite
+        f_write_log(vsavefolder, vjobid, 'Plot Prosite domains of protein group ' + vgitem + '.\n', 'a')
+        if vprositefile != '':
+            print('Plot data of Prosite for ' + vgitem)
+            fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
+            h = [Size.Fixed(vpaddingwidth), Size.Fixed(vscalingfigure * max(vmedlengroup) / 100)]
+            v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
+            divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+            ax = Axes(fig, divider.get_position())
+            ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
+            fig.add_axes(ax)
+            vmaxes = []
+            for vprd in range(vsize_of_prosite_data[0]):
+                vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
+            vmaxids = np.argsort(vmaxes)[::-1]
+            bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
+            for vheader_id in vmaxids:
+                if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
+                        float(sum(vprositedomainsingenes[vheader_id])) / float(vn_prot_per_group) > vcutoff and \
+                        vprositedomains_u_ignore_for_plot[vheader_id] == 0:
+                    # Create function
+                    a = min(bin_edges[:-1])  # integral lower limit
+                    b = max(bin_edges[:-1])  # integral upper limit
+                    x_temp = [0]
+                    for vx_i in range(1, b + 1):
+                        x_temp.append(vx_i)
+                    x = np.array(x_temp)
+                    y = vprositedomainsofgroup[vheader_id]  # Function value
+
+                    # Create Polygon
+                    ix = np.array(x_temp)
+                    iy = vprositedomainsofgroup[vheader_id]
+                    verts = [(a, 0), *zip(ix, iy), (b, 0)]
+                    if vprositedomains_u_color[vheader_id] == '':
+                        poly = Polygon(verts, alpha=0.7, label=vprositedomains_u[vheader_id])
+                    else:
+                        poly = Polygon(verts, facecolor=vprositedomains_u_color[vheader_id], alpha=0.7,
+                                       label=vprositedomains_u[vheader_id])
+                    # Plot function
+                    ax.plot(x, y, 'r', linewidth=0)
+                    ax.set_ylim(bottom=0)
+
+                    # Plot Polygon
+                    ax.add_patch(poly)
+                else:
+                    vprositedomains_u_ignore_for_plot[vheader_id] = 1
+            plt.xlim(min(bin_edges), max(bin_edges))
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)  # maximum of proteins in group
+            else:
+                plt.ylim(0, 100)  # 100 %
+            plt.grid(axis='y', alpha=0.75)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
+            if vabsolute:
+                plt.ylabel('# of occurrences', fontsize=vfontsize)
+            else:
+                plt.ylabel('Percent occurrence (n = ' + str(vn_prot_per_group) + ')', fontsize=vfontsize)
+            plt.xticks(fontsize=vfontsize)
+            plt.yticks(fontsize=vfontsize)
+            plt.title('Distribution of Prosite protein domains\nfor ' + vgitem, fontsize=vfontsize)
+            plt.legend(loc='upper left', frameon=False)
+            if vsavefolder != '':
+                plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.pdf'))
+            else:
+                plt.savefig(vjobid + '_' + vgitem + '_prosite.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_prosite_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_prosite_stickfigure.pdf'
+            f_get_stick(vmedlengroup[vug], vprositedomains_u, vprositedomainsofgroup_abs, vprositedomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vprositedomains_u_ignore_for_plot, max(vmedlengroup))
+
+        # Plot data of PFAM
+        f_write_log(vsavefolder, vjobid, 'Plot PFAM domains of protein group ' + vgitem + '.\n', 'a')
+        if vpfamfile != '':
+            print('Plot data of PFAM for ' + vgitem)
+            fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
+            h = [Size.Fixed(vpaddingwidth),
+                 Size.Fixed(vscalingfigure * max(vmedlengroup) / 100)]
+            v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
+            divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+            ax = Axes(fig, divider.get_position())
+            ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
+            fig.add_axes(ax)
+            vmaxes = []
+            for vheader_id in range(vsize_of_pfam_data[0]):
+                vmaxes.append(max(vpfamdomainsofgroup_rel[vheader_id]))
+            vmaxids = np.argsort(vmaxes)[::-1]
+            bin_edges = np.arange(vsize_of_pfam_data[1] + 1)
+            for vheader_id in vmaxids:
+                if max(vpfamdomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
+                        float(sum(vpfamdomainsingenes[vheader_id])) / \
+                        float(vn_prot_per_group) > vcutoff and vpfamdomains_u_ignore_for_plot[vheader_id] == 0:
+                    # Create function
+                    a = min(bin_edges[:-1])  # integral lower limit
+                    b = max(bin_edges[:-1])  # integral upper limit
+                    x_temp = [0]
+                    for vx_i in range(1, b + 1):
+                        x_temp.append(vx_i)
+                    x = np.array(x_temp)
+                    y = vpfamdomainsofgroup[vheader_id]  # Function value
+
+                    # Create Polygon
+                    ix = np.array(x_temp)
+                    iy = vpfamdomainsofgroup[vheader_id]
+                    verts = [(a, 0), *zip(ix, iy), (b, 0)]
+                    if vpfamdomains_u_color[vheader_id] == '':
+                        poly = Polygon(verts, alpha=0.7, label=vpfamdomains_u[vheader_id])
+                    else:
+                        poly = Polygon(verts, facecolor=vpfamdomains_u_color[vheader_id], alpha=0.7,
+                                       label=vpfamdomains_u[vheader_id])
+                    # Plot function
+                    ax.plot(x, y, 'r', linewidth=0)
+                    ax.set_ylim(bottom=0)
+
+                    # Plot Polygon
+                    ax.add_patch(poly)
+                else:
+                    vpfamdomains_u_ignore_for_plot[vheader_id] = 1
+            plt.xlim(min(bin_edges), max(bin_edges))
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
+                plt.ylim(0, 100)
+            plt.grid(axis='y', alpha=0.75)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
+            if vabsolute:
+                plt.ylabel('# of occurrences', fontsize=vfontsize)
+            else:
+                plt.ylabel('Percent occurrence (n = ' + str(vn_prot_per_group) + ')', fontsize=vfontsize)
+            plt.xticks(fontsize=vfontsize)
+            plt.yticks(fontsize=vfontsize)
+            plt.title('Distribution of PFAM protein domains\nfor ' + vgitem, fontsize=vfontsize)
+            plt.legend(loc='upper left', frameon=False)
+            if vsavefolder != '':
+                plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.pdf'))
+            else:
+                plt.savefig(vjobid + '_' + vgitem + '_pfam.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_pfam_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_pfam_stickfigure.pdf'
+            f_get_stick(vmedlengroup[vug], vpfamdomains_u, vpfamdomainsofgroup_abs, vpfamdomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vpfamdomains_u_ignore_for_plot, max(vmedlengroup))
+
+        # Combined plot
+        f_write_log(vsavefolder, vjobid, 'Plot all domains of protein group ' + vgitem + '.\n', 'a')
+        if vprositefile != '' and vpfamfile != '':
+            print('Plot data of Prosite and PFAM for ' + vgitem)
+            fig = plt.figure(figsize=[vstandardwidth, vstandardheight])
+            h = [Size.Fixed(vpaddingwidth),
+                 Size.Fixed(vscalingfigure * max(vmedlengroup) / 100)]
+            v = [Size.Fixed(vpaddingheight), Size.Fixed(vstandardheight - 2 * vpaddingheight)]
+            divider = Divider(fig, (0.0, 0.0, 1., 1.), h, v, aspect=False)
+            ax = Axes(fig, divider.get_position())
+            ax.set_axes_locator(divider.new_locator(nx=1, ny=1))
+            fig.add_axes(ax)
+            vmaxes = []
+            for vprd in range(vsize_of_prosite_data[0]):
+                vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
+            for vpfd in range(vsize_of_pfam_data[0]):
+                vmaxes.append(max(vpfamdomainsofgroup_rel[vpfd]))
+            vmaxids = np.argsort(vmaxes)[::-1]
+            bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
+            for vmaxi in vmaxids:
+                if vmaxi < vsize_of_prosite_data[0]:
+                    if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
+                            sum(vprositedomainsingenes[vmaxi])) / float(vn_prot_per_group) > vcutoff and \
+                            vprositedomains_u_ignore_for_plot[vmaxi] == 0:
+                        # Create function
+                        a = min(bin_edges[:-1])  # integral lower limit
+                        b = max(bin_edges[:-1])  # integral upper limit
+                        x_temp = [0]
+                        for vx_i in range(1, b + 1):
+                            x_temp.append(vx_i)
+                        x = np.array(x_temp)
+                        y = vprositedomainsofgroup[vmaxi]  # Function value
+
+                        # Create Polygon
+                        ix = np.array(x_temp)
+                        iy = vprositedomainsofgroup[vmaxi]
+                        verts = [(a, 0), *zip(ix, iy), (b, 0)]
+                        if vprositedomains_u_color[vmaxi] == '':
+                            poly = Polygon(verts, alpha=0.7, label=vprositedomains_u[vmaxi])
+                        else:
+                            poly = Polygon(verts, facecolor=vprositedomains_u_color[vmaxi], alpha=0.7,
+                                           label=vprositedomains_u[vmaxi])
+                        # Plot function
+                        ax.plot(x, y, 'r', linewidth=0)
+                        ax.set_ylim(bottom=0)
+
+                        # Plot Polygon
+                        ax.add_patch(poly)
+                    else:
+                        vprositedomains_u_ignore_for_plot[vmaxi] = 1
+                else:
+                    vimod = vmaxi - vsize_of_prosite_data[0]
+                    if max(vpfamdomainsofgroup_rel[vimod]) > (vmaxcutoff * 100) and float(
+                            sum(vpfamdomainsingenes[vimod])) / float(vn_prot_per_group) > vcutoff and \
+                            vpfamdomains_u_ignore_for_plot[vimod] == 0:
+                        # Create function
+                        a = min(bin_edges[:-1])  # integral lower limit
+                        b = max(bin_edges[:-1])  # integral upper limit
+                        x_temp = [0]
+                        for vx_i in range(1, b + 1):
+                            x_temp.append(vx_i)
+                        x = np.array(x_temp)
+                        y = vpfamdomainsofgroup[vimod]  # Function value
+
+                        # Create Polygon
+                        ix = np.array(x_temp)
+                        iy = vpfamdomainsofgroup[vimod]
+                        verts = [(a, 0), *zip(ix, iy), (b, 0)]
+                        if vpfamdomains_u_color[vimod] == '':
+                            poly = Polygon(verts, alpha=0.7, label=vpfamdomains_u[vimod])
+                        else:
+                            poly = Polygon(verts, facecolor=vpfamdomains_u_color[vimod], alpha=0.7,
+                                           label=vpfamdomains_u[vimod])
+                        # Plot function
+                        ax.plot(x, y, 'r', linewidth=0)
+                        ax.set_ylim(bottom=0)
+
+                        # Plot Polygon
+                        ax.add_patch(poly)
+                    else:
+                        vpfamdomains_u_ignore_for_plot[vimod] = 1
+
+            plt.xlim(min(bin_edges), max(bin_edges))
+            if vabsolute:
+                plt.ylim(0, vn_prot_per_group)
+            else:
+                plt.ylim(0, 100)
+            plt.grid(axis='y', alpha=0.75)
+            plt.xlabel('Median length: ' + str(vmedlengroup[vug]) + ' amino acids', fontsize=vfontsize)
+            if vabsolute:
+                plt.ylabel('# of occurrences', fontsize=vfontsize)
+            else:
+                plt.ylabel('Percent occurrence (n = ' + str(vn_prot_per_group) + ')', fontsize=vfontsize)
+            plt.xticks(fontsize=vfontsize)
+            plt.yticks(fontsize=vfontsize)
+            plt.title('Distribution of protein domains\nfor ' + vgitem, fontsize=vfontsize)
+            plt.legend(loc='upper left', frameon=False)
+            if vsavefolder != '':
+                plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_combined.pdf'))
+            else:
+                plt.savefig(vjobid + '_' + vgitem + '_combined.pdf')
+
+            # Get stick figure
+            if vsavefolder != '':
+                fstick_name = join(vsavefolder, vjobid + '_' + vgitem + '_combined_stickfigure.pdf')
+            else:
+                fstick_name = vjobid + '_' + vgitem + '_combined_stickfigure.pdf'
+            vcombineddomains_u = []
+            vcombinedomainsofgroup_abs = []
+            vcombineddomains_u_color = []
+            vcombineddomains_u_ignore = []
+            for vdid in range(len(vprositedomains_u)):
+                vcombineddomains_u.append(vprositedomains_u[vdid])
+                vcombinedomainsofgroup_abs.append(vprositedomainsofgroup_abs[vdid])
+                vcombineddomains_u_color.append(vprositedomains_u_color[vdid])
+                vcombineddomains_u_ignore.append(vprositedomains_u_ignore_for_plot[vdid])
+            for vdid in range(len(vpfamdomains_u)):
+                vcombineddomains_u.append(vpfamdomains_u[vdid])
+                vcombinedomainsofgroup_abs.append(vpfamdomainsofgroup_abs[vdid])
+                vcombineddomains_u_color.append(vpfamdomains_u_color[vdid])
+                vcombineddomains_u_ignore.append(vpfamdomains_u_ignore_for_plot[vdid])
+            f_get_stick(vmedlengroup[vug], vcombineddomains_u, vcombinedomainsofgroup_abs, vcombineddomains_u_color,
+                        vmaxcutoff * vn_prot_per_group, fstick_name, vcombineddomains_u_ignore, max(vmedlengroup))
+    # Write fifth cookie
+    f_write_log(vsavefolder, vjobid, 'Job ' + vjobid + ' ran successfully.\n', 'a')
+    time.sleep(5)  # make sure pdfs are created
+    f_write_cookie(100, vsavefolder, vjobid, 'Job ' + vjobid + 'successful')
+    print('done')
+
 
 ########################################################################################################################
 #                                                                                                                      #
-#  f_process_results                                                                                                   #
+#  f_run_domainviz                                                                                                   #
 #  Main function of domainviz.py. See help for further information                                                     #
 #                                                                                                                      #
 #  Mandatory arguments:                                                                                                #
@@ -927,6 +1894,17 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 vmaxes.append(max(vprositedomainsofgroup_rel[vprd]))
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
+            vx_html = []
+            vy_html = []
+            vlegend_html = []
+            vcolor_html = []
+            xlabel_html = ''
+            ylabel_html = ''
+            vlen_html = 0
+            vabs_html = vabsolute
+            vnr_html = 0
+            vout_html = ''
+            html_set = False
             for vheader_id in vmaxids:
                 if max(vprositedomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vprositedomainsingenes[vheader_id])) / float(vn_prot_per_group) > vcutoff and \
@@ -952,9 +1930,26 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                     # Plot function
                     ax.plot(x, y, 'r', linewidth=0)
                     ax.set_ylim(bottom=0)
-
                     # Plot Polygon
                     ax.add_patch(poly)
+                    # Collect info for html
+                    vx_html.append(x)
+                    vy_html.append(y)
+                    vcolor_html.append(vprositedomains_u_color[vheader_id])
+                    vlegend_html.append(vprositedomains_u[vheader_id])
+                    if not html_set:
+                        xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                        vlen_html = vmedlengroup[vug]
+                        if vabsolute:
+                            ylabel_html = '# of occurrences'
+                        else:
+                            ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                        vnr_html = vn_prot_per_group
+                        if vsavefolder != '':
+                            vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_prosite.html')
+                        else:
+                            vout_html = vjobid + '_' + vgitem + '_prosite.html'
+                        html_set = True
                 else:
                     vprositedomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
@@ -976,6 +1971,11 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_prosite.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_prosite.pdf')
+
+            # Get the html figure
+            if html_set:
+                f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1002,6 +2002,17 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 vmaxes.append(max(vpfamdomainsofgroup_rel[vheader_id]))
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_pfam_data[1] + 1)
+            vx_html = []
+            vy_html = []
+            vlegend_html = []
+            vcolor_html = []
+            xlabel_html = ''
+            ylabel_html = ''
+            vlen_html = 0
+            vabs_html = vabsolute
+            vnr_html = 0
+            vout_html = ''
+            html_set = False
             for vheader_id in vmaxids:
                 if max(vpfamdomainsofgroup_rel[vheader_id]) > (vmaxcutoff * 100) and \
                         float(sum(vpfamdomainsingenes[vheader_id])) / \
@@ -1030,6 +2041,25 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
 
                     # Plot Polygon
                     ax.add_patch(poly)
+
+                    # Collect info for html
+                    vx_html.append(x)
+                    vy_html.append(y)
+                    vcolor_html.append(vpfamdomains_u_color[vheader_id])
+                    vlegend_html.append(vpfamdomains_u[vheader_id])
+                    if not html_set:
+                        xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                        vlen_html = vmedlengroup[vug]
+                        if vabsolute:
+                            ylabel_html = '# of occurrences'
+                        else:
+                            ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                        vnr_html = vn_prot_per_group
+                        if vsavefolder != '':
+                            vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_pfam.html')
+                        else:
+                            vout_html = vjobid + '_' + vgitem + '_pfam.html'
+                        html_set = True
                 else:
                     vpfamdomains_u_ignore_for_plot[vheader_id] = 1
             plt.xlim(min(bin_edges), max(bin_edges))
@@ -1051,6 +2081,11 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_pfam.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_pfam.pdf')
+
+            # Get the html figure
+            if html_set:
+                f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1079,6 +2114,17 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 vmaxes.append(max(vpfamdomainsofgroup_rel[vpfd]))
             vmaxids = np.argsort(vmaxes)[::-1]
             bin_edges = np.arange(vsize_of_prosite_data[1] + 1)
+            vx_html = []
+            vy_html = []
+            vlegend_html = []
+            vcolor_html = []
+            xlabel_html = ''
+            ylabel_html = ''
+            vlen_html = 0
+            vabs_html = vabsolute
+            vnr_html = 0
+            vout_html = ''
+            html_set = False
             for vmaxi in vmaxids:
                 if vmaxi < vsize_of_prosite_data[0]:
                     if max(vprositedomainsofgroup_rel[vmaxi]) > (vmaxcutoff * 100) and float(
@@ -1108,6 +2154,25 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
 
                         # Plot Polygon
                         ax.add_patch(poly)
+
+                        # Collect info for html
+                        vx_html.append(x)
+                        vy_html.append(y)
+                        vcolor_html.append(vprositedomains_u_color[vmaxi])
+                        vlegend_html.append(vprositedomains_u[vmaxi])
+                        if not html_set:
+                            xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                            vlen_html = vmedlengroup[vug]
+                            if vabsolute:
+                                ylabel_html = '# of occurrences'
+                            else:
+                                ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                            vnr_html = vn_prot_per_group
+                            if vsavefolder != '':
+                                vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_combined.html')
+                            else:
+                                vout_html = vjobid + '_' + vgitem + '_combined.html'
+                            html_set = True
                     else:
                         vprositedomains_u_ignore_for_plot[vmaxi] = 1
                 else:
@@ -1139,6 +2204,25 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
 
                         # Plot Polygon
                         ax.add_patch(poly)
+
+                        # Collect info for html
+                        vx_html.append(x)
+                        vy_html.append(y)
+                        vcolor_html.append(vpfamdomains_u_color[vimod])
+                        vlegend_html.append(vpfamdomains_u[vimod])
+                        if not html_set:
+                            xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                            vlen_html = vmedlengroup[vug]
+                            if vabsolute:
+                                ylabel_html = '# of occurrences'
+                            else:
+                                ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                            vnr_html = vn_prot_per_group
+                            if vsavefolder != '':
+                                vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_combined.html')
+                            else:
+                                vout_html = vjobid + '_' + vgitem + '_combined.html'
+                            html_set = True
                     else:
                         vpfamdomains_u_ignore_for_plot[vimod] = 1
 
@@ -1161,6 +2245,11 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 plt.savefig(join(vsavefolder, vjobid + '_' + vgitem + '_combined.pdf'))
             else:
                 plt.savefig(vjobid + '_' + vgitem + '_combined.pdf')
+
+            # Get the html figure
+            if html_set:
+                f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -2783,6 +3872,8 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
         if vdomain_ignore[vids[vi]] == 0:
             vdo_start = True
             vdo_end = True
+            if len(vids) == 1:
+                vdo_end = False
             if vi == 0:
                 vdo_start = False
             elif vi == len(vids) - 1:
@@ -2832,6 +3923,13 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
     ax.add_collection(collection)
 
     # Create domain boxes
+    vx_html = []
+    vy_html = []
+    vwidth_html = []
+    vheight_html = []
+    vcolor_html = []
+    vlegend_html = []
+    vhtmlset = False
     for vi in range(len(vids)):
         vd = vids[vi]
         if vdomain_ignore[vd] == 0:
@@ -2867,6 +3965,16 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
             ax.add_collection(collection)
             ax.text(1 + length_scaling * (vdomain_start[vd] + vdomain_end[vd]) / 2, vh, vdomainnames[vd],
                     verticalalignment='center', horizontalalignment='center')
+            if not vhtmlset:
+                vhtmlset = True
+                vlen_html = vmedlength
+                vout_html = vfilename.rstrip('.pdf') + '.html'
+            vx_html.append(vdomain_start[vd])
+            vy_html.append(-2.5)
+            vwidth_html.append(vdomain_end[vd]-vdomain_start[vd])
+            vheight_html.append(5)
+            vcolor_html.append(vcolors[vd])
+            vlegend_html.append(vdomainnames[vd])
 
     # Scaling
     plt.axis('equal')
@@ -2879,6 +3987,10 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
 
     # plt.show()
     plt.savefig(vfilename)
+
+    # get html
+    if vhtmlset:
+        f_plot_sticks_plotly(vx_html, vy_html, vwidth_html, vheight_html, vcolor_html, vlegend_html, vlen_html, vout_html)
 
 
 ########################################################################################################################
@@ -2970,7 +4082,6 @@ def f_print_help():
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) <= 1:  # If only script name is given, print help
         f_print_help()
         sys.exit()
@@ -3258,3 +4369,7 @@ if __name__ == "__main__":
                         vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main, vcustom_scaling_on_main,
                         vscalefigure_main, vabsoluteresults_main, vwarnings_main, vfrom_scratch_main,
                         vnotolderthan_main)
+        '''f_run_domainviz_iprscan(vjobid_main, vinputfile_main, vignoredb_main, vsavefolder_main, vdbfolder_main, vgroupfile_main,
+                        vcolorfile_main, vignoredomainfile_main, vcutoff_main, vmaxcutoff_main, vcustom_scaling_on_main,
+                        vscalefigure_main, vabsoluteresults_main, vwarnings_main, vfrom_scratch_main,
+                        vnotolderthan_main)'''

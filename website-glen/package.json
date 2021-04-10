@@ -22,7 +22,8 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.0",
-    "react-transition-group": "^4.4.1"
+    "react-transition-group": "^4.4.1",
+    "semver": "^7.3.2"
   },
   "scripts": {
     "start": "react-scripts start",

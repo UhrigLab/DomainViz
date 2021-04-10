@@ -1,0 +1,10 @@
+Acetyltransf_1	#4d8ac6
+GNAT	#6f4c9b
+Hat1_N	#e4632d
+BROMODOMAIN_2	#69b190
+Bromodomain	#8cbc68
+Acetyltransf_10	#da2222
+BROMODOMAIN_1	#e8ecfb
+Radical_SAM	#95211b
+RADICAL_SAM	#b58fc2
+Radical_SAM_C	#ddd8ef

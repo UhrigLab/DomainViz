@@ -47,9 +47,9 @@ def cleanup_cookies(file_path, id):
 # It also creates the groupfile.txt file.
 def save_fasta_file(file_path, file, id, group_name):
     if "examples" in file_path:
-        # If the file is in the example folder, make a temporary copy of it in the tmp folder
-        copyfile(file_path + file, file_path.replace("examples", "tmp") + id + "tmp" + ".fa")
-        file_path = file_path.replace("examples", "tmp")
+        # If the file is in the example folder, make a temporary copy of it in the static folder
+        copyfile(file_path + file, file_path.replace("examples", "static") + id + "tmp" + ".fa")
+        file_path = file_path.replace("examples", "static")
     else:
         #save the file under a temporary filename using the built in Flask method, so we can read it using python methods
         file.save(file_path + id + "tmp" + ".fa")
@@ -86,15 +86,17 @@ def save_fasta_file(file_path, file, id, group_name):
 
 
 '''Getting functions'''
-def get_pdf_names(file_path, result_id):
-    pdf_names = []
-    for f in glob.glob(os.path.abspath(file_path+result_id+'*.pdf')):
+def get_output_names(file_path, result_id, type):
+    output_names = []
+    for f in glob.glob(os.path.abspath(file_path+result_id+'*'+type)):
         #get the result_id from the filename to ensure we have to correct files
-        file_id = f.split("tmp/")[1]
+        file_id = f.split("static/")[1]
         file_id = file_id.split("_")[0]
         if result_id == file_id:
-            pdf_names.append(f)
-    return pdf_names
+            output_names.append(f.split("static/")[1])
+        print(output_names)
+    return output_names
+
 def get_group_names(file_path, result_id):
     group_names = []
     group_file = open(os.path.abspath(file_path+result_id+'_groupfile.tsv'), 'r')
