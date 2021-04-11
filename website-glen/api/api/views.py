@@ -11,19 +11,20 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-api_path = "api/api/"
+#api_path = "api/api/"
 #PRODUCTION
-#api_path = "api/"
+api_path = "api/"
 
 #DEVELOPMENT
-virtual_env = "api/api/propplotenvDEV/"
+#virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-#virtual_env = "api/propplotenv/"
+virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
 example_multiple_files = {"single_test": "GNATs_ALL.fa", "mult_test_1": "GNATs_class1.fa", "mult_test_2": "GNATs_class2.fa", "mult_test_3": "GNATs_class3.fa"}
 
+group_size = 6
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
 
@@ -97,14 +98,14 @@ def images(username):
             return jsonify({'failed': max_cookie})
     elif len(group_names) < 1: 
         return jsonify({'failed': 'null'})
-    # If there are groups, we need to wait until there are 3 pdfs per group in order to display them. 
+    # If there are groups, we need to wait until there are group_size (6) pdfs per group in order to display them. 
     # Otherwise, we will display a bunch of broken or half-made data.
-    if len(htmls) < (3*len(group_names)) and max_cookie:
+    if len(htmls) < (group_size*len(group_names)) and max_cookie:
         if get_cookie_info(file_path, result_id, max_cookie):
             return jsonify({'failed': max_cookie, 'info': " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
             return jsonify({'failed': max_cookie})
-    elif len(htmls) < (3*len(group_names)):
+    elif len(htmls) < (group_size*len(group_names)):
         return jsonify({'failed': 'notready'})
     else:
         cleanup_cookies(file_path, result_id)

@@ -40,7 +40,8 @@ export const PDFMap = ({ images, uid, groupNames }) => {
         useEffect(() => {
             for (let i=0; i<images.length; i++) {
                 fetch('/api/iframes/'+images[i]).then(response => {
-                    setHTMLs(old => [...old, response.url]);
+                    if (htmls.length < images.length) //shouldnt add more htmls if we already have the same amount as we have image links
+                        setHTMLs(old => [...old, response.url]);
                 })
             }
         }, [])
