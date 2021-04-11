@@ -1,9 +1,10 @@
-import { React } from 'react';
+import { React, useEffect, useState } from 'react';
 import { PDF } from './PDF';
 import { Typography, Grid, Button, Paper, Accordion, AccordionSummary, AccordionDetails, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { saveAs } from 'file-saver';
+import { groupsize } from '../ViewPDF'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -25,61 +26,56 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: 'black',
     },
   }));
+
 export const PDFMap = ({ images, uid, groupNames }) => {
         const classes = useStyles()
-        const groupsize = 3;
-
+        // const [htmls, setHTMLs] = useState(["http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite_stickfigure.html"])
+        const [htmls, setHTMLs] = useState([])
         function gotoDownload() {
             fetch('/api/download/' + uid).then(response => {
                 saveAs(response.url, 'DomainViz_results.zip')
             });
         }
-        console.log(images)
+
+        useEffect(() => {
+            for (let i=0; i<images.length; i++) {
+                fetch('/api/iframes/'+images[i]).then(response => {
+                    setHTMLs(old => [...old, response.url]);
+                })
+            }
+        }, [])
 
         return (
         <>
-            {images.map((image, index) => {
+            {htmls.map((image, index) => {
                 return (
                     <>
-                        {image && (index % 6 === 0) && //For 2 pdfs in a single row, 6 pdfs per group
-                        <Grid item xs={12}>
-                             {/* If there is only a single group, there will only be 6 pdfs in total, 
+                        {(image) && groupNames[index/6] && (index % groupsize === 0) && //For 2 html files in a single row, 6 pdfs per group
+                        <Grid item xs={12} key={index}>
+                             {/* If there is only a single group, there will only be groupsize (6) htmls in total, 
                                 and if this is the case, start with the accordion expanded, but if there are more than one
                                 groups, then all of the accordions should be closed. */}
-                            <Accordion defaultExpanded={images.length===6} className={classes.accordion}>
+                            <Accordion defaultExpanded={images.length===groupsize} className={classes.accordion}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                                     <Typography variant="h5">Group: {groupNames[index/6]}</Typography>
                                     
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <div className={classes.column}>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index]} height="525" width="100%" ></iframe>
-                                        <p>{images[index]}</p>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index+2]} height="525" width="100%" ></iframe>
-                                        <p>{images[index+2]}</p>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index+4]} height="525" width="100%" ></iframe>
-                                        <p>{images[index+4]}</p>
-
-                                        {/* <PDF pdf={images[index].file}/>
-                                        <PDF pdf={images[index+2].file}/>
-                                        <PDF pdf={images[index+4].file}/> */}
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+4]} height="525" width="100%" ></iframe>
                                     </div>
                                     <div className={classes.column}>
-                                    <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index+1]} height="525" width="100%" ></iframe>
-                                    <p>{images[index+1]}</p>
-                                    <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index+3]} height="525" width="100%" ></iframe>
-                                    <p>{images[index+3]}</p>
-                                    <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={images[index+5]} height="525" width="100%" ></iframe>
-                                    <p>{images[index+5]}</p>
-                                        {/* <PDF pdf={images[index+1].file}/>
-                                        <PDF pdf={images[index+3].file}/>
-                                        <PDF pdf={images[index+5].file}/> */}
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+1]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+3]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+5]} height="525" width="100%" ></iframe>
                                     </div>
                                 </AccordionDetails>
                             </Accordion>
                         </Grid>
                         }
-                        </>
+                    </>
                 )
             })}
             <Grid item xs={12}>

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, redirect, current_app, render_template, url_for
-from flask.helpers import send_file
+from flask.helpers import send_file, send_from_directory
 from zipfile import ZipFile
 import io
 from os.path import basename
@@ -11,16 +11,16 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
-file_path = api_path + "static/"
+file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
 example_multiple_files = {"single_test": "GNATs_ALL.fa", "mult_test_1": "GNATs_class1.fa", "mult_test_2": "GNATs_class2.fa", "mult_test_3": "GNATs_class3.fa"}
 
@@ -51,6 +51,12 @@ def index():
 def test_fasta():
     return send_file(os.path.abspath(example_file_path + "example.zip"), as_attachment=True)
 
+@main.route('/api/iframes/<filename>')
+def iframes(filename):
+    print(file_path, filename)
+
+    return send_from_directory(os.path.abspath(file_path), filename)
+
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
@@ -80,7 +86,7 @@ def images(username):
     #     print("added image: " + f)
     #     file.close()
     for f in html_names:
-        htmls.append(url_for("static", filename=f[1:]))
+        htmls.append(f.split("/tmp/"))
     max_cookie = get_max_cookie(file_path, result_id)
     
     # First we check if there are any groups, if there aren't, then something went wrong, and we return 'failed'

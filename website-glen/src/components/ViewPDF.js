@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 let interval;
-
+export const groupsize = 6;
 export const ViewPDF = () => {
     const url = window.location.pathname;
     const [images, setImages] = useState([]);
@@ -65,7 +65,7 @@ export const ViewPDF = () => {
                     }
                     else {
                         if (data.failed === 'null') {
-                            alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
+                            //alert("Oh dear, we don't seem to have any information under that ID. Please try again.");
                             setFailed(true);
                         }
                         else if (data.failed === 'notready') {
@@ -104,7 +104,7 @@ export const ViewPDF = () => {
         return () => clearInterval(interval);
     }, []);
     useEffect(() => {
-        if (images.length > 0) {
+        if (images.length / groupNames.length === groupsize) {
             setDisplayImages(true);
             setShowProgressBar(false);
             clearInterval(interval);
