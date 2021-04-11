@@ -1,6 +1,6 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Version: 1.1.002                                                                                                   #
+#   Version: 1.1.003                                                                                                   #
 #   Author: Pascal Schläpfer, ETH Zürich, April 10th 2021,                                                             #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
@@ -1024,6 +1024,20 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
                                       vabs_html, vnr_html, vout_html)
+            else:
+                xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                vlen_html = vmedlengroup[vug]
+                if vabsolute:
+                    ylabel_html = '# of occurrences'
+                else:
+                    ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                vnr_html = vn_prot_per_group
+                if vsavefolder != '':
+                    vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_prosite.html')
+                else:
+                    vout_html = vjobid + '_' + vgitem + '_prosite.html'
+                f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1134,6 +1148,20 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             # Get the html figure
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
+            else:
+                xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                vlen_html = vmedlengroup[vug]
+                if vabsolute:
+                    ylabel_html = '# of occurrences'
+                else:
+                    ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                vnr_html = vn_prot_per_group
+                if vsavefolder != '':
+                    vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_pfam.html')
+                else:
+                    vout_html = vjobid + '_' + vgitem + '_pfam.html'
+                f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
                                       vabs_html, vnr_html, vout_html)
 
             # Get stick figure
@@ -1299,6 +1327,20 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
                                       vabs_html, vnr_html, vout_html)
+            else:
+                xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
+                vlen_html = vmedlengroup[vug]
+                if vabsolute:
+                    ylabel_html = '# of occurrences'
+                else:
+                    ylabel_html = 'Percent occurrence (n = ' + str(vn_prot_per_group) + ')'
+                vnr_html = vn_prot_per_group
+                if vsavefolder != '':
+                    vout_html = join(vsavefolder, vjobid + '_' + vgitem + '_combined.html')
+                else:
+                    vout_html = vjobid + '_' + vgitem + '_combined.html'
+                f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
+                                      vabs_html, vnr_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1417,14 +1459,16 @@ def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, v
         fig.update_yaxes(tick0=0,
                          dtick=vnr / 5,
                          showgrid=True,
-                         gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+                         gridcolor='rgba(0.5, 0.5, 0.5, 0.5)',
+                         range=[-1, vnr])
         fig.update_xaxes(showgrid=False,
                          gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
     else:
         fig.update_yaxes(tick0=0,
                          dtick=20,
                          showgrid=True,
-                         gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
+                         gridcolor='rgba(0.5, 0.5, 0.5, 0.5)',
+                         range=[-1, 100])
         fig.update_xaxes(showgrid=False,
                          gridcolor='rgba(0.5, 0.5, 0.5, 0.5)')
     fig.update_yaxes(title={'text': ylabel})
@@ -1547,8 +1591,11 @@ def f_plot_sticks_plotly(vx, vy, vwidth, vheight, vcolor, vlegend, vlen, vout):
                            fillcolor=vcolor_keep[vi],
                            layer='above',
                            line=dict(color=vcolor_keep[vi], width=0.1)))
-    fig.update_yaxes(visible=False, showticklabels=False)
-    fig.update_xaxes(visible=False, showticklabels=False)
+    fig.update_yaxes(visible=False,
+                     showticklabels=False,
+                     range=[-25, 25])
+    fig.update_xaxes(visible=False,
+                     showticklabels=False)
     fig.write_html(vout)
 
 
@@ -3265,6 +3312,11 @@ def f_get_stick(vmedlength, vdomainnames, vdomain_prevalence, vcolors, vthres, v
     # get html
     if vhtmlset:
         f_plot_sticks_plotly(vx_html, vy_html, vwidth_html, vheight_html, vcolor_html, vlegend_html, vlen_html,
+                             vout_html)
+    else:
+        vlen_html = vmedlength
+        vout_html = vfilename.rstrip('.pdf') + '.html'
+        f_plot_sticks_plotly([], [], [], [], [], [], vlen_html,
                              vout_html)
 
 
