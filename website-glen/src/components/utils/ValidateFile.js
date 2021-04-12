@@ -25,7 +25,7 @@ async function checkFasta(file) {
             if (line[0] === '>') {
                 headers.push(line);
             }
-            else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx\n]*$') === null) {
+            else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n]*$') === null) {
                 // 1) Check if line only consists of the following characters
                 // GALMFWKQESPVICYHRNDTgalmfwkqespvicyhrndt* and space and new line character (\n)
                 // If the line contains any other character, or is completely empty, the regex will return null
