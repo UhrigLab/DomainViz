@@ -64,7 +64,7 @@ def images(username):
 
     # get and sort the list of html output files, and the list of groups associated with the result_id
     html_names = get_output_names(file_path, result_id, ".html")
-    html_names = sorted(html_names)
+    htmls = sorted(html_names)
 
     # if there are no pdfs, then there cant be any groups (or rather, even if there are groups, we have to return a failed status
     # since domainviz.py isnt finished yet)
@@ -73,21 +73,7 @@ def images(username):
         group_names = sorted(group_names)
     else:
         group_names = []
-    
-
-
-    
-    # open the files in order of their name (for consistency of display) and add them to the list of pdfs
-    htmls = []
-    # for f in html_names:
-    #     file = open(f, 'rb')
-    #     b64_bytes = base64.b64encode(file.read())
-    #     image_file = b64_bytes.decode("utf-8")
-    #     htmls.append({"resultID" : result_id, "file" : image_file})
-    #     print("added image: " + f)
-    #     file.close()
-    for f in html_names:
-        htmls.append(f.split("/tmp/"))
+ 
     max_cookie = get_max_cookie(file_path, result_id)
     
     # First we check if there are any groups, if there aren't, then something went wrong, and we return 'failed'

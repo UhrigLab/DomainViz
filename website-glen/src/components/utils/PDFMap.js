@@ -41,7 +41,7 @@ export const PDFMap = ({ images, uid, groupNames }) => {
             for (let i=0; i<images.length; i++) {
                 fetch('/api/iframes/'+images[i]).then(response => {
                     if (htmls.length < images.length) //shouldnt add more htmls if we already have the same amount as we have image links
-                        setHTMLs(old => [...old, response.url]);
+                        setHTMLs(old => [...old, response.url].sort());
                 })
             }
         }, [])
