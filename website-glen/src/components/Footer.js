@@ -1,15 +1,9 @@
 import React from 'react';
-import { Typography, Grid, Button, Container } from '@material-ui/core';
+import { Typography, Grid, Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-    BrowserRouter,
-    Switch,
-    Route,
-    Link,
-  } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import UalbertaLogo from './img/UA-SCI-1C-SOLID-REVERSE.png'
-import { TermsOfUse } from './TermsOfUse';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -44,7 +38,7 @@ function Footer () {
             <Container className={classes.container} maxWidth="xl" disableGutters style={{ marginTop: "20px" }}>
                 <Grid container spacing={0} alignItems='center' justify='center'>
                     <Grid item xs={2}>
-                        <img src={UalbertaLogo} className={classes.img}></img>
+                        <img src={UalbertaLogo} alt={"University of Alberta Logo"} className={classes.img}></img>
                     </Grid>
                     <Grid item xs={3}/>
                     <Grid item xs={2}>
