@@ -1,6 +1,6 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Version: 1.1.003                                                                                                   #
+#   Version: 1.1.004                                                                                                   #
 #   Author: Pascal Schläpfer, ETH Zürich, April 10th 2021,                                                             #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
@@ -986,6 +986,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                     vcolor_html.append(vprositedomains_u_color[vheader_id])
                     vlegend_html.append(vprositedomains_u[vheader_id])
                     if not html_set:
+                        title_html = 'Distribution of Prosite protein domains\nfor ' + vgitem
                         xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                         vlen_html = vmedlengroup[vug]
                         if vabsolute:
@@ -1023,8 +1024,9 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             # Get the html figure
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
             else:
+                title_html = 'Distribution of Prosite protein domains\nfor ' + vgitem
                 xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                 vlen_html = vmedlengroup[vug]
                 if vabsolute:
@@ -1037,7 +1039,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 else:
                     vout_html = vjobid + '_' + vgitem + '_prosite.html'
                 f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1111,6 +1113,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                     vcolor_html.append(vpfamdomains_u_color[vheader_id])
                     vlegend_html.append(vpfamdomains_u[vheader_id])
                     if not html_set:
+                        title_html = 'Distribution of PFAM protein domains\nfor ' + vgitem
                         xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                         vlen_html = vmedlengroup[vug]
                         if vabsolute:
@@ -1148,8 +1151,9 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             # Get the html figure
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
             else:
+                title_html = 'Distribution of PFAM protein domains\nfor ' + vgitem
                 xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                 vlen_html = vmedlengroup[vug]
                 if vabsolute:
@@ -1162,7 +1166,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 else:
                     vout_html = vjobid + '_' + vgitem + '_pfam.html'
                 f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1238,6 +1242,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                         vcolor_html.append(vprositedomains_u_color[vmaxi])
                         vlegend_html.append(vprositedomains_u[vmaxi])
                         if not html_set:
+                            title_html = 'Distribution of protein domains\nfor ' + vgitem
                             xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                             vlen_html = vmedlengroup[vug]
                             if vabsolute:
@@ -1288,6 +1293,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                         vcolor_html.append(vpfamdomains_u_color[vimod])
                         vlegend_html.append(vpfamdomains_u[vimod])
                         if not html_set:
+                            title_html = 'Distribution of protein domains\nfor ' + vgitem
                             xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                             vlen_html = vmedlengroup[vug]
                             if vabsolute:
@@ -1326,8 +1332,9 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
             # Get the html figure
             if html_set:
                 f_plot_domains_plotly(vx_html, vy_html, vcolor_html, vlegend_html, xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
             else:
+                title_html = 'Distribution of protein domains\nfor ' + vgitem
                 xlabel_html = 'Median length: ' + str(vmedlengroup[vug]) + ' amino acids'
                 vlen_html = vmedlengroup[vug]
                 if vabsolute:
@@ -1340,7 +1347,7 @@ def f_run_domainviz(vjobid, vinputfile, vignoredb, vsavefolder, vdbfolder, vgrou
                 else:
                     vout_html = vjobid + '_' + vgitem + '_combined.html'
                 f_plot_domains_plotly([], [], [], [], xlabel_html, ylabel_html, vlen_html,
-                                      vabs_html, vnr_html, vout_html)
+                                      vabs_html, vnr_html, title_html, vout_html)
 
             # Get stick figure
             if vsavefolder != '':
@@ -1416,7 +1423,7 @@ def f_get_plotly_color(vcolor, valpha):
 ########################################################################################################################
 
 
-def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, vnr, vout):
+def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, vnr, vtitle, vout):
     domainlevels = {}
     valpha = 0.5
     vx_p = [1, 1, vlen, vlen]
@@ -1453,6 +1460,7 @@ def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, v
                       hoverlabel_font_color='rgba(10,10,10,10)',
                       showlegend=True,
                       font=dict(size=18),
+                      title=vtitle,
                       hoverlabel=dict(bgcolor="white",
                                       font_size=10))
     if vabs:

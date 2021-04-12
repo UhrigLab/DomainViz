@@ -158,7 +158,7 @@ function ProtPlot() {
         
         let files = []
         for (let i=0; i<fileList.length; i++) {
-            files.push(fileList[i])
+            files.push(fileList[i]);
         }
         if ((files.length + fastaFiles.length) >= 20) {
             alert("Please restrict your number of files to a maximum of 20 total.");
@@ -173,7 +173,7 @@ function ProtPlot() {
                 alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
                 valid = false;
             }
-            // // Check that the file is a fasta file
+            // Check that the file is a fasta file
             await isFasta(file).then((result) => {
                 valid = result;
             });
