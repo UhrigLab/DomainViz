@@ -1,5 +1,4 @@
 import { React, useEffect, useState } from 'react';
-import { PDF } from './PDF';
 import { Typography, Grid, Button, Paper, Accordion, AccordionSummary, AccordionDetails, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -48,29 +47,32 @@ export const PDFMap = ({ images, uid, groupNames }) => {
 
         return (
         <>
-            {htmls.map((image, index) => {
+            <Grid item xs={12}>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
+            </Grid>
+            {htmls.map((link, index) => {
                 return (
                     <>
-                        {(image) && groupNames[index/6] && (index % groupsize === 0) && //For 2 html files in a single row, 6 pdfs per group
+                        {(link) && groupNames[index/6] && (index % groupsize === 0) && //For 2 html files in a single row, 6 html files per group
                         <Grid item xs={12} key={index}>
                              {/* If there is only a single group, there will only be groupsize (6) htmls in total, 
                                 and if this is the case, start with the accordion expanded, but if there are more than one
                                 groups, then all of the accordions should be closed. */}
-                            <Accordion defaultExpanded={images.length===groupsize} className={classes.accordion}>
+                            <Accordion defaultExpanded={images.length === groupsize} className={classes.accordion}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                                     <Typography variant="h5">Group: {groupNames[index/6]}</Typography>
                                     
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <div className={classes.column}>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+4]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" title={htmls[index].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+2].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+4].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+4]} height="525" width="100%" />
                                     </div>
                                     <div className={classes.column}>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+1]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+3]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+5]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" title={htmls[index+1].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+1]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+3].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+3]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+5].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+5]} height="525" width="100%" />
                                     </div>
                                 </AccordionDetails>
                             </Accordion>
@@ -79,9 +81,6 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                     </>
                 )
             })}
-            <Grid item xs={12}>
-                <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
-            </Grid>
         </>
     );
 }
