@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from 'react';
-import { Typography, Grid, Button, Paper, Accordion, AccordionSummary, AccordionDetails, Divider } from '@material-ui/core';
+import { Typography, Grid, Button, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { saveAs } from 'file-saver';
@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
 
 export const PDFMap = ({ images, uid, groupNames }) => {
         const classes = useStyles()
-        // const [htmls, setHTMLs] = useState(["http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite_stickfigure.html"])
         const [htmls, setHTMLs] = useState([])
         function gotoDownload() {
             fetch('/api/download/' + uid).then(response => {
@@ -60,7 +59,7 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                                 groups, then all of the accordions should be closed. */}
                             <Accordion defaultExpanded={images.length === groupsize} className={classes.accordion}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                                    <Typography variant="h5">Group: {groupNames[index/6]}</Typography>
+                                    <Typography variant="h5">Group: {groupNames[index / groupsize]}</Typography>
                                     
                                 </AccordionSummary>
                                 <AccordionDetails>

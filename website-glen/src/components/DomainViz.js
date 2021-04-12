@@ -56,17 +56,17 @@ function ProtPlot() {
             alert("Please enter a result ID.");
             return;
         }
-        if (id.length != 36) {
+        if (id.length !== 36) {
             alert("Please enter a valid result ID, this ID is the wrong length.");
             return;
         }
-        if (id.match('^[a-z0-9.]*$') == null) {
+        if (id.match('^[a-z0-9.]*$') === null) {
             alert("Please enter a valid result ID, this ID has the wrong characters.")
             return;
         }
         let idSplit = id.split('.')
-        if (idSplit.length != 5 || idSplit[0].length != 8 || idSplit[1].length != 4 || idSplit[2].length != 4 
-            || idSplit[3].length != 4 || idSplit[4].length != 12) {
+        if (idSplit.length !== 5 || idSplit[0].length !== 8 || idSplit[1].length !== 4 || idSplit[2].length !== 4 
+            || idSplit[3].length !== 4 || idSplit[4].length !== 12) {
             alert("Please enter a valid result ID, this ID isn't formatted correctly.")
             return
         }
@@ -277,7 +277,7 @@ function ProtPlot() {
         <div className='protplot'>
             <Grid className={classes.root} container spacing={3} alignItems='center' justify='center' style={{marginTop: '90px'}}>
                 <Grid item xs={12}>
-                    <img src={DomainVizIcon} className={classes.img}></img>
+                    <img src={DomainVizIcon} alt="DomainViz logo" className={classes.img}></img>
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>

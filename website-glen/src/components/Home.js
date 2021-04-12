@@ -1,32 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import { Button, TextField, Typography } from '@material-ui/core';
+import React, { useEffect } from 'react';
+// import Paper from '@material-ui/core/Paper';
+// import Grid from '@material-ui/core/Grid';
+// import { makeStyles } from '@material-ui/core/styles';
+// import { Button, TextField, Typography } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-      flexGrow: 1,
-  },
-  button: {
-      padding: theme.spacing(1),
-      textAlign: 'center',
-  },
-  paper: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   root: {
+//       flexGrow: 1,
+//   },
+//   button: {
+//       padding: theme.spacing(1),
+//       textAlign: 'center',
+//   },
+//   paper: {
+//       padding: theme.spacing(2),
+//       textAlign: 'center',
+//       color: theme.palette.text.secondary,
+//   },
+// }));
 
 function Home() {
-  const classes = useStyles();
+  // const classes = useStyles();
   let history = useHistory();
   //automatically reroute to domainviz
   useEffect(() => {
     history.push('/domainviz');
-  }, []);
+  });
 
   // const [textFields, setTextFields] = useState({
   //   uidTextField: '',
