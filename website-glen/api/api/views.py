@@ -54,8 +54,6 @@ def test_fasta():
 
 @main.route('/api/iframes/<filename>')
 def iframes(filename):
-    print(file_path, filename)
-
     return send_from_directory(os.path.abspath(file_path), filename)
 
 @main.route('/api/images/<username>')
@@ -110,7 +108,6 @@ def sendfiles():
     for key in request.files.keys():
         fasta_file=request.files[key]
         group_name=key
-        print(fasta_file)
          # A failsafe in case the wrong type of files have been uploaded. In this case, we ignore it, and move on to the next file
         if ".fa" not in group_name and ".fasta" not in group_name:
             print("File " + group_name + " is not a fastafile, and is being skipped.")
@@ -132,7 +129,6 @@ def sendfiles():
         # Start i at -1 because the first key-value pair will always be "result_id": the_result_id_for_this_job
         i=-1
         result_id=request.form['result_id']
-        print(request.form)
         for key in request.form.keys():
             # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
             if '.fa' in request.form[key]:
@@ -196,13 +192,10 @@ def download(username):
 
     for f in glob.glob(file_path+result_id+'*.pdf'):
         result_zip.write(f, basename(f))
-        print("added pdf: " + f)
     for f in glob.glob(file_path+result_id+'*.html'):
         result_zip.write(f, basename(f))
-        print("added html file: " + f)
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
-        print('added tsv: ' + f)
     for f in glob.glob(file_path+result_id+'*.txt'):
         result_zip.write(f, basename(f))
     for f in glob.glob(example_file_path+'README.md'):

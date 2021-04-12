@@ -1,6 +1,5 @@
 import { React, useEffect, useState } from 'react';
-import { PDF } from './PDF';
-import { Typography, Grid, Button, Paper, Accordion, AccordionSummary, AccordionDetails, Divider } from '@material-ui/core';
+import { Typography, Grid, Button, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { saveAs } from 'file-saver';
@@ -29,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
 
 export const PDFMap = ({ images, uid, groupNames }) => {
         const classes = useStyles()
-        // const [htmls, setHTMLs] = useState(["http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_combined_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_pfam_stickfigure.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite.html","http://localhost:3000/api/iframes/b8bc8f46.3c3d.0ae4.9d56.54c3f17ce322_single_test_file_prosite_stickfigure.html"])
         const [htmls, setHTMLs] = useState([])
         function gotoDownload() {
             fetch('/api/download/' + uid).then(response => {
@@ -37,6 +35,13 @@ export const PDFMap = ({ images, uid, groupNames }) => {
             });
         }
 
+        // NOTE: There may be a warning in the console about this useEffect such as:
+        // " Line 45:12:  React Hook useEffect has missing dependencies: 'htmls.length' and 'images'.
+        // Either include them or remove the dependency array  react-hooks/exhaustive-deps"
+        //
+        // HOWEVER, do not add these, as there is asyncronous code running that will cause the same html file to be fetched
+        // multiple times, rather than fetching all num_groups*groupsize. I realize that this is likely poor practices, however,
+        // we are pressed for time and i cannot determine a solution that is better. 
         useEffect(() => {
             for (let i=0; i<images.length; i++) {
                 fetch('/api/iframes/'+images[i]).then(response => {
@@ -44,33 +49,37 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                         setHTMLs(old => [...old, response.url].sort());
                 })
             }
-        }, [])
+        // eslint-disable-next-line
+        }, []);
 
         return (
         <>
-            {htmls.map((image, index) => {
+            <Grid item xs={12}>
+                <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
+            </Grid>
+            {htmls.map((link, index) => {
                 return (
                     <>
-                        {(image) && groupNames[index/6] && (index % groupsize === 0) && //For 2 html files in a single row, 6 pdfs per group
+                        {(htmls.length % groupsize === 0) && (link) && groupNames[index/groupsize] && (index % groupsize === 0) && //For 2 html files in a single row, 6 html files per group
                         <Grid item xs={12} key={index}>
                              {/* If there is only a single group, there will only be groupsize (6) htmls in total, 
                                 and if this is the case, start with the accordion expanded, but if there are more than one
                                 groups, then all of the accordions should be closed. */}
-                            <Accordion defaultExpanded={images.length===groupsize} className={classes.accordion}>
+                            <Accordion defaultExpanded={images.length === groupsize} className={classes.accordion}>
                                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
-                                    <Typography variant="h5">Group: {groupNames[index/6]}</Typography>
+                                    <Typography variant="h5">Group: {groupNames[index / groupsize]}</Typography>
                                     
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     <div className={classes.column}>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+4]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" title={htmls[index].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+2].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+4].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+4]} height="525" width="100%" />
                                     </div>
                                     <div className={classes.column}>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+1]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+3]} height="525" width="100%" ></iframe>
-                                        <iframe id="igraph" scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+5]} height="525" width="100%" ></iframe>
+                                        <iframe id="igraph" title={htmls[index+1].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+1]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+3].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+3]} height="525" width="100%" />
+                                        <iframe id="igraph" title={htmls[index+5].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+5]} height="525" width="100%" />
                                     </div>
                                 </AccordionDetails>
                             </Accordion>
@@ -79,9 +88,6 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                     </>
                 )
             })}
-            <Grid item xs={12}>
-                <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
-            </Grid>
         </>
     );
 }

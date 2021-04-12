@@ -1,5 +1,3 @@
-let fileReader;
-
 async function canReadFile(file) {
     // Check if file exists.
     try {
@@ -21,22 +19,22 @@ async function checkFasta(file) {
             let line = lines[i];
 
             if (headers.length > 3000) {
-                return false, 'Fasta file contains too many headers. Please limit your file to 3000 headers.'
+                return (false, 'Fasta file contains too many headers. Please limit your file to 3000 headers.');
             }
 
-            if (line[0] =='>') {
+            if (line[0] === '>') {
                 headers.push(line);
             }
-            else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx\*\n]*$') == null) {
+            else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n]*$') === null) {
                 // 1) Check if line only consists of the following characters
                 // GALMFWKQESPVICYHRNDTgalmfwkqespvicyhrndt* and space and new line character (\n)
                 // If the line contains any other character, or is completely empty, the regex will return null
                 let line_num = parseInt(i) + 1
-                return false, 'Fasta file contains forbidden characters on line ' + line_num.toString() + '. The only characters that are allowed are: ' + 'GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n The line that caused problems was: ' + line;
+                return (false, 'Fasta file contains forbidden characters on line ' + line_num.toString() + '. The only characters that are allowed are: GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n The line that caused problems was: ' + line);
             }
         }
         //make sure there are no repeated headers
-        if ((new Set(headers)).size == headers.length) {
+        if ((new Set(headers)).size === headers.length) {
             return true;
         }
         else {
@@ -53,7 +51,7 @@ async function isFasta(file) {
         valid=true;
     }).catch((error) => {
         console.error(error);
-        alert("Could not read file.")
+        alert("Could not read file.");
     });
 
     if (!valid) {
@@ -64,7 +62,7 @@ async function isFasta(file) {
     // Check if file consists only of headers and protein sequences. 
     //Collect all headers to then check if there are duplicates.
     await checkFasta(file).then(result => {
-        if (result != true) {
+        if (result !== true) {
             valid = false;
             alert(result);
         }

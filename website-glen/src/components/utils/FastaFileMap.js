@@ -66,13 +66,13 @@ export const FastaFileMap = ({ fastaFiles, changeName, removeFile }) => {
                             </Paper>
                         </Grid>
                         <Grid item xs={2}>
-                            <TextField fullWidth name="fasta-filename-${i}" label='New Name' onChange={(e) => handleFAFilesChange(e, e.target.value, i)}/>
+                            <TextField fullWidth name={`fasta-filename-${i}`} label='New Name' onChange={(e) => handleFAFilesChange(e, e.target.value, i)}/>
                         </Grid>
                         <Grid item xs={1}>
-                            <Button name='rename-button-${i}' variant='contained' color='default' component='span' className={classes.button} onClick={(e) => returnName(e, i)}>Confirm</Button>
+                            <Button name={`rename-button-${i}`} variant='contained' color='default' component='span' className={classes.button} onClick={(e) => returnName(e, i)}>Confirm</Button>
                         </Grid>
                         <Grid item xs={1}>
-                            <Button name='delete-button-${i}' variant='contained' color='default' component='span' className={classes.button} onClick={(e) => deleteFile(e, i)}>Clear Entry</Button>
+                            <Button name={`delete-button-${i}`} variant='contained' color='default' component='span' className={classes.button} onClick={(e) => deleteFile(e, i)}>Clear Entry</Button>
                         </Grid>
                         <Grid item xs={3}/>
                     </Fragment>
