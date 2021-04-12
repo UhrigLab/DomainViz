@@ -35,6 +35,13 @@ export const PDFMap = ({ images, uid, groupNames }) => {
             });
         }
 
+        // NOTE: There may be a warning in the console about this useEffect such as:
+        // " Line 45:12:  React Hook useEffect has missing dependencies: 'htmls.length' and 'images'.
+        // Either include them or remove the dependency array  react-hooks/exhaustive-deps"
+        //
+        // HOWEVER, do not add these, as there is asyncronous code running that will cause the same html file to be fetched
+        // multiple times, rather than fetching all num_groups*groupsize. I realize that this is likely poor practices, however,
+        // we are pressed for time and i cannot determine a solution that is better. 
         useEffect(() => {
             for (let i=0; i<images.length; i++) {
                 fetch('/api/iframes/'+images[i]).then(response => {
@@ -42,7 +49,7 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                         setHTMLs(old => [...old, response.url].sort());
                 })
             }
-        }, [])
+        }, []);
 
         return (
         <>
@@ -52,7 +59,7 @@ export const PDFMap = ({ images, uid, groupNames }) => {
             {htmls.map((link, index) => {
                 return (
                     <>
-                        {(link) && groupNames[index/6] && (index % groupsize === 0) && //For 2 html files in a single row, 6 html files per group
+                        {(htmls.length % groupsize === 0) && (link) && groupNames[index/groupsize] && (index % groupsize === 0) && //For 2 html files in a single row, 6 html files per group
                         <Grid item xs={12} key={index}>
                              {/* If there is only a single group, there will only be groupsize (6) htmls in total, 
                                 and if this is the case, start with the accordion expanded, but if there are more than one

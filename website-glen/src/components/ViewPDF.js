@@ -126,7 +126,7 @@ export const ViewPDF = () => {
         if (!messages.includes(currentMessage) && currentMessage.length > 0) {
             setMessages(currentMessages => [...currentMessages, currentMessage]);
         }
-    }, [images, failed, currentMessage, messages]);
+    }, [images, failed, currentMessage, messages, groupNames.length]);
 
     return (
         <Grid container spacing={3} alignItems='center' style={{marginTop: '90px'}}>
