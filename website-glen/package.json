@@ -12,6 +12,7 @@
     "axios": "^0.21.0",
     "babel": "^6.23.0",
     "core-util-is": "^1.0.2",
+    "css-what": "^5.0.0",
     "file-saver": "^2.0.2",
     "fontsource-roboto": "^3.0.3",
     "material-ui": "^0.20.2",
