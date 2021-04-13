@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from 'react';
+import { Fragment, React, useEffect, useState } from 'react';
 import { Typography, Grid, Button, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -59,9 +59,9 @@ export const PDFMap = ({ images, uid, groupNames }) => {
             </Grid>
             {htmls.map((link, index) => {
                 return (
-                    <>
+                    <Fragment key={index}>
                         {(htmls.length % groupsize === 0) && (link) && groupNames[index/groupsize] && (index % groupsize === 0) && //For 2 html files in a single row, 6 html files per group
-                        <Grid item xs={12} key={index}>
+                        <Grid item xs={12}>
                              {/* If there is only a single group, there will only be groupsize (6) htmls in total, 
                                 and if this is the case, start with the accordion expanded, but if there are more than one
                                 groups, then all of the accordions should be closed. */}
@@ -85,7 +85,7 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                             </Accordion>
                         </Grid>
                         }
-                    </>
+                    </Fragment>
                 )
             })}
         </>

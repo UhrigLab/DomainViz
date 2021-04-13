@@ -1459,7 +1459,7 @@ def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, v
                       paper_bgcolor='rgba(0, 0, 0, 0)',
                       hoverlabel_font_color='rgba(10,10,10,10)',
                       showlegend=True,
-                      font=dict(size=18),
+                      font=dict(size=14),
                       title=vtitle,
                       hoverlabel=dict(bgcolor="white",
                                       font_size=10))

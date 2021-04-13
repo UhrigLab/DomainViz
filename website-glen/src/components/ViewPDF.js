@@ -154,7 +154,7 @@ export const ViewPDF = () => {
                         </Paper>
                     </Grid>
                     <Grid item xs={12}>
-                        <CircularProgress variant='static' value={progress} color='secondary'></CircularProgress>
+                        <CircularProgress variant='determinate' value={progress} color='secondary'></CircularProgress>
                     </Grid>
                 </>
             }

@@ -166,7 +166,6 @@ function ProtPlot() {
             }
         }
 
-
         let files = []
         for (let i=0; i<fileList.length; i++) {
             files.push(fileList[i]);

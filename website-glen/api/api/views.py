@@ -11,14 +11,14 @@ from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fas
 import os, subprocess, base64, glob
 
 #DEVELOPMENT
-#api_path = "api/api/"
+api_path = "api/api/"
 #PRODUCTION
-api_path = "api/"
+#api_path = "api/"
 
 #DEVELOPMENT
-#virtual_env = "api/api/propplotenvDEV/"
+virtual_env = "api/api/propplotenvDEV/"
 #PRODUCTION
-virtual_env = "api/propplotenv/"
+#virtual_env = "api/propplotenv/"
 
 file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
@@ -156,7 +156,7 @@ def sendfiles():
         custom_scaling = "0" 
 
     # Set up the call for Pascals script here
-    call = virtual_env +  "bin/python " + api_path + "domainviz.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
+    call = virtual_env +  "bin/python " + api_path + "domainviz_smallFont.py " + "-id " + result_id + " -in " + file_path + fasta_filename + " -sf " + file_path + " -dbf " + api_path + "dbs/" + " -ar " + ar + " -cut " + cutoff + " -mcut " + max_cutoff + " -cs " + custom_scaling + " -api " + scale_figure
     
     #add the protein groups file, the creation of which can be found in utils.py
     protein_groups_filename = result_id + "_groupfile.tsv"
