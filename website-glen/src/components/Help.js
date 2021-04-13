@@ -88,6 +88,21 @@ export const Help = () => {
           <Typography variant='h6'>Figure Scaling</Typography>
           <Typography variant='body1' paragraph>The number input here represents the number of inches per 100 amino acids that the plot will use to display each visualization.</Typography>
 
+          <Typography variant='h6'>Results</Typography>
+          <Typography variant='body1' paragraph>There are two types of Results output by DomainViz: interactive plots displayed on the Results webpage and a Downloadable file containing vector images and the underlying data. The interactive mv-plots have the following options:</Typography>
+          <Typography variant='body1' display='inline'>1. </Typography>
+          <Typography variant='body1' display='inline'>Users can click on individual domains in the legend to choose to display/hide them in the plot.</Typography>
+          <Typography paragraph />
+          <Typography variant='body1' display='inline'>2. </Typography>
+          <Typography variant='body1' display='inline'>Zoom: Users can click on the Zoom button in the toolbar to zoom into specific sections of the plot. Double click anywhere to zoom back out. </Typography>
+          <Typography paragraph />
+          <Typography variant='body1' display='inline'>3. </Typography>
+          <Typography variant='body1' display='inline'>Snapshot: Users can click the Camera icon in the toolbar to take a .png snapshot of the current display in the plot (for example, after hiding a particular domain).</Typography>
+          <Typography paragraph />
+
+          <iframe id="igraph" title="example_iframe" scrolling="no" style={{border:"none"}} seamless="seamless" src={process.env.PUBLIC_URL + "example_iframe.html"} height="525" width="100%" />
+
+
           <Typography variant='h5'>Data Interpretation</Typography>
           <Typography variant='body1'>The mv-plots depict both the position and prevalence of each protein domain within the group of proteins input by the user. Conventional symbolic representations of the domains detected are also generated and placed next to the mv-plots.</Typography>
           <Typography variant='body1' paragraph>Note: interactive example is accessible by submitting the “Load Example” dataset on the main DomainViz page.</Typography>
