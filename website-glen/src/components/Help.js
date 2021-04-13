@@ -1,7 +1,8 @@
 import React from 'react';
-import { Grid, Paper, Typography, Link } from '@material-ui/core';
+import { Grid, Paper, Typography, Link, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import HelpImage from './img/help-file.png'
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -209,23 +210,39 @@ export const Help = () => {
           <Typography variant='body1' paragraph>The same as Job.id_ProteinGroup_pfam.csv, however for ProSite domains.</Typography>
 
 
-          <Typography variant='h5'>FAQ</Typography>
-          <Typography variant='body1' display='inline'>1. </Typography>
-          <Typography className={classes.body2} variant='body1' display='inline'>Q. How do I retrieve my results after navigating away from the processing results?</Typography>
-          <Typography variant='body1'>A. Ensure that you retain the 32-character unique identifier result ID displayed on the Results page. Enter this code into the Result ID field on the home page and hit “Go to My Results”. Alternatively, bookmark the Results page and revisit it after some time. </Typography>
-          <Typography paragraph/>
-          <Typography variant='body1' display='inline'>2. </Typography>
-          <Typography className={classes.body2} variant='body1' display='inline'>Q. Why have I have been warned that I have duplicate sequences in my FASTA file?</Typography>
-          <Typography variant='body1'>A. DomainViz will still process your file under the assumption that duplicate sequences refer to independent proteins that share the same sequence. We advise checking that spurious duplicate sequences were not accidentally introduced during input file creation as they can lead to altered results.</Typography>
-          <Typography paragraph/>
-          <Typography variant='body1' display='inline'>3. </Typography>
-          <Typography className={classes.body2} variant='body1' display='inline'>Q. What is the maximum number of protein sequences that can be analyzed at once?</Typography>
-          <Typography variant='body1'>A. DomainViz can currently assess 3000 protein sequences at once. NOTE: The more sequences in a single query the longer the analysis will take.</Typography>
-          <Typography paragraph/>
-          <Typography variant='body1' display='inline'>4. </Typography>
-          <Typography className={classes.body2} variant='body1' display='inline'>Q. My fasta files are't uploading, it says there is a problem with one of my lines? How do I fix this?</Typography>
-          <Typography variant='body1'>A. Please remove the lines that are causing issues.</Typography>
-          <Typography paragraph/>
+          <Accordion  className={classes.accordion}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+              <Typography variant='h5'>FAQ</Typography>                
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container>
+                <Grid item xs={12}>
+                  <Typography className={classes.body2} variant='body1' display='inline'>1. </Typography>
+                  <Typography className={classes.body2} variant='body1' display='inline'>Q. How do I retrieve my results after navigating away from the processing results?</Typography>
+                  <Typography variant='body1'>A. Ensure that you retain the 32-character unique identifier result ID displayed on the Results page. Enter this code into the Result ID field on the home page and hit “Go to My Results”. Alternatively, bookmark the Results page and revisit it after some time. </Typography>
+                  <Typography paragraph/>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography className={classes.body2} variant='body1' display='inline'>2. </Typography>
+                  <Typography className={classes.body2} variant='body1' display='inline'>Q. Why have I have been warned that I have duplicate sequences in my FASTA file?</Typography>
+                  <Typography variant='body1'>A. DomainViz will still process your file under the assumption that duplicate sequences refer to independent proteins that share the same sequence. We advise checking that spurious duplicate sequences were not accidentally introduced during input file creation as they can lead to altered results.</Typography>
+                  <Typography paragraph/>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography className={classes.body2} variant='body1' display='inline'>3. </Typography>
+                  <Typography className={classes.body2} variant='body1' display='inline'>Q. What is the maximum number of protein sequences that can be analyzed at once?</Typography>
+                  <Typography variant='body1'>A. DomainViz can currently assess 3000 protein sequences at once. NOTE: The more sequences in a single query the longer the analysis will take.</Typography>
+                  <Typography paragraph/>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography className={classes.body2} variant='body1' display='inline'>4. </Typography>
+                  <Typography className={classes.body2} variant='body1' display='inline'>Q. My fasta files are't uploading, it says there is a problem with one of my lines? How do I fix this?</Typography>
+                  <Typography variant='body1'>A. Please remove the lines that are causing issues.</Typography>
+                  <Typography paragraph/>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
 
         </Paper>
       </Grid>

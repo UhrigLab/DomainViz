@@ -155,7 +155,18 @@ function ProtPlot() {
         }
     }
     async function handleFastaFiles(fileList) {
-        
+
+        // Check that there are no test files in the fastaFiles list, since the backend cannot currently handle both test and regular files
+        for (let i=0; i<fastaFiles.length; i++) {
+            if (fastaFiles[i].file) {
+                if ("test" in fastaFiles.file) {
+                    alert("Please remove all test files before uploading fasta files.");
+                    return;
+                }
+            }
+        }
+
+
         let files = []
         for (let i=0; i<fileList.length; i++) {
             files.push(fileList[i]);
