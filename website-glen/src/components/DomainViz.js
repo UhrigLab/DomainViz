@@ -159,7 +159,7 @@ function ProtPlot() {
         // Check that there are no test files in the fastaFiles list, since the backend cannot currently handle both test and regular files
         for (let i=0; i<fastaFiles.length; i++) {
             if (fastaFiles[i].file) {
-                if ("test" in fastaFiles.file) {
+                if (fastaFiles[i].file.includes("test")) {
                     alert("Please remove all test files before uploading fasta files.");
                     return;
                 }
