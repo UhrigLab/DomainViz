@@ -92,6 +92,9 @@ def images(username):
     elif len(htmls) < (group_size*len(group_names)):
         return jsonify({'failed': 'notready'})
     else:
+        print("****************************")
+        print("sending files")
+        print("***********************")
         cleanup_cookies(file_path, result_id)
         return jsonify({'images': htmls, 'groups': group_names})
 
@@ -197,6 +200,8 @@ def download(username):
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
     for f in glob.glob(file_path+result_id+'*.txt'):
+        result_zip.write(f, basename(f))
+    for f in glob.glob(file_path+'plotly.min.js'):
         result_zip.write(f, basename(f))
     for f in glob.glob(example_file_path+'README.md'):
         result_zip.write(f, basename(f))

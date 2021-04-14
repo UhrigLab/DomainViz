@@ -9,7 +9,6 @@ from shutil import copyfile
 # OUTPUTS: boolean - if there are no cookies, the function will return false.
 def get_max_cookie(file_path, id):
     cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
-    print(cookies)
     if cookies: # True unless there are no cookies
         max_cookie = 0
         for cookie in cookies:
@@ -31,7 +30,6 @@ def get_cookie_info(file_path, id, current_cookie):
         print("Cookie: " + current_cookie + " could not be found.")
         return False
     # If the file is blank, this will return an empty string, which acts as "False" for the calling function
-    print(" ".join(cookie_info.split()))
     return cookie_info
 def cleanup_cookies(file_path, id):
     cookies = glob.glob(os.path.abspath(file_path + id + "_cookie_*"))
@@ -94,7 +92,7 @@ def get_output_names(file_path, result_id, type):
         file_id = file_id.split("_")[0]
         if result_id == file_id:
             output_names.append(f.split("tmp/")[1])
-        print(output_names)
+        print("output names:", output_names)
     return output_names
 
 def get_group_names(file_path, result_id):
