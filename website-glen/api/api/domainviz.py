@@ -1,6 +1,6 @@
 ########################################################################################################################
 #                                                                                                                      #
-#   Version: 1.1.006                                                                                                   #
+#   Version: 1.1.008                                                                                                   #
 #   Author: Pascal Schläpfer, ETH Zürich, April 10th 2021,                                                             #
 #   See below for function description                                                                                 #
 #                                                                                                                      #
@@ -263,6 +263,10 @@ except ImportError:
 #    - jobid_proteingroup_prosite.html [file]: HTML version of jobid_proteingroup_prosite.pdf                          #
 #    - jobid_proteingroup_pfam.html [file]: HTML version of jobid_proteingroup_pfam.pdf                                #
 #    - jobid_proteingroup_combined.html [file]: HTML version of jobid_proteingroup_combined.pdf                        #
+#    - jobid_proteingroup_stickfigure_prosite.html [file]: HTML version of jobid_proteingroup_stickfigure_prosite.pdf  #
+#    - jobid_proteingroup_stickfigure_pfam.html [file]: HTML version of jobid_proteingroup_stickfigure_pfam.pdf        #
+#    - jobid_proteingroup_stickfigure_combined.html [file]: HTML version of                                            #
+#                                                           jobid_proteingroup_stickfigure_combined.pdf                #
 #    - proteingroup_prosite_colors.txt [file]: Tsv of the domains and colors used in the plot. Can be modified and     #
 #                                              funneled back into the script to modify colors. See vcolorfile for      #
 #                                              structure.                                                              #
@@ -1499,7 +1503,7 @@ def f_plot_domains_plotly(vx, vy, vcolor, vlegend, xlabel, ylabel, vlen, vabs, v
                       paper_bgcolor='rgba(0, 0, 0, 0)',
                       hoverlabel_font_color='rgba(10,10,10,10)',
                       showlegend=True,
-                      font=dict(size=18),
+                      font=dict(size=14),
                       title=vtitle,
                       hoverlabel=dict(bgcolor="white",
                                       font_size=10))
@@ -1574,7 +1578,7 @@ def get_round_rect(x0, y0, vwidth_i, vheight_i):
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - a file with the name that is saved in the input variable vout, formatted in html, that shows the domains as     #
-#      stickfigures.                                                                                                   #
+#      stick figures.                                                                                                  #
 #                                                                                                                      #
 ########################################################################################################################
 
@@ -2120,7 +2124,7 @@ def f_read_in_file(vfile, vsavefolder, vjobid):
 #    - vsavefolder [string]: Indicates the location of the folder where result files should be saved.                  #
 #    - vjobid [string]: Id of the run. Is used to produce the output file names.                                       #
 #    - vwarnings_prosite [boolean]: If warnings should be given out or not.                                            #
-#    - vcurrentdate [string]: Indicates the currend date that the record is from.                                      #
+#    - vcurrentdate [string]: Indicates the current date that the record is from.                                      #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vout_all [list]: List of lists, containing the results as sublist, with the sequence header as the first item,  #
@@ -2199,7 +2203,7 @@ def f_run_sequences_through_prosite(vdbfolder, vhead, vseq, vsavefolder, vjobid,
 #    - vrecords [string]: Prosite domain results of a protein                                                          #
 #    - vdbfolder [string]: Indicates the location of the folder where the databases of previous results should be      #
 #                          built up.                                                                                   #
-#    - vcurrentdate [string]: Indicates the currend date that the record is from.                                      #
+#    - vcurrentdate [string]: Indicates the current date that the record is from.                                      #
 #                                                                                                                      #
 #  Output:                                                                                                             #
 #    - vrecords_out [list]: List of lists, containing the results as sublist, with the sequence header as the first    #
@@ -3416,6 +3420,21 @@ def f_print_help():
           '                                           amino acid sequence of all proteins in the protein group.\n'
           '  - jobid_proteingroup_pfam.pdf [file]: Pdf plot as above, but for PFAM domains.\n'
           '  - jobid_proteingroup_combined.pdf [file]: Pdf plot for Prosite and PFAM domains.\n'
+          '  - jobid_proteingroup_stickfigure_prosite.pdf [file]: Same as jobid_proteingroup_prosite.pdf, but shown \n'
+          '                                                       as traditional stick figure.\n'
+          '  - jobid_proteingroup_stickfigure_pfam.pdf [file]: Same as jobid_proteingroup_pfam.pdf, but shown as\n'
+          '                                                    traditional stick figure.\n'
+          '  - jobid_proteingroup_stickfigure_combined.pdf [file]: Same as jobid_proteingroup_combined.pdf, but shown\n'
+          '                                                        as traditional stick figure.\n'
+          '  - jobid_proteingroup_prosite.html [file]: HTML version of jobid_proteingroup_prosite.pdf\n'
+          '  - jobid_proteingroup_pfam.html [file]: HTML version of jobid_proteingroup_pfam.pdf\n'
+          '  - jobid_proteingroup_combined.html [file]: HTML version of jobid_proteingroup_combined.pdf\n'
+          '  - jobid_proteingroup_stickfigure_prosite.html [file]: HTML version of\n'
+          '                                                        jobid_proteingroup_stickfigure_prosite.pdf\n'
+          '  - jobid_proteingroup_stickfigure_pfam.html [file]: HTML version of\n'
+          '                                                     jobid_proteingroup_stickfigure_pfam.pdf\n'
+          '  - jobid_proteingroup_stickfigure_combined.html [file]: HTML version of\n'
+          '                                                       jobid_proteingroup_stickfigure_combined.pdf\n'
           '  - jobid_domain_color_file.txt [file]: Tsv of the domains and colors used in the plots. Can be modified\n'
           '                                        and funneled back into the script to modify colors. See vcolorfile\n'
           '                                        for structure.\n'
