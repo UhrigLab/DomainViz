@@ -195,7 +195,6 @@ function ProtPlot() {
         let filenames = ""
         for (let i=0; i<files.length; i++) {
             if(validList[i] === false) {
-                alert("File " + files[i].name + " is invalid")
                 return;
             }
             filenames = filenames + files[i].name + " "
