@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid, Paper, Typography, Link, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import HelpImage from './img/help-file.png'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ReactGA from 'react-ga';
+import { createBrowserHistory } from 'history';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -25,8 +27,17 @@ const useStyles = makeStyles((theme) => ({
     width: "1000px"
 },
 }));
+
+const browserHistory = createBrowserHistory();
 export const Help = () => {
   const classes = useStyles()
+
+  useEffect(() => {
+    browserHistory.listen(location => {
+      ReactGA.set({ page: location.pathname }); // Update the users current page
+      ReactGA.pageview(location.pathname); // Record a pageview for the page.
+    });
+  }, []);
 
   return (
     <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>

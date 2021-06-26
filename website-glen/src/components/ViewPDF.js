@@ -16,6 +16,8 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { useHistory } from 'react-router-dom';
 import DomainVizIcon from './img/domainviz.png';
+import ReactGA from 'react-ga';
+import { createBrowserHistory } from 'history';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -36,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
         width: "293px"
     },
 }));
+
+const browserHistory = createBrowserHistory();
 let interval;
 export const groupsize = 6;
 export const ViewPDF = () => {
@@ -65,6 +69,14 @@ export const ViewPDF = () => {
     const handleClose = () => {
         setOpen(false);
     };
+    
+    useEffect(() => {
+        browserHistory.listen(location => {
+            // Here the url should just be ".../view-results/"
+            ReactGA.set({ page: location.split(uid)[0] }); // Update the users current page
+            ReactGA.pageview(location.split(uid)[0]); // Record a pageview for the page.
+        });
+    }, [uid]);
 
     useEffect(() => {
         interval = setInterval(() => {
