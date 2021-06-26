@@ -1,12 +1,12 @@
-from flask import Blueprint, jsonify, request, redirect, current_app, render_template
-from flask.helpers import send_file
+from flask import Blueprint, jsonify, request, redirect, current_app, render_template, url_for
+from flask.helpers import send_file, send_from_directory
 from zipfile import ZipFile
 import io
 from os.path import basename
 
 from werkzeug.exceptions import InternalServerError
 #import py-fasta-validator # for validating fasta files
-from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fasta_file, get_pdf_names, get_group_names
+from api.utils import get_max_cookie, get_cookie_info, cleanup_cookies, save_fasta_file, get_output_names, get_group_names
 
 import os, subprocess, base64, glob
 
@@ -24,6 +24,7 @@ file_path = api_path + "tmp/"
 example_file_path = api_path + "examples/"
 example_multiple_files = {"single_test": "GNATs_ALL.fa", "mult_test_1": "GNATs_class1.fa", "mult_test_2": "GNATs_class2.fa", "mult_test_3": "GNATs_class3.fa"}
 
+group_size = 6
 
 main = Blueprint('main', __name__, static_folder="../build", static_url_path='/')
 
@@ -51,34 +52,26 @@ def index():
 def test_fasta():
     return send_file(os.path.abspath(example_file_path + "example.zip"), as_attachment=True)
 
+@main.route('/api/iframes/<filename>')
+def iframes(filename):
+    return send_from_directory(os.path.abspath(file_path), filename)
+
 @main.route('/api/images/<username>')
 def images(username):
     result_id = username
 
-    # get and sort the list of pdfs, and the list of groups associated with the result_id
-    pdf_names = get_pdf_names(file_path, result_id)
-    pdf_names = sorted(pdf_names)
+    # get and sort the list of html output files, and the list of groups associated with the result_id
+    html_names = get_output_names(file_path, result_id, ".html")
+    htmls = sorted(html_names)
 
     # if there are no pdfs, then there cant be any groups (or rather, even if there are groups, we have to return a failed status
     # since domainviz.py isnt finished yet)
-    if len(pdf_names) > 0:
+    if len(html_names) > 0:
         group_names = get_group_names(file_path, result_id)
         group_names = sorted(group_names)
     else:
         group_names = []
-    
-
-
-    
-    # open the files in order of their name (for consistency of display) and add them to the list of pdfs
-    pdfs = []
-    for f in pdf_names:
-        file = open(f, 'rb')
-        b64_bytes = base64.b64encode(file.read())
-        image_file = b64_bytes.decode("utf-8")
-        pdfs.append({"resultID" : result_id, "file" : image_file})
-        print("added image: " + f)
-        file.close()
+ 
     max_cookie = get_max_cookie(file_path, result_id)
     
     # First we check if there are any groups, if there aren't, then something went wrong, and we return 'failed'
@@ -89,18 +82,21 @@ def images(username):
             return jsonify({'failed': max_cookie})
     elif len(group_names) < 1: 
         return jsonify({'failed': 'null'})
-    # If there are groups, we need to wait until there are 3 pdfs per group in order to display them. 
+    # If there are groups, we need to wait until there are group_size (6) pdfs per group in order to display them. 
     # Otherwise, we will display a bunch of broken or half-made data.
-    if len(pdfs) < (3*len(group_names)) and max_cookie:
+    if len(htmls) < (group_size*len(group_names)) and max_cookie:
         if get_cookie_info(file_path, result_id, max_cookie):
             return jsonify({'failed': max_cookie, 'info': " ".join(get_cookie_info(file_path, result_id, max_cookie).split())})
         else:
             return jsonify({'failed': max_cookie})
-    elif len(pdfs) < (3*len(group_names)):
+    elif len(htmls) < (group_size*len(group_names)):
         return jsonify({'failed': 'notready'})
     else:
+        print("****************************")
+        print("sending files")
+        print("***********************")
         cleanup_cookies(file_path, result_id)
-        return jsonify({'images': pdfs, 'groups': group_names})
+        return jsonify({'images': htmls, 'groups': group_names})
 
 @main.route('/api/sendfiles', methods=['POST'])
 def sendfiles():
@@ -115,7 +111,6 @@ def sendfiles():
     for key in request.files.keys():
         fasta_file=request.files[key]
         group_name=key
-        print(fasta_file)
          # A failsafe in case the wrong type of files have been uploaded. In this case, we ignore it, and move on to the next file
         if ".fa" not in group_name and ".fasta" not in group_name:
             print("File " + group_name + " is not a fastafile, and is being skipped.")
@@ -137,7 +132,6 @@ def sendfiles():
         # Start i at -1 because the first key-value pair will always be "result_id": the_result_id_for_this_job
         i=-1
         result_id=request.form['result_id']
-        print(request.form)
         for key in request.form.keys():
             # if the form contains a .fa or .fasta file, we save it as such, if not, ignore it
             if '.fa' in request.form[key]:
@@ -201,11 +195,13 @@ def download(username):
 
     for f in glob.glob(file_path+result_id+'*.pdf'):
         result_zip.write(f, basename(f))
-        print("added pdf: " + f)
+    for f in glob.glob(file_path+result_id+'*.html'):
+        result_zip.write(f, basename(f))
     for f in glob.glob(file_path+result_id+'*.tsv'):
         result_zip.write(f, basename(f))
-        print('added tsv: ' + f)
     for f in glob.glob(file_path+result_id+'*.txt'):
+        result_zip.write(f, basename(f))
+    for f in glob.glob(file_path+'plotly.min.js'):
         result_zip.write(f, basename(f))
     for f in glob.glob(example_file_path+'README.md'):
         result_zip.write(f, basename(f))

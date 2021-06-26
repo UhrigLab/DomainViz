@@ -15,6 +15,13 @@ async function checkFasta(file) {
     return file.text().then(content => {
         let headers = [];
         let lines = content.split('\n');
+        let prevLineHeader = false; 
+
+        // Check that the file is not empty
+        if (lines.length === 0 || content === '') {
+            return (false, "Fasta file has no content. Please make sure you aren't uploading an empty fasta file.")
+        }
+
         for (var i in lines) {
             let line = lines[i];
 
@@ -23,7 +30,13 @@ async function checkFasta(file) {
             }
 
             if (line[0] === '>') {
+                if (prevLineHeader === true) {
+                    // Check that there are no headers without a following sequence.
+                    let line_num = parseInt(i) + 1
+                    return (false, 'Fasta file contains a fasta header without a sequence on line ' + line_num.toString() + '. Please remove this line and try again.');
+                }
                 headers.push(line);
+                prevLineHeader = true;
             }
             else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n]*$') === null) {
                 // 1) Check if line only consists of the following characters
@@ -32,7 +45,15 @@ async function checkFasta(file) {
                 let line_num = parseInt(i) + 1
                 return (false, 'Fasta file contains forbidden characters on line ' + line_num.toString() + '. The only characters that are allowed are: GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n The line that caused problems was: ' + line);
             }
+            else {
+                prevLineHeader = false;
+            }
         }
+        // Check that there are headers.
+        if (headers.length === 0) {
+            return (false, 'Fasta file has no headers. Fasta files must have headers.')
+        }
+
         //make sure there are no repeated headers
         if ((new Set(headers)).size === headers.length) {
             return true;

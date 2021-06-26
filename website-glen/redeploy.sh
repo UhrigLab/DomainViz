@@ -16,6 +16,7 @@ fi
 cd ..
 git pull
 cd website-glen/
+npm install
 npm run build
 systemctl reload nginx
 systemctl daemon-reload

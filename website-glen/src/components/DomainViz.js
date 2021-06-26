@@ -155,10 +155,20 @@ function ProtPlot() {
         }
     }
     async function handleFastaFiles(fileList) {
-        
+
+        // Check that there are no test files in the fastaFiles list, since the backend cannot currently handle both test and regular files
+        for (let i=0; i<fastaFiles.length; i++) {
+            if (fastaFiles[i].file) {
+                if (fastaFiles[i].file.includes("test")) {
+                    alert("Please remove all test files before uploading fasta files.");
+                    return;
+                }
+            }
+        }
+
         let files = []
         for (let i=0; i<fileList.length; i++) {
-            files.push(fileList[i])
+            files.push(fileList[i]);
         }
         if ((files.length + fastaFiles.length) >= 20) {
             alert("Please restrict your number of files to a maximum of 20 total.");
@@ -173,7 +183,7 @@ function ProtPlot() {
                 alert("Your fasta file is greater than 10mb, which is the maximum allowed size.")
                 valid = false;
             }
-            // // Check that the file is a fasta file
+            // Check that the file is a fasta file
             await isFasta(file).then((result) => {
                 valid = result;
             });
@@ -185,7 +195,6 @@ function ProtPlot() {
         let filenames = ""
         for (let i=0; i<files.length; i++) {
             if(validList[i] === false) {
-                alert("File " + files[i].name + " is invalid")
                 return;
             }
             filenames = filenames + files[i].name + " "
