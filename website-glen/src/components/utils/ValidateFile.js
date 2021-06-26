@@ -39,7 +39,7 @@ async function checkFasta(file) {
                 prevLineHeader = true;
             }
             else if (line.trim().match('^[GALMFWKQESPVICYHRNDTXgalmfwkqespvicyhrndtx*\n]*$') === null) {
-                // Check if line only consists of the following characters
+                // 1) Check if line only consists of the following characters
                 // GALMFWKQESPVICYHRNDTgalmfwkqespvicyhrndt* and space and new line character (\n)
                 // If the line contains any other character, or is completely empty, the regex will return null
                 let line_num = parseInt(i) + 1
