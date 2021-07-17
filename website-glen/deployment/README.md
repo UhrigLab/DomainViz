@@ -9,7 +9,7 @@ The api is contained in a folder aptly named: `api`. You can find this in the pa
 
 
 # Section 1 - Frontend Deployment
-## Section 1.1 Redeploy
+## Section 1.1 Redeploy - Frontend
 The frontend deployment is quite easy, at least if you are redeploying the site, and not making too many major changes. There is a file within this folder `Glen Website/website-glen/deployment/redeploy.sh` that will automatically redeploy both the frontend and backend. However, this shell file isn't ideal, and could certainly use some updating (There is a TODO in the file if you want some more work).
 
 This file needs to be run with `sudo`, so the full commands from logging onto the server should be:
@@ -46,4 +46,16 @@ Here are some of the videos/blogs that I used to learn how to deploy an Nginx si
 
 
 # Section 2 - Backend Deployment
-The backend is slightly more complex
+The backend is slightly more complex, but certainly manageable. It is quite easy to redeploy, but rather difficult to deploy fresh.
+
+## Section 2.1 Redeploy - Backend
+The backend deployment is quite easy, at least if you are redeploying the site, and not making too many major changes, much like the frontend. There is a file within this folder `Glen Website/website-glen/deployment/redeploy.sh` that will automatically redeploy both the frontend and backend. (See *Section 1.1 Redeploy - Frontend* for more details)
+
+This file needs to be run with `sudo`, so the full commands from logging onto the server should be:
+### 2.1.1 IMPORTANT
+`cd Website_Glen/website-glen/deployment`
+`sudo ./redeploy.sh`
+
+Luckily python is nicer than npm, so usually modules aren't as big of an issue. However, if you run into any issues, install all packages inside the virtual environment by traveling to the api folder: `cd Website_Glen/website-glen/api/api/`  and activate the virtual environment: `source propplotenv/bin/activate` and run `pip3 install -r requirements.domainviz.txt` and `pip3 install -r requirements.flask.txt`.
+
+If you add more packages to the backend, add them to `requirements.flask.txt`.
