@@ -2,7 +2,17 @@ import React from 'react';
 import './App.css';
 import 'fontsource-roboto';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, Button, createMuiTheme, ThemeProvider, Divider, Box, Container } from '@material-ui/core';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  createMuiTheme,
+  ThemeProvider,
+  Divider,
+  Box,
+  Container
+} from '@material-ui/core';
 import {
   BrowserRouter,
   Switch,
@@ -19,8 +29,16 @@ import { Help } from './components/Help';
 import { TermsOfUse } from './components/TermsOfUse';
 import { PrivacyStatement } from './components/PrivacyStatement';
 import DomainViz from './components/DomainViz';
+/* MotifX was the previous name of UMotif. When using this module, have a look at the UMotifMerge branch
+ * and attempt to merge that into the main codebase. https://github.com/UhrigLab/DomainViz/tree/UMotifMerge
+ * That way, that work is not lost.
+ */
 // import MotifX from './components/MotifX';
 
+
+/* This makeStyles() is used to bring the Raleway font into the DomainViz site,
+ * as well as for certain typeographys used on the toolbar.
+ */
 const useStyles = makeStyles((theme) => ({
   app: {
     minHeight: '85.8vh',
@@ -62,10 +80,10 @@ const useStyles = makeStyles((theme) => ({
 const theme = createMuiTheme({
   palette: {
     primary: {
+      // This is grey as hex.
       main: '#e8e8e8',
     },
     secondary: {
-      // This is green.A700 as hex.
       main: '#000000',
     },
   },
@@ -92,8 +110,13 @@ function App() {
               <Divider className={classes.divider}></Divider>
               <Typography variant='body1' className={classes.subtitle}>Protein tools</Typography>
             </Box>
-            <Typography variant="h6" className={classes.subtitle}/> {/* Need this for spacing for now */}
+            {/* Need this for spacing - If you are better at frontend than me, please change it */}
+            <Typography variant="h6" className={classes.subtitle}/>
             
+            {/* The Home button is currently disabled, as is the MotifX/UMotif button. This is so that
+              * users are automatically redirected to the DomainViz page, since there is only one tool enabled at the moment.
+              * When UMotif is added, you should enable the Home button, and un-comment the Home.js component to create a real home page.
+              */}
             {/* <RouterLink to='/'>
               <Button color='inherit'>Home</Button>
             </RouterLink> */}
