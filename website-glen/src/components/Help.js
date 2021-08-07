@@ -25,7 +25,17 @@ const useStyles = makeStyles((theme) => ({
     width: "1000px"
 },
 }));
+
+
 export const Help = () => {
+  /* This functional component displays helpful information for a user who may be struggling to use the tool.
+   * A rather simple component, and very similar to About.js, PrivacyStatement.js, and TermsOfUse.js. 
+   *
+   * Based on this Google Doc: https://docs.google.com/document/d/1degKXhefAYDrJlXRwpU-yPnqwVgvFfo67koMiitGrqg/edit#heading=h.b11zvzh3fvy0
+   * 
+   * This component could be improved by using css, and changing from a Grid layout to a more flexible one.
+   * Potentially it could be changed by only having one link to each unique URL, rather than many. 
+   */
   const classes = useStyles()
 
   return (
@@ -101,6 +111,7 @@ export const Help = () => {
           <Typography variant='body1' display='inline'>Snapshot: Users can click the Camera icon in the toolbar to take a .png snapshot of the current display in the plot (for example, after hiding a particular domain).</Typography>
           <Typography paragraph />
 
+          {/* This iframe is an example of our outputs, and will not appear unless the `example_iframe.html` file is in the `public` folder */}
           <iframe id="igraph" title="example_iframe" scrolling="no" style={{border:"none"}} seamless="seamless" src={process.env.PUBLIC_URL + "example_iframe.html"} height="525" width="100%" />
 
 
@@ -108,6 +119,7 @@ export const Help = () => {
           <Typography variant='body1'>The mv-plots depict both the position and prevalence of each protein domain within the group of proteins input by the user. Conventional symbolic representations of the domains detected are also generated and placed next to the mv-plots.</Typography>
           <Typography variant='body1' paragraph>Note: interactive example is accessible by submitting the “Load Example” dataset on the main DomainViz page.</Typography>
 
+          {/* This image is an example of our outputs, as a PDF */}
           <img src={HelpImage} alt="Example outputs with notes, explaining how to interpret the outputs from DomainViz" className={classes.img}/>
 
           <Typography variant='body1' paragraph>Generally, results with non-overlapping domains can be directly interpreted as showing the prevalence and position of each domain with different degrees of conservation within the protein group.</Typography>
@@ -209,7 +221,6 @@ export const Help = () => {
           <Typography className={classes.body2} variant='body1'>Result Output: Job.id_ProteinGroup_prosite_domain_results_per_aa.tsv</Typography>
           <Typography variant='body1' paragraph>The same as Job.id_ProteinGroup_pfam.csv, however for ProSite domains.</Typography>
 
-
           <Accordion  className={classes.accordion}>
             <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
               <Typography variant='h5'>FAQ</Typography>                
@@ -243,10 +254,9 @@ export const Help = () => {
               </Grid>
             </AccordionDetails>
           </Accordion>
-
         </Paper>
+
       </Grid>
     </Grid>
   );
 }
-
