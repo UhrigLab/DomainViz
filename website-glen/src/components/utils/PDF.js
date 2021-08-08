@@ -3,7 +3,10 @@ import React, { useState } from 'react';
 import { Page } from 'react-pdf';
 import { Document } from 'react-pdf/dist/esm/entry.webpack';
 
+
 export const PDF = ({pdf}) => {
+    // This component is not used any more, and can be deleted. It was used to display PDF files when we used those,
+    // but now we use iframes instead. This code was basically all taken from the react-pdf readme page.
 
     const [numPages, setNumPages] = useState(null);
     const [didError, setDidError] = useState(false);
@@ -38,4 +41,5 @@ export const PDF = ({pdf}) => {
             }
         </>
     );
-} 
+}
+

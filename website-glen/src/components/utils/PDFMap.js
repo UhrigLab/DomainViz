@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { saveAs } from 'file-saver';
 import { groupsize } from '../ViewPDF'
 
+
 const useStyles = makeStyles((theme) => ({
     root: {
         flexGrow: 1,
@@ -26,33 +27,47 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
+// TODO rename PDF-X components to iframe-X or something similar, since we no longer use PDFs for on-site viewing.
 export const PDFMap = ({ images, uid, groupNames }) => {
-        const classes = useStyles()
-        const [htmls, setHTMLs] = useState([])
-        function gotoDownload() {
-            fetch('/api/download/' + uid).then(response => {
-                saveAs(response.url, 'DomainViz_results.zip')
-            });
+    /* This component fetches and displays the iframe files after they have been retrieved from the backend.
+     * perform actions such as deletion, and renaming of each file.
+     * iframes are cool since they allow multiple different actions, such as hiding certain elements, zooming, and more.
+     * This makes the site much more interactable, with minimal dev work.
+     * 
+     * As a `Map` component, this component receives a list of objects, the ending to links for iframe files in this instance,
+     * and displays each object in a way that allows reusability, and conciseness. 
+     * 
+     * Must be used inside of a Grid container component.
+     */
+    const classes = useStyles()
+    const [htmls, setHTMLs] = useState([])
+
+    // We have a button that allows the user to download their entire results, and this function performs the downloading
+    function gotoDownload() {
+        fetch('/api/download/' + uid).then(response => {
+            saveAs(response.url, 'DomainViz_results.zip')
+        });
+    }
+
+    // NOTE: There may be a warning in the console about this useEffect such as:
+    // " Line 45:12:  React Hook useEffect has missing dependencies: 'htmls.length' and 'images'.
+    // Either include them or remove the dependency array  react-hooks/exhaustive-deps"
+    //
+    // HOWEVER, do not add these, as there is asyncronous code running that will cause the same html file to be fetched
+    // multiple times, rather than fetching all num_groups*groupsize. I realize that this is likely poor practices, however,
+    // we are pressed for time and i cannot determine a solution that is better. 
+    useEffect(() => {
+        // This useEffect() is what GETs the iframes from the backend.
+        for (let i=0; i<images.length; i++) {
+            fetch('/api/iframes/'+images[i]).then(response => {
+                if (htmls.length < images.length) //shouldnt add more htmls if we already have the same amount as we have image links
+                    setHTMLs(old => [...old, response.url].sort());
+            })
         }
+    // eslint-disable-next-line
+    }, []);
 
-        // NOTE: There may be a warning in the console about this useEffect such as:
-        // " Line 45:12:  React Hook useEffect has missing dependencies: 'htmls.length' and 'images'.
-        // Either include them or remove the dependency array  react-hooks/exhaustive-deps"
-        //
-        // HOWEVER, do not add these, as there is asyncronous code running that will cause the same html file to be fetched
-        // multiple times, rather than fetching all num_groups*groupsize. I realize that this is likely poor practices, however,
-        // we are pressed for time and i cannot determine a solution that is better. 
-        useEffect(() => {
-            for (let i=0; i<images.length; i++) {
-                fetch('/api/iframes/'+images[i]).then(response => {
-                    if (htmls.length < images.length) //shouldnt add more htmls if we already have the same amount as we have image links
-                        setHTMLs(old => [...old, response.url].sort());
-                })
-            }
-        // eslint-disable-next-line
-        }, []);
-
-        return (
+    return (
         <>
             <Grid item xs={12}>
                 <Button variant='contained' color='default' component='span' className={classes.button} onClick={gotoDownload}>Download</Button>
@@ -71,6 +86,8 @@ export const PDFMap = ({ images, uid, groupNames }) => {
                                     
                                 </AccordionSummary>
                                 <AccordionDetails>
+                                    {/* This could be greatly improved, but I am not sure how. It works for now, but this is truly
+                                        terrible coding practices, having hard-coded indicies like this. */}
                                     <div className={classes.column}>
                                         <iframe id="igraph" title={htmls[index].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index]} height="525" width="100%" />
                                         <iframe id="igraph" title={htmls[index+2].split("/")[0]} scrolling="no" style={{border:"none"}} seamless="seamless" src={htmls[index+2]} height="525" width="100%" />
