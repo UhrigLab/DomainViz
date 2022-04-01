@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 //import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
 import axios from 'axios';
+import ReactGA from 'react-ga';
+import { createBrowserHistory } from 'history';
+
 import UploadFile from './utils/UploadFile';
 import AccordionSetup from './AccordionSetup';
 import isFasta from './utils/ValidateFile';
@@ -48,7 +51,16 @@ let guid = () => {
     return s4() + s4() + '.' + s4() + '.' + s4() + '.' + s4() + '.' + s4() + s4() + s4();
 }
 
+const browserHistory = createBrowserHistory();
 function ProtPlot() {
+
+    useEffect(() => {
+        browserHistory.listen(location => {
+          ReactGA.set({ page: location.pathname }); // Update the users current page
+          ReactGA.pageview(location.pathname); // Record a pageview for the page.
+        });
+      }, []);
+
     //temp for production
     function getImages() {
         let id = textFields.uidTextField;
