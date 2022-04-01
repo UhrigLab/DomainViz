@@ -21,6 +21,10 @@ import { useHistory } from 'react-router-dom';
 // }));
 
 function Home() {
+  /* This component is a hot mess, and only redirects the user to /domainviz when they arrive at / (ie. The main page of the site.)
+   * We originally were planning on having a fully fledged homepage, but since we only ended up creating the DomainViz tool, this was
+   * deemed unneccesary for the time being.
+   */
   // const classes = useStyles();
   let history = useHistory();
   //automatically reroute to domainviz
@@ -72,5 +76,5 @@ function Home() {
     </>
   );
 }
-
 export default Home;
+
