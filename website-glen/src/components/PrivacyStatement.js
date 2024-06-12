@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid, Paper, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import ReactGA from 'react-ga';
+import { createBrowserHistory } from 'history';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -15,8 +17,17 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'underline',
   },
 }));
+
+const browserHistory = createBrowserHistory();
 export const PrivacyStatement = () => {
   const classes = useStyles()
+
+  useEffect(() => {
+    browserHistory.listen(location => {
+      ReactGA.set({ page: location.pathname }); // Update the users current page
+      ReactGA.pageview(location.pathname); // Record a pageview for the page.
+    });
+  }, []);
 
   return (
       <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>

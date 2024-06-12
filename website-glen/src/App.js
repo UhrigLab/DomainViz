@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import 'fontsource-roboto';
 import { makeStyles } from '@material-ui/core/styles';
@@ -9,6 +9,8 @@ import {
   Route,
   Link as RouterLink,
 } from 'react-router-dom';
+import ReactGA from 'react-ga';
+import { createBrowserHistory } from 'history';
 
 import { ViewPDF } from './components/ViewPDF';
 import Footer from './components/Footer';
@@ -71,6 +73,14 @@ const theme = createMuiTheme({
   },
 });
 
+// This is the google analytics TrackingID. From @DevangMeta.
+const trackingID = 'G-14GTTWTQ07';
+const browserHistory = createBrowserHistory();
+
+browserHistory.listen(location => {
+  ReactGA.set({ page: location.pathname }); // Update the users current page
+  ReactGA.pageview(location.pathname); // Record a pageview for the page.
+})
 // NOTE that this <Link> component in this App is different than the <Link> component in other pages such as Help and About.
 // This is an unfortunate circumstance due to React Router DOM and MaterialUI using the same component name for different 
 // functionalities. Therefore, I am using the Alias <RouterLink> for the React Router DOM <Link> component.
@@ -80,6 +90,13 @@ const theme = createMuiTheme({
 // https://material-ui.com/components/links/
 function App() {
   const classes = useStyles();
+
+  // Initialize google analytics
+  useEffect(() => {
+    ReactGA.initialize(trackingID);
+
+  }, []);
+
   return (
     <div className="App">
       <BrowserRouter>
