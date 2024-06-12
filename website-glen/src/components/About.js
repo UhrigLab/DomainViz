@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import {  Link as RouterLink } from 'react-router-dom';
 
 
-
 const useStyles = makeStyles((theme) => ({
   paper: {
       padding: theme.spacing(2),
@@ -21,7 +20,20 @@ const useStyles = makeStyles((theme) => ({
       height: '580px',
   },
 }));
+
+
 export const About = () => {
+  /* This functional component displays information about the site, and about our organization.
+   * A rather simple component, and very similar to Help.js, PrivacyStatement.js, and TermsOfUse.js. 
+   *
+   * One complexity of this component is the use of RouterLink vs. Link. While both components are called Link in their respective
+   * libraries, I have renamed the react-router Link to <RouterLink>, which is a component that allows the user to navigate around
+   * our site, whereas the <Link> component from material-ui is an external link to another site.
+   * 
+   * Based on this Google Doc: https://docs.google.com/document/d/1bflUShOzD8q-_b0dgBLxk6FaLmpfTEnRkgwMIOGcaxQ/edit
+   *
+   * This component could be improved by using css, and changing from a Grid layout to a more flexible one.
+   */
   const classes = useStyles()
 
   return (
@@ -31,6 +43,7 @@ export const About = () => {
 
           <Paper className={classes.paper} variant='outlined' >
             <Typography variant='body1' display='inline'>The  </Typography>
+            {/* Inline allows us to have a differently styled piece of text on the same line as text */}
             <Link className={classes.link} target='_blank' href='https://www.uhriglab.com/'>Uhrig Lab</Link> 
             <Typography variant='body1' display='inline'>  at the University of Alberta is a protein biochemistry and proteomics research group interested in protein function discovery. We are also currently developing multiple open-source, accessible, and easy to use protein sequence analysis tools to enable biological discovery.</Typography>
             <Typography paragraph/>
@@ -49,4 +62,3 @@ export const About = () => {
       </Grid>
   );
 }
-

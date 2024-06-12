@@ -36,10 +36,21 @@ const useStyles = makeStyles((theme) => ({
         width: "293px"
     },
 }));
+
 let interval;
 export const groupsize = 6;
+
+
 export const ViewPDF = () => {
+    /* This functional component is a page for the user to view the outputs of their DomainViz run.
+     * It could be extended to include outputs from UMotif as well, but this has not been done yet.
+     * 
+     * The name of the component is out-of-date, since now we use iframes rather than PDFs for the outputs on the site itself.
+     *
+     * Overall this component is too complex, and some of the work done here should be shunted off to other components.
+     */
     const url = window.location.pathname;
+    // TODO To many useState()s, needs refactoring
     const [images, setImages] = useState([]);
     const [groupNames, setGroupNames] = useState([]);
     const [displayImages, setDisplayImages] = useState(false);
@@ -58,14 +69,20 @@ export const ViewPDF = () => {
     function goToHome() {
         history.push('/')
     }
+
     const handleClickOpen = () => {
         setOpen(true);
     };
-
     const handleClose = () => {
         setOpen(false);
     };
 
+    // This useEffect is very complex, but essentially it gets the output images from the backend, groups them based on their group names
+    // displays the images if they exist, and if not, it shows both an alert, and a "failed" message on the page (Why did I do both?).
+    // As well, it controls the progress wheel based on the cookie-completion value sent from the backend.
+    //
+    // It runs a GET request to the backend every 5 seconds for an update on the run's progress. Once the run has completed, 
+    // it stops GET-ing from the backend.
     useEffect(() => {
         interval = setInterval(() => {
             fetch('/api/images/' + uid).then(response =>
@@ -97,6 +114,8 @@ export const ViewPDF = () => {
                                 console.log("No message was found with this cookie: Cookie -1.")
                             }
                         }
+                        // If data.failed isn't -1, the run hasn't actually failed, but it is still in progress, with the failed
+                        // number representing how far along in the run we are, from 1-100.
                         else if (data.failed < 100) {
                             setShowProgressBar(true);
                             setProgress(data.failed);
@@ -114,6 +133,10 @@ export const ViewPDF = () => {
         }, 5000);
         return () => clearInterval(interval);
     }, [uid]);
+
+    // This second useEffect() is run whenever the first useEffect() updates one of the important state variables, as can be seen in the
+    // [images, failed, currentMessage, messages, groupNames.length] list.
+    // This is what actually updates the UI with the message, or the iframes.
     useEffect(() => {
         if (images.length / groupNames.length === groupsize) {
             setDisplayImages(true);
@@ -130,6 +153,7 @@ export const ViewPDF = () => {
 
     return (
         <Grid container spacing={3} alignItems='center' style={{marginTop: '90px'}}>
+
             <Grid item xs={12}>
                 <img src={DomainVizIcon} alt="DomainViz logo" className={classes.img}></img>
             </Grid>
@@ -141,6 +165,7 @@ export const ViewPDF = () => {
             </Grid>
 
             {(displayImages && !showProgressBar && failed === false) &&
+                // The <PDFMap> component is what actually displays the iframes.
                 <PDFMap images={images} uid={uid} groupNames={groupNames} />
             }
             {(!displayImages && showProgressBar && failed === false) &&
@@ -148,6 +173,8 @@ export const ViewPDF = () => {
                     <Grid item xs={12}>
                         <Paper className={classes.paper} variant='outlined'>
                             {(messages.length) && //If the message only contains whitespace, display the loading text
+                                // The <MessageMap> component shows a list of the messages that have been returned from the cookies
+                                // produced in the backend.
                                 <MessageMap messages={messages}></MessageMap>
                             }
                             <Typography variant='h5'>Task processing can take several minutes to several hours. Please wait or copy the Result ID, exit, and retrieve your results later using the homepage.</Typography>
@@ -172,6 +199,7 @@ export const ViewPDF = () => {
                     </Paper>
                 </Grid>
             }
+            {/* End of TEMP */}
             {(!displayImages && !showProgressBar && failed) &&
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
@@ -186,6 +214,11 @@ export const ViewPDF = () => {
                     </Paper>
                 </Grid>
             }
+            {/* 
+                This Grid item contains the Exit button, and the dialog popup that appears when the user tries to exit the page.
+                While useful, we need to open this dialog when the user tries to navigate away from this page using other methods,
+                such as the AppBar, or the browser navigation buttons.
+            */}
             <Grid item xs={12}>
                 <Button variant='contained' color='default' component='span' className={classes.button} onClick={handleClickOpen} style={{marginBottom:"10px"}}>Exit</Button>
                 <Dialog
@@ -211,6 +244,7 @@ export const ViewPDF = () => {
                     </DialogActions>
                 </Dialog>
             </Grid>
+
         </Grid>
     );
 }

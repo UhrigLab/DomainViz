@@ -15,12 +15,23 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'underline',
   },
 }));
+
+
 export const PrivacyStatement = () => {
+  /* This functional component displays helpful information for a user who wishes to know how we use their information. 
+   * It may be out of date, and may require some rewriting.
+   * A rather simple component, and very similar to About.js, Help.js, and TermsOfUse.js. 
+   *
+   * Based on this Google Doc: https://docs.google.com/document/d/1-pqGz7OFeM32aj1ebjRE45E84hGaBkCOCxoP-PXMiIw/edit#heading=h.75lceviscgpz
+   * 
+   * This component could be improved by using css, and changing from a Grid layout to a more flexible one.
+   */
   const classes = useStyles()
 
   return (
       <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>
         <Grid item xs={11}>
+
           <Typography variant='h4'>Privacy Statement</Typography>
           <Paper className={classes.paper} variant='outlined' >
             <Typography variant='body1' paragraph>This Privacy Statement explains what personal data is collected by the specific Uhrig Lab tool and service you are requesting, for what purposes, how it is processed, and how we keep it secure.</Typography>
@@ -97,11 +108,9 @@ export const PrivacyStatement = () => {
 
             <Typography variant='h5'>Published on:</Typography>
             <Typography variant='body1' paragraph>Wednesday, December 16, 2020</Typography>
-
-
           </Paper>
+
         </Grid>
       </Grid>
   );
 }
-

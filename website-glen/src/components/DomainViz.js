@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-//import request from 'utils/Request'; TODO refactor to remove burden from ProtPlot.js
+//import request from 'utils/Request'; TODO refactor DomainViz to remove burden from the component, since it already does too much
 import axios from 'axios';
 import UploadFile from './utils/UploadFile';
 import AccordionSetup from './AccordionSetup';
@@ -13,6 +13,7 @@ import { Button, Checkbox, Divider, FormControlLabel, TextField, Typography } fr
 import { useHistory } from 'react-router';
 import DomainVizIcon from './img/domainviz.png';
 import { saveAs } from 'file-saver';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -37,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+
 //generates random id;
 let guid = () => {
     let s4 = () => {
@@ -48,8 +50,14 @@ let guid = () => {
     return s4() + s4() + '.' + s4() + '.' + s4() + '.' + s4() + '.' + s4() + s4() + s4();
 }
 
+
 function ProtPlot() {
-    //temp for production
+    /* This functional component contains the logic, as well as the UI for the DomainViz page. This is the page that allows
+     * users to upload their fasta files, add their own settings, and produce the results. It also automatically redirects the user
+     * to the correct output page.
+     */
+
+    //TODO This was supposed to be temp for production, and the Home page was supposed to be added, but it hasn't been done yet.
     function getImages() {
         let id = textFields.uidTextField;
         if (!id) {
@@ -73,12 +81,15 @@ function ProtPlot() {
         history.push('/view-results/' + textFields.uidTextField);
     }
     //end of temp
+
     const classes = useStyles();
     const resultID = guid();
     const history = useHistory()
 
+    // Input files
     const [fastaFiles, setFastaFiles] = useState([]);
 
+    // User-defined parameters
     const [checkboxes, setCheckboxes] = useState({
         absoluteResultsCheckbox: false,
         fastaFileLoadedCheckbox: false,
@@ -87,7 +98,6 @@ function ProtPlot() {
     const handleCheckBox = (event) => {
         setCheckboxes({ ...checkboxes, [event.target.name]: event.target.checked });
     };
-
     const [textFields, setTextFields] = useState({
         cutoffTextField: '0.05',
         maxCutoffTextField: '0.05',
@@ -102,6 +112,7 @@ function ProtPlot() {
             saveAs(response.url);
         });
     }
+
     function uploadTestFastaFile() {
         // This function sends dummy info to the backend, so that it knows which file to use
         setFastaFiles(
@@ -109,6 +120,7 @@ function ProtPlot() {
         )
     }
     function uploadMultipleTestFastaFiles() {
+        // This function sends dummy info to the backend, so that it knows which files to use
         setFastaFiles(
             [
                 {file: "mult_test_1", name: "multi_test_file_1.fa"},
@@ -130,8 +142,6 @@ function ProtPlot() {
         }
     }
     function changeFAFileName(index, newName) {
-        console.log(fastaFiles)
-        console.log(index)
         // If the fastafile is one of the example files, we only replace its name, otherwise, we replace the whole file
         // since that is the only way to change a File's name in Javascript. 
         if (fastaFiles[index].file) {
@@ -154,8 +164,11 @@ function ProtPlot() {
             ]);
         }
     }
-    async function handleFastaFiles(fileList) {
 
+    async function handleFastaFiles(fileList) {
+        /* This function is run when the user uploads one or more fasta files, it validates the files
+         * and stores them in the fastaFile State variable to send them to the backend.
+         */
         // Check that there are no test files in the fastaFiles list, since the backend cannot currently handle both test and regular files
         for (let i=0; i<fastaFiles.length; i++) {
             if (fastaFiles[i].file) {
@@ -204,6 +217,9 @@ function ProtPlot() {
     }
 
     async function sendPartOneFiles() {
+        /* This function performs some final validation to the fasta files, and sends those files to the backend.
+         * It's run when the user presses the "Submit Task" button.
+         */
         //Save file to server so the backend can access it 
         const data = new FormData();
 
@@ -230,7 +246,7 @@ function ProtPlot() {
             }
         }
 
-
+        // Add optional settings
         if (checkboxes.absoluteResultsCheckbox) {
             data.append('absoluteResults', checkboxes.absoluteResultsCheckbox);
         }
@@ -264,13 +280,14 @@ function ProtPlot() {
                 data.append('scaleFigure', parseFloat(textFields.scaleFigureTextField));
             }
         }
-        console.log(data)
+
+        // Make POST request to send the form-data object to the backend
         await axios.post('/api/sendfiles', data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             }
         }).then(response => {
-            console.log(response);
+            // Reset setting values
             textFields.scaleFigureTextField = '';
             textFields.maxCutoffTextField = '';
             textFields.cutoffTextField = '';
@@ -288,6 +305,7 @@ function ProtPlot() {
                 <Grid item xs={12}>
                     <img src={DomainVizIcon} alt="DomainViz logo" className={classes.img}></img>
                 </Grid>
+
                 <Grid item xs={12}>
                     <Paper className={classes.paper} variant='outlined'>
                         <Typography variant='h5'>Protein domain search {'&'} visualization tool</Typography>
@@ -371,7 +389,7 @@ function ProtPlot() {
                     <Divider className={classes.divider}></Divider>
                 </Grid>
 
-                {/* temp for production */}
+                {/* temp for production - should be added to Home component long-term. */}
                 <Grid item xs={12} />
                 <Grid item xs={12} />
                 <Grid item xs={5}>

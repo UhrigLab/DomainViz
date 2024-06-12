@@ -32,34 +32,41 @@ const useStyles = makeStyles((theme) => ({
     },
   }));
 
+
 function Footer () {
-        const classes = useStyles();
-        return (
-            <Container className={classes.container} maxWidth="xl" disableGutters style={{ marginTop: "20px" }}>
-                <Grid container spacing={0} alignItems='center' justify='center'>
-                    <Grid item xs={2}>
-                        <img src={UalbertaLogo} alt={"University of Alberta Logo"} className={classes.img}></img>
-                    </Grid>
-                    <Grid item xs={3}/>
-                    <Grid item xs={2}>
-                        <Link to='/terms-of-use' >
-                            <Typography className={classes.typography} variant='body1'>Terms of Use</Typography>
-                        </Link>
-                        <Link to='/privacy-statement'>
-                            <Typography className={classes.typography} variant='body1'>Privacy Statement</Typography>
-                        </Link>
-                    </Grid>
-                    <Grid item xs={3}/>
-                    <Grid item xs={2}>
-                        <Typography className={classes.typography} variant='body1'>Contact:</Typography>
-                            <a href={`mailto:protools@ualberta.ca?subject=DomainViz Help`}>
-                                <Typography className={classes.typography} variant='body1'>protools@ualberta.ca</Typography>
-                            </a>
-                        <Typography className={classes.typography} variant='body1'>{'\u00A9'} 2020 The Uhrig Lab</Typography>
-                    </Grid>
-                    
+    /* This function is the footer for each page, and is incredibly poorly styled, however
+     * it works for all current pages.
+     * It contains links to important pages, and an email link.
+     */
+    const classes = useStyles();
+    return (
+        <Container className={classes.container} maxWidth="xl" disableGutters style={{ marginTop: "20px" }}>
+
+            <Grid container spacing={0} alignItems='center' justify='center'>
+                <Grid item xs={2}>
+                    <img src={UalbertaLogo} alt={"University of Alberta Logo"} className={classes.img}></img>
                 </Grid>
-            </Container>
+                <Grid item xs={3}/>
+                <Grid item xs={2}>
+                    <Link to='/terms-of-use' >
+                        <Typography className={classes.typography} variant='body1'>Terms of Use</Typography>
+                    </Link>
+                    <Link to='/privacy-statement'>
+                        <Typography className={classes.typography} variant='body1'>Privacy Statement</Typography>
+                    </Link>
+                </Grid>
+                <Grid item xs={3}/>
+                <Grid item xs={2}>
+                    <Typography className={classes.typography} variant='body1'>Contact:</Typography>
+                        <a href={`mailto:protools@ualberta.ca?subject=DomainViz Help`}>
+                            <Typography className={classes.typography} variant='body1'>protools@ualberta.ca</Typography>
+                        </a>
+                    <Typography className={classes.typography} variant='body1'>{'\u00A9'} 2020 The Uhrig Lab</Typography>
+                </Grid>
+            </Grid>
+
+        </Container>
     );
 }
 export default Footer;
+

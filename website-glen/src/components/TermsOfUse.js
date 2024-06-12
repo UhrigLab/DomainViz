@@ -10,12 +10,23 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.text.secondary,
   },
 }));
+
+
 export const TermsOfUse = () => {
+  /* This functional component displays helpful information for a user who wishes to know how they can use the site. 
+   * It may be out of date, and may require some rewriting.
+   * A rather simple component, and very similar to About.js, Help.js, and PrivacyStatement.js. 
+   *
+   * Based on this Google Doc: https://docs.google.com/document/d/1-W9vfgZtzWgRO1X1m5rlOIWKIZMUE2onbEePClEOt7g/edit#heading=h.xas289ecghsv
+   * 
+   * This component could be improved by using css, and changing from a Grid layout to a more flexible one.
+   */
   const classes = useStyles()
 
   return (
       <Grid container spacing={3} alignItems='center' justify='center' style={{ marginTop: "90px" }}>
         <Grid item xs={11}>
+
           <Typography variant='h4'>Terms of use</Typography>
           <Paper className={classes.paper} variant='outlined' >
             <Typography variant='h5'>General</Typography>
@@ -43,10 +54,9 @@ export const TermsOfUse = () => {
             <Typography variant='body1' paragraph>5. The original data may be subject to rights claimed by third parties, including but not limited to, patent, copyright, other intellectual property rights, biodiversity-related access and benefit-sharing rights. It is the responsibility of users of our services to ensure that their exploitation of the data does not infringe any of the rights of such third parties.</Typography>
 
             <Typography variant='body1'>The Terms of Use and the use of the Uhrig Lab Protein Tools website are governed by Canadian law. </Typography>
-
           </Paper>
+
         </Grid>
       </Grid>
   );
 }
-

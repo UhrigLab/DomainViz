@@ -13,6 +13,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function UploadFile({ value, handleFile, acceptedTypes=".tsv", multiple=false }) {
+  /* This component is used to accept input files, do some simple validation, and perform a function call (handleFile)
+   * after the completion of the upload. It may, or may not allow multiple file uploads, depending on the value of the `multiple` variable.
+   */
   const classes = useStyles();
   const [inputValue, setInputValue] = useState("")
   const returnFile = (file) => {

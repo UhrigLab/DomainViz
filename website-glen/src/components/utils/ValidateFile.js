@@ -12,6 +12,7 @@ async function canReadFile(file) {
 }
 
 async function checkFasta(file) {
+    // Validates a physical fasta FILE.
     return file.text().then(content => {
         let headers = [];
         let lines = content.split('\n');
@@ -66,6 +67,9 @@ async function checkFasta(file) {
     
 }
 async function isFasta(file) {
+    // NOTE: This is the function that is called by DomainViz whenever a fasta file is uploaded.
+    // All the functions above are helper functions called by this function.
+
     // Check if file can be read
     let valid = false;
     await canReadFile(file).then(result => {
@@ -94,6 +98,10 @@ async function isFasta(file) {
  
 }
 export default isFasta
+// TODO the code below is not used, as we don't use groupfile or colorfile anymore. If @Pascal or @Glen decide they want to use these again
+// you can use this python code as a basis for the validation of those files.
+
+
 // def is_groupfile(filename):
 //     # Default values
 //     vreturn = True
